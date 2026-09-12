@@ -281,21 +281,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#可變更新-vs-不可變轉換" id="toc-可變更新-vs-不可變轉換" class="nav-link active" data-scroll-target="#可變更新-vs-不可變轉換">3.1　可變更新 vs 不可變轉換</a></li>
   <li><a href="#兩種設計風格" id="toc-兩種設計風格" class="nav-link" data-scroll-target="#兩種設計風格">3.2　兩種設計風格</a>
   <ul class="collapse">
-  <li><a href="#風格-a行為放在-record-內部" id="toc-風格-a行為放在-record-內部" class="nav-link" data-scroll-target="#風格-a行為放在-record-內部">3.2.1　風格 A：行為放在 record 內部</a></li>
-  <li><a href="#風格-b行為放在外部函式或服務" id="toc-風格-b行為放在外部函式或服務" class="nav-link" data-scroll-target="#風格-b行為放在外部函式或服務">3.2.2　風格 B：行為放在外部函式或服務</a></li>
+  <li><a href="#風格-a行為放在-record-內部" id="toc-風格-a行為放在-record-內部" class="nav-link" data-scroll-target="#風格-a行為放在-record-內部">風格 A：行為放在 record 內部</a></li>
+  <li><a href="#風格-b行為放在外部函式或服務" id="toc-風格-b行為放在外部函式或服務" class="nav-link" data-scroll-target="#風格-b行為放在外部函式或服務">風格 B：行為放在外部函式或服務</a></li>
   </ul></li>
   <li><a href="#兩種風格的比較" id="toc-兩種風格的比較" class="nav-link" data-scroll-target="#兩種風格的比較">3.3　兩種風格的比較</a>
   <ul class="collapse">
-  <li><a href="#預設建議從風格-a-開始" id="toc-預設建議從風格-a-開始" class="nav-link" data-scroll-target="#預設建議從風格-a-開始">3.3.1　預設建議：從風格 A 開始</a></li>
+  <li><a href="#預設建議從風格-a-開始" id="toc-預設建議從風格-a-開始" class="nav-link" data-scroll-target="#預設建議從風格-a-開始">預設建議：從風格 A 開始</a></li>
   </ul></li>
   <li><a href="#加入業務規則驗證" id="toc-加入業務規則驗證" class="nav-link" data-scroll-target="#加入業務規則驗證">3.4　加入業務規則驗證</a>
   <ul class="collapse">
-  <li><a href="#拋出例外簡單直接" id="toc-拋出例外簡單直接" class="nav-link" data-scroll-target="#拋出例外簡單直接">3.4.1　拋出例外：簡單直接</a></li>
-  <li><a href="#回傳結果型別更明確的錯誤處理" id="toc-回傳結果型別更明確的錯誤處理" class="nav-link" data-scroll-target="#回傳結果型別更明確的錯誤處理">3.4.2　回傳結果型別：更明確的錯誤處理</a></li>
+  <li><a href="#拋出例外簡單直接" id="toc-拋出例外簡單直接" class="nav-link" data-scroll-target="#拋出例外簡單直接">拋出例外：簡單直接</a></li>
+  <li><a href="#回傳結果型別更明確的錯誤處理" id="toc-回傳結果型別更明確的錯誤處理" class="nav-link" data-scroll-target="#回傳結果型別更明確的錯誤處理">回傳結果型別：更明確的錯誤處理</a></li>
   </ul></li>
   <li><a href="#轉換管線把多個步驟串接起來" id="toc-轉換管線把多個步驟串接起來" class="nav-link" data-scroll-target="#轉換管線把多個步驟串接起來">3.5　轉換管線：把多個步驟串接起來</a>
   <ul class="collapse">
-  <li><a href="#在測試中驗證每個步驟" id="toc-在測試中驗證每個步驟" class="nav-link" data-scroll-target="#在測試中驗證每個步驟">3.5.1　在測試中驗證每個步驟</a></li>
+  <li><a href="#在測試中驗證每個步驟" id="toc-在測試中驗證每個步驟" class="nav-link" data-scroll-target="#在測試中驗證每個步驟">在測試中驗證每個步驟</a></li>
   </ul></li>
   <li><a href="#讓轉換函式保持純粹" id="toc-讓轉換函式保持純粹" class="nav-link" data-scroll-target="#讓轉換函式保持純粹">3.6　讓轉換函式保持純粹</a></li>
   <li><a href="#一個完整的範例" id="toc-一個完整的範例" class="nav-link" data-scroll-target="#一個完整的範例">3.7　一個完整的範例</a></li>
@@ -398,7 +398,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="兩種設計風格">3.2　兩種設計風格</h2>
 <p>「把改變表達成轉換」這個思維有兩種常見的實作風格，各有優缺點。第 1 章的 <code>OrderWorkflow</code> 範例其實已經示範了其中一種：把轉換邏輯放在 <code>Order</code> 外部。這一節會先把兩種寫法並排放在一起，接著再討論它們各自適合什麼情境。</p>
 <section id="風格-a行為放在-record-內部" class="level3">
-<h3 class="anchored" data-anchor-id="風格-a行為放在-record-內部">3.2.1　風格 A：行為放在 record 內部</h3>
+<h3 class="anchored" data-anchor-id="風格-a行為放在-record-內部">風格 A：行為放在 record 內部</h3>
 <p>這種作法類似傳統 OOP 的設計，由 record 本身提供轉換方法，但這些方法不會修改 <code>this</code>（物件本身），而是回傳新版本。為了聚焦在這個封裝方式，下面的範例只保留建立草稿和提交訂單所需的屬性：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record Order</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
@@ -469,7 +469,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </blockquote>
 </section>
 <section id="風格-b行為放在外部函式或服務" class="level3">
-<h3 class="anchored" data-anchor-id="風格-b行為放在外部函式或服務">3.2.2　風格 B：行為放在外部函式或服務</h3>
+<h3 class="anchored" data-anchor-id="風格-b行為放在外部函式或服務">風格 B：行為放在外部函式或服務</h3>
 <p>另一種作法，是像第 1 章的 <code>OrderWorkflow</code> 那樣，把轉換邏輯放在一個獨立的靜態類別（或服務）裡，讓 <code>Order</code> 本身保持為資料容器：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record <span class="fu">Order</span><span class="op">(</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span></span>
@@ -584,7 +584,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>已取消訂單不能再付款</li>
 </ul>
 <section id="預設建議從風格-a-開始" class="level3">
-<h3 class="anchored" data-anchor-id="預設建議從風格-a-開始">3.3.1　預設建議：從風格 A 開始</h3>
+<h3 class="anchored" data-anchor-id="預設建議從風格-a-開始">預設建議：從風格 A 開始</h3>
 <p>如果你不確定用哪種，建議可以從風格 A 開始——把行為放在 record 內部。</p>
 <p>理由是：</p>
 <ul>
@@ -607,7 +607,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>實務上的狀態轉換不只是「更新欄位」，還需要驗證當前狀態是否允許這個轉換。</p>
 <p>例如，一張「草稿（draft）」訂單才能被提交，一張「已取消」的訂單不能再付款。這種「從某個狀態才能轉換到另一個狀態」的約束，就是業務規則（business rule）。</p>
 <section id="拋出例外簡單直接" class="level3">
-<h3 class="anchored" data-anchor-id="拋出例外簡單直接">3.4.1　拋出例外：簡單直接</h3>
+<h3 class="anchored" data-anchor-id="拋出例外簡單直接">拋出例外：簡單直接</h3>
 <p>最直接的做法是在轉換方法裡驗證，如果不滿足就拋出例外：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record Order</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
@@ -651,7 +651,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>這種做法簡單，但不代表每個呼叫方都必須就地使用 <code>try</code>-<code>catch</code>。如果不合法的轉換代表程式設計錯誤，可以讓例外交由應用程式的統一錯誤處理機制接住；如果它是使用者操作時可預期的結果，下一節的結果型別通常更合適。也不要只在呼叫前重複檢查狀態，因為真正維護規則的地方仍應該是轉換方法。</p>
 </section>
 <section id="回傳結果型別更明確的錯誤處理" class="level3">
-<h3 class="anchored" data-anchor-id="回傳結果型別更明確的錯誤處理">3.4.2　回傳結果型別：更明確的錯誤處理</h3>
+<h3 class="anchored" data-anchor-id="回傳結果型別更明確的錯誤處理">回傳結果型別：更明確的錯誤處理</h3>
 <p>另一種做法是讓方法回傳一個結果型別，明確表達「成功」或「失敗」。</p>
 <p>同樣以訂單為例，我們可以先定義一個代表轉換結果的型別，名稱是 <code>OrderTransitionResult</code>：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record OrderTransitionResult</span>
@@ -772,7 +772,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">// draft 仍然是原本的草稿訂單，因為它沒有被修改</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <p>不可變轉換方法不會修改原本的物件，而是透過回傳值提供新的狀態，因此呼叫方必須把回傳值視為新的狀態來源。你可以把它想成一條資料流：每一步都接收上一個狀態，產生下一個狀態；如果中間某一步的輸出被丟掉，流程就中斷了。</p>
 <section id="在測試中驗證每個步驟" class="level3">
-<h3 class="anchored" data-anchor-id="在測試中驗證每個步驟">3.5.1　在測試中驗證每個步驟</h3>
+<h3 class="anchored" data-anchor-id="在測試中驗證每個步驟">在測試中驗證每個步驟</h3>
 <p>轉換管線的另一個好處是，每一步都可以獨立驗證：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">[</span>Fact<span class="op">]</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">void</span> <span class="fu">Complete_Order_Lifecycle_Should_Produce_Correct_States</span><span class="op">()</span></span>

@@ -280,21 +280,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#可變物件的煩惱" id="toc-可變物件的煩惱" class="nav-link active" data-scroll-target="#可變物件的煩惱">1.1　可變物件的煩惱</a>
   <ul class="collapse">
-  <li><a href="#隱患一狀態和資料的對應關係不明確" id="toc-隱患一狀態和資料的對應關係不明確" class="nav-link" data-scroll-target="#隱患一狀態和資料的對應關係不明確">1.1.1　隱患一：狀態和資料的對應關係不明確</a></li>
-  <li><a href="#隱患二任何方法都能修改任何欄位" id="toc-隱患二任何方法都能修改任何欄位" class="nav-link" data-scroll-target="#隱患二任何方法都能修改任何欄位">1.1.2　隱患二：任何方法都能修改任何欄位</a></li>
-  <li><a href="#隱患三多個地方修改同一個物件" id="toc-隱患三多個地方修改同一個物件" class="nav-link" data-scroll-target="#隱患三多個地方修改同一個物件">1.1.3　隱患三：多個地方修改同一個物件</a></li>
+  <li><a href="#隱患一狀態和資料的對應關係不明確" id="toc-隱患一狀態和資料的對應關係不明確" class="nav-link" data-scroll-target="#隱患一狀態和資料的對應關係不明確">隱患一：狀態和資料的對應關係不明確</a></li>
+  <li><a href="#隱患二任何方法都能修改任何欄位" id="toc-隱患二任何方法都能修改任何欄位" class="nav-link" data-scroll-target="#隱患二任何方法都能修改任何欄位">隱患二：任何方法都能修改任何欄位</a></li>
+  <li><a href="#隱患三多個地方修改同一個物件" id="toc-隱患三多個地方修改同一個物件" class="nav-link" data-scroll-target="#隱患三多個地方修改同一個物件">隱患三：多個地方修改同一個物件</a></li>
   </ul></li>
   <li><a href="#換個角度把改變表達成轉換" id="toc-換個角度把改變表達成轉換" class="nav-link" data-scroll-target="#換個角度把改變表達成轉換">1.2　換個角度：把改變表達成轉換</a></li>
   <li><a href="#c-的-record-和-with-運算式" id="toc-c-的-record-和-with-運算式" class="nav-link" data-scroll-target="#c-的-record-和-with-運算式">1.3　C# 的 record 和 with 運算式</a>
   <ul class="collapse">
-  <li><a href="#用-record-建立不可變資料" id="toc-用-record-建立不可變資料" class="nav-link" data-scroll-target="#用-record-建立不可變資料">1.3.1　用 record 建立不可變資料</a></li>
-  <li><a href="#用-with-運算式建立新版本" id="toc-用-with-運算式建立新版本" class="nav-link" data-scroll-target="#用-with-運算式建立新版本">1.3.2　用 with 運算式建立新版本</a></li>
+  <li><a href="#用-record-建立不可變資料" id="toc-用-record-建立不可變資料" class="nav-link" data-scroll-target="#用-record-建立不可變資料">用 record 建立不可變資料</a></li>
+  <li><a href="#用-with-運算式建立新版本" id="toc-用-with-運算式建立新版本" class="nav-link" data-scroll-target="#用-with-運算式建立新版本">用 with 運算式建立新版本</a></li>
   </ul></li>
   <li><a href="#不可變設計的三個好處" id="toc-不可變設計的三個好處" class="nav-link" data-scroll-target="#不可變設計的三個好處">1.4　不可變設計的三個好處</a>
   <ul class="collapse">
-  <li><a href="#好處一可預測predictable" id="toc-好處一可預測predictable" class="nav-link" data-scroll-target="#好處一可預測predictable">1.4.1　好處一：可預測（predictable）</a></li>
-  <li><a href="#好處二易測試testable" id="toc-好處二易測試testable" class="nav-link" data-scroll-target="#好處二易測試testable">1.4.2　好處二：易測試（testable）</a></li>
-  <li><a href="#好處三易追蹤traceable" id="toc-好處三易追蹤traceable" class="nav-link" data-scroll-target="#好處三易追蹤traceable">1.4.3　好處三：易追蹤（traceable）</a></li>
+  <li><a href="#好處一可預測predictable" id="toc-好處一可預測predictable" class="nav-link" data-scroll-target="#好處一可預測predictable">好處一：可預測（predictable）</a></li>
+  <li><a href="#好處二易測試testable" id="toc-好處二易測試testable" class="nav-link" data-scroll-target="#好處二易測試testable">好處二：易測試（testable）</a></li>
+  <li><a href="#好處三易追蹤traceable" id="toc-好處三易追蹤traceable" class="nav-link" data-scroll-target="#好處三易追蹤traceable">好處三：易追蹤（traceable）</a></li>
   </ul></li>
   <li><a href="#回到-order不可變版本長什麼樣子" id="toc-回到-order不可變版本長什麼樣子" class="nav-link" data-scroll-target="#回到-order不可變版本長什麼樣子">1.5　回到 Order：不可變版本長什麼樣子</a></li>
   <li><a href="#何時修改狀態" id="toc-何時修改狀態" class="nav-link" data-scroll-target="#何時修改狀態">1.6　何時修改狀態？</a></li>
@@ -410,7 +410,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </blockquote>
 <p>這個設計在小程式裡跑起來沒問題，但仔細考慮一下，它有幾個隱患。</p>
 <section id="隱患一狀態和資料的對應關係不明確" class="level3">
-<h3 class="anchored" data-anchor-id="隱患一狀態和資料的對應關係不明確">1.1.1　隱患一：狀態和資料的對應關係不明確</h3>
+<h3 class="anchored" data-anchor-id="隱患一狀態和資料的對應關係不明確">隱患一：狀態和資料的對應關係不明確</h3>
 <p>看看 <code>Cancel</code> 方法，它把 <code>SubmittedAt</code>（提交時間）和 <code>PaidAt</code>（付款時間）清掉了：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">void</span> <span class="fu">Cancel</span><span class="op">(</span>Order order<span class="op">,</span> <span class="dt">string</span> reason<span class="op">)</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
@@ -426,7 +426,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>這是資料表示（representation）的問題。程式碼裡面的資料不只要「能存」，還要能說清楚自己代表什麼。當 <code>Status</code>、<code>PaidAt</code>、<code>CancelReason</code> 之間的關係只存在於開發者腦中，而沒有被型別或方法明確表達出來，每一段使用 <code>Order</code> 的程式都得猜一次這些欄位的語意。猜對了只是多花時間；猜錯了，便可能產生 bug。</p>
 </section>
 <section id="隱患二任何方法都能修改任何欄位" class="level3">
-<h3 class="anchored" data-anchor-id="隱患二任何方法都能修改任何欄位">1.1.2　隱患二：任何方法都能修改任何欄位</h3>
+<h3 class="anchored" data-anchor-id="隱患二任何方法都能修改任何欄位">隱患二：任何方法都能修改任何欄位</h3>
 <p><code>Order</code> 型別的所有屬性都是可設定的（例如都寫成 <code>{ get; set; }</code>）。這代表系統中任何拿到某個 <code>order</code> 物件參考的程式碼，都可以在任何時候修改任何欄位。例如：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>order<span class="op">.</span><span class="fu">Status</span> <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">;</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>order<span class="op">.</span><span class="fu">SubmittedAt</span> <span class="op">=</span> now<span class="op">;</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
@@ -434,7 +434,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>要回答這個問題，你必須在腦子裡重播整個執行流程，或者透過除錯工具一步步觀察物件的狀態變化。這就是我們常說的「難以推理（hard to reason about）」。</p>
 </section>
 <section id="隱患三多個地方修改同一個物件" class="level3">
-<h3 class="anchored" data-anchor-id="隱患三多個地方修改同一個物件">1.1.3　隱患三：多個地方修改同一個物件</h3>
+<h3 class="anchored" data-anchor-id="隱患三多個地方修改同一個物件">隱患三：多個地方修改同一個物件</h3>
 <p>假設有一種情況：<code>OrderService.Pay</code> 方法在執行的同時，有另一個非同步的（asynchronous）流程也在讀取或修改同一個 <code>order</code> 物件——例如一個自動通知的背景工作。</p>
 <p>可變物件加上多個執行路徑，是<strong>競爭狀況（race condition）</strong>的溫床。原因是這些欄位更新不是原子操作（atomic operation）：<code>Pay</code> 會先設定 <code>Status</code>，再設定 <code>PaidAt</code>。如果另一段程式剛好在兩次指派之間讀取同一個物件，就可能看到一個正處於「中間狀態」的訂單：<code>Status</code> 已經是 <code>Paid</code>（訂單已付款），但 <code>PaidAt</code> 還是 <code>null</code>（付款時間尚未指定）。</p>
 <p>這種問題很難穩定重現，所以也不容易除錯。</p>
@@ -470,7 +470,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="c-的-record-和-with-運算式">1.3　C# 的 record 和 with 運算式</h2>
 <p>在說明不可變設計的好處之前，先介紹 C# 對這種設計方式提供的語法支援。</p>
 <section id="用-record-建立不可變資料" class="level3">
-<h3 class="anchored" data-anchor-id="用-record-建立不可變資料">1.3.1　用 record 建立不可變資料</h3>
+<h3 class="anchored" data-anchor-id="用-record-建立不可變資料">用 record 建立不可變資料</h3>
 <p>C# 9 引入了 <code>record</code> 型別，其中一個主要目的就是作為不可變資料的載體。它提供了一組很適合表達「資料值」的預設行為；如果你採用位置參數（positional parameters）的寫法，或者使用 <code>init</code> 屬性，就能比較輕鬆地寫出建立後不再修改的資料物件。以下示範一種最簡單的寫法：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">Order</span><span class="op">(</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span>          <span class="co">// 訂單編號，用來識別這張訂單。</span></span>
@@ -499,7 +499,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>這就是為什麼剛才說，採用 init-only 屬性能夠比較輕鬆地寫出建立後不再修改的資料物件。</p>
 </section>
 <section id="用-with-運算式建立新版本" class="level3">
-<h3 class="anchored" data-anchor-id="用-with-運算式建立新版本">1.3.2　用 with 運算式建立新版本</h3>
+<h3 class="anchored" data-anchor-id="用-with-運算式建立新版本">用 with 運算式建立新版本</h3>
 <p><code>record</code> 的另一個重要語法是 <code>with</code> 運算式。它讓你從現有的 record 建立新版本，只改你想改的屬性，其他的照搬：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> paidOrder <span class="op">=</span> order with</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
@@ -524,7 +524,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="不可變設計的三個好處">1.4　不可變設計的三個好處</h2>
 <p>現在我們有了基本的語法概念，來看看這種設計風格實際上能解決什麼問題。</p>
 <section id="好處一可預測predictable" class="level3">
-<h3 class="anchored" data-anchor-id="好處一可預測predictable">1.4.1　好處一：可預測（predictable）</h3>
+<h3 class="anchored" data-anchor-id="好處一可預測predictable">好處一：可預測（predictable）</h3>
 <p>可預測的意思是：<strong>物件不會在你看不到的地方被原地修改</strong>。以本章的 <code>Order</code> 為例，它的 init-only 屬性不會在傳入方法後被重新指派。</p>
 <blockquote class="blockquote">
 <p>為了避免讀者誤解，這裡再次重申：此範例的作法是淺層複製。也就是說，如果物件的屬性是參考到可變物件，例如 <code>Lines</code>（訂單明細）背後的集合，該物件的內容仍可能改變；這是「淺層不可變」的限制。第 2 章會進一步說明解法與集合選型，第 3 章則會有比較完整的 <code>Order</code> 範例。</p>
@@ -544,7 +544,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>如果是可變設計，你可能會擔心：「<code>OrderWorkflow.Pay</code> 有沒有改動 <code>submittedOrder</code>？」你必須去看實作才能確認。在這個不可變設計裡，<code>Pay</code> 會回傳另一個 <code>Order</code>，不會重新指派 <code>submittedOrder</code> 的屬性。</p>
 </section>
 <section id="好處二易測試testable" class="level3">
-<h3 class="anchored" data-anchor-id="好處二易測試testable">1.4.2　好處二：易測試（testable）</h3>
+<h3 class="anchored" data-anchor-id="好處二易測試testable">好處二：易測試（testable）</h3>
 <p>不可變資料讓測試變得非常容易，原因有兩個。</p>
 <p>第一，轉換方法不會修改測試輸入。你準備一個 <code>draft</code> 訂單，把它傳進幾個方法；結束後，<code>draft</code> 還是原來那個 <code>draft</code>。</p>
 <p>第二，可以逐步驗證每一個狀態轉換。每個步驟產生一個獨立的新物件，你可以在任何一步暫停並驗證當時的狀態。以下以 xUnit 來展示單元測試的寫法（其中的 <code>[Fact]</code> 只是用來標記底下的方法是一個測試方法）：</p>
@@ -575,7 +575,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>這個測試清楚地展示了整個狀態轉換的流程，而且每一次狀態轉換都能被單獨驗證。</p>
 </section>
 <section id="好處三易追蹤traceable" class="level3">
-<h3 class="anchored" data-anchor-id="好處三易追蹤traceable">1.4.3　好處三：易追蹤（traceable）</h3>
+<h3 class="anchored" data-anchor-id="好處三易追蹤traceable">好處三：易追蹤（traceable）</h3>
 <p>不可變資料很適合表達「快照（snapshot）」：每次轉換都能產生一個代表當時狀態的新物件。只要把需要的版本保存下來，就能建立清楚的歷史。</p>
 <p>這在稽核日誌（audit log）、事件溯源（event sourcing）、問題診斷上非常有用：</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 這段流程的每一步都有一個不同的 Order 狀態快照</span></span>
