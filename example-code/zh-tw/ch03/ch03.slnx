@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="DemoOrderTransformationStyleA/DemoOrderTransformationStyleA.csproj" Type="Classic C#" />
+  <Project Path="DemoOrderTransformationStyleB/DemoOrderTransformationStyleB.csproj" Type="Classic C#" />
+  <Project Path="DemoOrderTransformationPipeline/DemoOrderTransformationPipeline.csproj" Type="Classic C#" />
+</Solution>

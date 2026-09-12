@@ -1,3 +1,2 @@
-# C# Immutable Data Design web site
+Published automatically from huanlin-writing/csharp-immutable-data-design.
 
-Published automatically from `huanlin-writing/csharp-immutable-data-design`.

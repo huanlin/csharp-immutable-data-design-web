@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-TW" xml:lang="zh-TW"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>前言：為什麼需要不可變資料設計 – C# 不可變資料設計</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../ch00/about-book.html" rel="next">
+<link href="../index.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-a90b5042977bc76a464b14ca3180e4ff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "沒有結果",
+    "search-matching-documents-text": "符合的文件",
+    "search-copy-link-title": "複製搜尋連結",
+    "search-hide-matches-text": "隱藏其他符合的結果",
+    "search-more-match-text": "更多符合結果",
+    "search-more-matches-text": "更多符合結果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "送出",
+    "search-label": "搜尋"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../styles-html.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="切換側邊欄導航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ch00/preface.html"><span class="chapter-title">前言</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="切換側邊欄導航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜尋" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">C# 不可變資料設計</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/huanlin/csharp-immutable-data-design-web" title="原始碼" class="quarto-navigation-tool px-1" aria-label="原始碼"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜尋"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">首頁</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/preface.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/about-book.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">關於本書</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/about-author.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">關於作者</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/publication-notes.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">版本說明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch01/ch01.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">第 1 章</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch02/ch02.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">第 2 章</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch03/ch03.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">第 3 章</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目錄</h2>
+   
+  <ul>
+  <li><a href="#不是銀彈" id="toc-不是銀彈" class="nav-link active" data-scroll-target="#不是銀彈">不是銀彈</a></li>
+  <li><a href="#這本書要解決什麼問題" id="toc-這本書要解決什麼問題" class="nav-link" data-scroll-target="#這本書要解決什麼問題">這本書要解決什麼問題</a></li>
+  <li><a href="#本書架構" id="toc-本書架構" class="nav-link" data-scroll-target="#本書架構">本書架構</a></li>
+  <li><a href="#目標讀者" id="toc-目標讀者" class="nav-link" data-scroll-target="#目標讀者">目標讀者</a></li>
+  <li><a href="#技術環境" id="toc-技術環境" class="nav-link" data-scroll-target="#技術環境">技術環境</a></li>
+  <li><a href="#開始之前" id="toc-開始之前" class="nav-link" data-scroll-target="#開始之前">開始之前</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">前言：為什麼需要不可變資料設計</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    <div>
+    <div class="quarto-title-meta-heading">修改於</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">2026-09-12</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>你有沒有遇過這種情況：測試突然失敗，找了半小時才發現是某個方法改了一個物件的狀態，而那個物件還有其他物件正在使用？</p>
+<p>或這種情況：你追一個 bug 追了很久，最後發現問題不在你懷疑的那段程式碼，而是某個物件在傳遞過程中被一些程式碼修改了，而你一直都不知道其實很多地方都會改變那個物件的狀態。</p>
+<p>又或者這種情況：你的 Web API 收到一個 HTTP 請求，請求內容被轉成一個 request DTO；你需要把它轉換成領域物件，再轉成資料庫用的實體物件，之後再轉成 response DTO。在此過程中，每一層都使用不同的類別，每一層的物件都可能在你沒發現的地方被修改。</p>
+<blockquote class="blockquote">
+<p>備註：這裡的 DTO 是 data transfer object（資料傳輸物件）的縮寫。request DTO 承載外部請求的資料，response DTO 則承載 API 回應資料。</p>
+</blockquote>
+<p>圖：從 HTTP 請求到回應的物件流動過程。當每一層都能修改物件狀態時，資料來源與修改責任會變得越來越難追蹤。</p>
+<pre><code>HTTP Request
+     |
+     | 反序列化 / Model Binding
+     v
+Request DTO
+     |
+     | 轉換
+     v
+Domain Object
+     |
+     | 套用規則 / 業務流程
+     v
+Persistence Entity
+     |
+     | 儲存 / 查詢 / 重新組裝
+     v
+Response DTO
+     |
+     | 序列化
+     v
+HTTP Response
+
+
+在流程中可能發生的事：
+
+Request DTO        可能被修改
+Domain Object      可能被修改
+Persistence Entity 可能被 ORM 或程式碼修改
+Response DTO       可能來自已被改過的狀態
+
+結果：
+「資料現在是什麼值？」
+「是誰改的？」
+「在哪一層改的？」
+「這個物件還能不能信任？」</code></pre>
+<blockquote class="blockquote">
+<p>圖中的 Domain Object 是用來表達核心業務概念與規則；Persistence Entity 則是配合資料庫或資料存取工具使用的儲存模型。這只是常見的責任分工，不表示每個系統都必須使用不同型別或採用特定的分層架構。</p>
+</blockquote>
+<p>這些場景有一個共同的根源：<strong>可變狀態（mutable state）在程式中流動，讓你很難確定資料在某個時間點究竟是什麼值、是誰改的、在哪裡改的。</strong></p>
+<p>本書欲探討和解決的正是這個問題。</p>
+<section id="不是銀彈" class="level2">
+<h2 class="anchored" data-anchor-id="不是銀彈">不是銀彈</h2>
+<p>這本書<strong>不是</strong>「放棄物件導向（OOP）」的書。物件導向有它的強項與適合場景：封裝複雜的業務規則、管理有生命週期的實體、維護物件在任何時候都必須滿足的規則。這些場景仍然需要物件導向的封裝。</p>
+<p>這也<strong>不是</strong>一本講函數式程式設計（functional programming）的書。我們不會把全部的 C# 程式碼改成只有熟悉函數式風格才看得懂的資料轉換管線，也不會假裝你不用和「物件-關聯對應」工具（ORM，例如 Entity Framework Core）打交道。</p>
+<p>這本書想要講的是一個務實的觀點：</p>
+<blockquote class="blockquote">
+<p>C# 近年來加入了許多語言特性，使得「讓資料保持透明、不可變、可追蹤」變得容易許多。問題是，很多開發者知道這些語法，卻不知道它們組合在一起能帶來什麼樣的設計改變。</p>
+</blockquote>
+<p>C# 的 <code>record</code>、<code>init</code>、<code>with</code>、<code>ImmutableList&lt;T&gt;</code>、<code>switch</code> 運算式——這些特性不只是個別的語法或 API，更是一套能用來建構不可變資料模型的工具組。本書的目的，就是讓你知道如何善用這套工具組來改善軟體的設計，而不是只看一些語法範例。</p>
+</section>
+<section id="這本書要解決什麼問題" class="level2">
+<h2 class="anchored" data-anchor-id="這本書要解決什麼問題">這本書要解決什麼問題</h2>
+<p>想像一個訂單系統。訂單建立之後，可以被提交、付款、出貨，也可以被取消。如果用傳統的可變物件設計，整個訂單物件的狀態通常會在處理流程中的某些地方修改相關屬性，例如：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>order<span class="op">.</span><span class="fu">Status</span> <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>order<span class="op">.</span><span class="fu">PaidAt</span> <span class="op">=</span> DateTime<span class="op">.</span><span class="fu">Now</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>order<span class="op">.</span><span class="fu">UpdatedBy</span> <span class="op">=</span> currentUser<span class="op">;</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這樣寫當然能跑。但隨著程式規模擴大，問題就來了：</p>
+<ul>
+<li>你要追蹤「是誰、在哪裡、在什麼條件下」把 <code>Status</code> 從 <code>Submitted</code> 改成 <code>Paid</code>，變得非常困難。</li>
+<li>如果一個方法接收了 <code>order</code> 並在內部改了某個欄位，你只能靠閱讀程式碼（而不是型別簽名）才能發現這件事。</li>
+<li>測試這個流程時，你必須小心管理物件的初始狀態，否則不同測試之間可能互相干擾。</li>
+</ul>
+<p>不可變設計的做法是：每次狀態改變，都產生一個新的訂單版本，不會動到舊的版本。像這樣：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> paidOrder <span class="op">=</span> order<span class="op">.</span><span class="fu">MarkAsPaid</span><span class="op">(</span>clock<span class="op">.</span><span class="fu">Now</span><span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>paidOrder</code> 是一個新物件，原本的 <code>order</code> 保持不變。這樣做的好處是：你可以隨時知道某個版本的訂單在那個時間點的完整狀態。</p>
+<p>其背後的思維是務實的工程決策：把「原地修改同一個物件的狀態」這件事改成一種「資料轉換」的形式。這樣的程式更容易測試、更容易追蹤，也比較容易在多執行緒或非同步流程中安全共享資料——因為原本的物件不會被修改，其他程式碼即使同時讀取它，也不必擔心資料在中途被改掉。第 5 章會說明這項好處的適用範圍與限制。</p>
+</section>
+<section id="本書架構" class="level2">
+<h2 class="anchored" data-anchor-id="本書架構">本書架構</h2>
+<p>本書分為六章，以訂單處理系統作為貫穿全書的主要範例。之所以選擇訂單系統，是因為它同時具備了大多數設計挑戰：狀態轉換、API 輸入輸出資料、集合、驗證、資料持久化，以及狀態建模。</p>
+<p><strong>第 1 章</strong>從最基本的問題切入：為什麼可變物件在小程式裡方便，卻在大型程式中帶來追蹤困難？本章的功能是建立全書主旨：不要直接改掉同一個物件，而是把每一次改變表達成「從舊版本建立新版本」。</p>
+<p><strong>第 2 章</strong>介紹 C# 中用來建構不可變資料的語言特性：<code>record class</code>、<code>record struct</code>、<code>init</code>、<code>required</code>、<code>with</code> 運算式，以及不可變集合的選擇指南。這章是工具箱章節，會特別強調一個常見陷阱：用了 <code>record</code> 並不代表資料真的不可變。</p>
+<p><strong>第 3 章</strong>是全書核心。本章會討論「用資料轉換取代原地修改」究竟意味著什麼，以及在行為邏輯放在型別內還是放在外部服務之間，如何做出實務上的判斷。讀完這章，你應該能看懂不可變設計在業務流程中的實際寫法。</p>
+<p><strong>第 4 章</strong>把討論重心從領域模型（domain model）轉向 Web API 與其他資料傳輸情境，探討 request/response DTO、System.Text.Json 整合、validation 的位置選擇、DTO 與 domain model 的分離，以及 command object 和 event payload，並說明不可變設計為何容易在這些位置落實。</p>
+<p><strong>第 5 章</strong>總結全書的核心內容：不可變資料在哪些位置最容易產生效益，又會帶來哪些成本？本章會釐清可追蹤性、測試與並行讀取的適用範圍，並討論封裝、物件配置、深層更新、物件-關聯對應（ORM）、序列化、UI 資料繫結與強封裝物件。最後會提供漸進導入的順序和決策參考表，幫助你判斷何時該採用可變設計。</p>
+<p><strong>第 6 章</strong>是進階選讀。當 enum、旗標與 nullable 欄位已經讓非法狀態難以避免時，可以進一步用狀態型別和 pattern matching 建模。若第 3 章的單一 <code>Order</code> record 已經足夠清楚，可以略過這章。</p>
+</section>
+<section id="目標讀者" class="level2">
+<h2 class="anchored" data-anchor-id="目標讀者">目標讀者</h2>
+<p>這本書適合你，如果你：</p>
+<ul>
+<li>已經會寫 C#，熟悉類別（class）、介面（interface）、LINQ、async/await 基礎觀念。</li>
+<li>知道 <code>record</code> 這個關鍵字，但不確定什麼時候該用。</li>
+<li>在設計 API 的 request DTO 與 response DTO 時，會在可變 class、record、readonly struct 之間猶豫。</li>
+<li>知道不可變資料很好，但實務上不知道怎麼更新深層嵌套的資料。</li>
+<li>聽過不可變設計，但不確定跟你目前的 C# 專案有什麼關係。</li>
+</ul>
+<p>這本書假設你有中階的 C# 開發經驗。我們不會從頭解釋什麼是類別或介面，但也不會預設你熟悉進階的型別理論或 functional programming 的術語。</p>
+</section>
+<section id="技術環境" class="level2">
+<h2 class="anchored" data-anchor-id="技術環境">技術環境</h2>
+<p>本書的程式碼範例以 <strong>C# 14 和 .NET 10</strong> 為基準，但絕大多數內容在 C# 10（.NET 6）以上就能適用。</p>
+<p>使用較新的語法時，會說明該特性是從哪個版本開始可用，以及在舊版本中的替代做法。</p>
+</section>
+<section id="開始之前" class="level2">
+<h2 class="anchored" data-anchor-id="開始之前">開始之前</h2>
+<p>為了避免誤解，這裡先釐清一件事：本書不會告訴你「所有東西都改成 record 就對了」，也不會說「把方法全部搬到服務類別（service class）裡就是好的設計」。</p>
+<p>實際上，這本書的一個主要目的，是希望幫你建立一種判斷力：<strong>看到一段程式碼或一個設計問題時，能夠判斷這裡適不適合用不可變設計（immutable design）；如果適合，又該怎麼做。</strong></p>
+<p>這種判斷能力通常比背誦一堆教條更有用。</p>
+<p>接下來，我們要從一個最基本的問題開始：可變物件到底帶來了什麼麻煩？</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+(() => {
+  const path = window.location.pathname;
+  const isZh = path.includes('/zh-tw');
+  const target = isZh ? '/en/' : '/zh-tw/';
+  const label = isZh ? '🌐 English' : '🌐 繁體中文';
+
+  const link = document.createElement('a');
+  link.className = 'language-switch';
+  link.href = target;
+  link.textContent = label;
+
+  const githubLink = document.querySelector("#quarto-sidebar .sidebar-tools-main a.quarto-navigation-tool[href*='github.com']");
+  const generatedTools = githubLink?.parentElement;
+  const tools = document.createElement('div');
+  tools.className = 'site-tools';
+  tools.appendChild(link);
+
+  if (githubLink) {
+    githubLink.className = 'github-repo-link';
+    githubLink.target = '_blank';
+    githubLink.rel = 'noopener noreferrer';
+    tools.appendChild(githubLink);
+    generatedTools?.remove();
+  }
+
+  const sidebarHeader = document.querySelector('#quarto-sidebar .sidebar-header');
+  if (sidebarHeader) {
+    tools.classList.add('site-tools-sidebar');
+    sidebarHeader.appendChild(tools);
+  }
+})();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已複製");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已複製");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../index.html" class="pagination-link" aria-label="首頁">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">首頁</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../ch00/about-book.html" class="pagination-link" aria-label="關於本書">
+        <span class="nav-page-text"><span class="chapter-title">關於本書</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></div></div></footer></body></html>

@@ -1,0 +1,313 @@
+/* ========== Latin Font Fallback (防止英文字型攔截中文字型) ========== */
+@font-face {
+    font-family: "Latin Fallback";
+    src: local("Segoe UI"), local("Roboto"), local("Helvetica Neue"), local("Arial"), local("sans-serif");
+    /* 涵蓋基本英數字、半形標點，以及彎引號 (Smart Quotes) */
+    unicode-range: U+0020-007F, U+2018-201D;
+}
+
+/* ========== 整體頁面設定 ========== */
+body {
+    /* Default fallback */
+    font-family: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 1em;
+    line-height: 1.6;
+    /* 設定全域行高 (標準版) 。在生成 EPUB 時，腳本會針對 Google Play 版將此屬性替換為 1.4 */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Traditional Chinese (繁體中文) */
+body:lang(zh-TW),
+body:lang(zh-Hant) {
+    font-family: "Latin Fallback", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+}
+
+/* Japanese */
+body:lang(ja),
+body:lang(ja-JP) {
+    font-family: "Latin Fallback", "Noto Sans JP", "Yu Gothic", "Hiragino Kaku Gothic ProN", "Meiryo", system-ui, sans-serif;
+}
+
+/* Simplified Chinese (簡體中文) */
+body:lang(zh-CN),
+body:lang(zh-Hans) {
+    font-family: "Latin Fallback", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+/* English */
+body:lang(en),
+body:lang(en-US) {
+    font-family: Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+
+
+/* ========== EPUB Table of Contents 設定 ========== */
+/* 隱藏 TOC 中的自動編號 */
+ol.toc {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+ol.toc ol {
+    padding-left: 1.5em;
+}
+
+/* ========== 段落樣式 ========== */
+p {
+    margin-top: 0.8em;
+    margin-bottom: 1em;
+    /*text-indent: 2em;     /* 中文首行縮排 */
+}
+
+/* ========== 圖片置中 ========== */
+p img {
+    display: block;
+    margin: 0 auto;
+}
+
+/* ========== 標題樣式 ========== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Latin Fallback", "Noto Sans TC", "Source Han Sans TC", "Microsoft JhengHei", sans-serif;
+    font-weight: bold;
+    line-height: 1.4;
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    text-align: start;
+    text-indent: 0;
+    /* 標題不縮排 */
+}
+
+/* English Headings */
+body:lang(en) h1,
+body:lang(en) h2,
+body:lang(en) h3,
+body:lang(en) h4,
+body:lang(en) h5,
+body:lang(en) h6,
+body:lang(en-US) h1,
+body:lang(en-US) h2,
+body:lang(en-US) h3,
+body:lang(en-US) h4,
+body:lang(en-US) h5,
+body:lang(en-US) h6 {
+    font-family: Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Japanese Headings */
+body:lang(ja) h1,
+body:lang(ja) h2,
+body:lang(ja) h3,
+body:lang(ja) h4,
+body:lang(ja) h5,
+body:lang(ja) h6,
+body:lang(ja-JP) h1,
+body:lang(ja-JP) h2,
+body:lang(ja-JP) h3,
+body:lang(ja-JP) h4,
+body:lang(ja-JP) h5,
+body:lang(ja-JP) h6 {
+    font-family: "Latin Fallback", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+}
+
+h1 {
+    font-size: 1.8em;
+}
+
+h2 {
+    font-size: 1.5em;
+}
+
+h3 {
+    font-size: 1.25em;
+}
+
+/* ========== 清單樣式 ========== */
+li {
+    margin-bottom: 0.6em;
+    line-height: 1.5;
+}
+
+ul,
+ol {
+    padding-left: 2.5em;
+    margin-top: 0.5em;
+    margin-bottom: 1.8em;
+}
+
+/* ========== 引用區塊 ========== */
+blockquote,
+.blockquote {
+    margin-top: 2.5em;
+    margin-bottom: 2.5em;
+    margin-left: 2em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 1rem;
+    padding-right: 1.5rem;
+    border-left: none;
+    border-top: 1px solid rgba(128, 128, 128, 0.5);  /* 同時適用 light/dark mode 的顏色 */
+    border-bottom: 1px solid rgba(128, 128, 128, 0.5);
+    /* 預設繼承 body 的字型設定 */
+    font-size: 0.95em;
+}
+
+/* English Blockquotes */
+body:lang(en) blockquote,
+body:lang(en-US) blockquote,
+body:lang(en) .blockquote,
+body:lang(en-US) .blockquote {
+    font-family: Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+/* 中文版引言區塊使用中文字型 */
+body:lang(zh-TW) blockquote,
+body:lang(zh-Hant) blockquote,
+body:lang(zh-TW) .blockquote,
+body:lang(zh-Hant) .blockquote {
+    font-family: "Latin Fallback", "Noto Sans TC", "Source Han Sans TC", "Microsoft JhengHei";
+}
+
+body:lang(zh-CN) blockquote,
+body:lang(zh-Hans) blockquote,
+body:lang(zh-CN) .blockquote,
+body:lang(zh-Hans) .blockquote {
+    font-family: "Latin Fallback", "Noto Sans SC", "Source Han Sans SC", "Microsoft YaHei";
+}
+
+body:lang(ja) blockquote,
+body:lang(ja-JP) blockquote,
+body:lang(ja) .blockquote,
+body:lang(ja-JP) .blockquote {
+    font-family: "Latin Fallback", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo";
+}
+
+/* ========== 程式碼區塊 ========== */
+code {
+    font-family: "Source Code Pro", "Noto Sans Mono CJK TC", monospace;
+    font-size: 0.95em;
+    background-color: #f4f4f4;
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+    text-align: start;
+}
+
+pre {
+    background-color: #f4f4f4;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    padding: 1em;
+    overflow-x: auto;
+    border-radius: 5px;
+    line-height: 1.4;
+    text-align: start;
+}
+
+/* 覆寫 Pandoc/Quarto 內嵌樣式，避免長行程式碼在 EPUB 中溢出頁面 */
+pre > code.sourceCode {
+    white-space: pre-wrap !important;
+}
+
+/* 修正：code 預設有 padding，導致在 pre 內第一行會縮進。
+   這裡強制移除 pre 內部的 code padding 與背景色 (由 pre 統一處理) */
+pre code {
+    font-size: 0.95em;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 0;
+    white-space: pre-wrap;
+}
+
+/* ========== 表格樣式 ========== */
+table,
+.table {
+    width: 95%;
+    font-size: 0.9em;
+    margin-top: 2em;
+    margin-bottom: 3em;
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border-top: 2px solid #666;
+    border-bottom: 2px solid #666;
+}
+
+table.table {
+    margin-top: 2em;
+    margin-bottom: 3em;
+}
+
+th,
+td {
+    padding: 0.8em 0.5em;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid #ddd;
+}
+
+/* 提高權重以覆蓋 Quarto/Bootstrap 的預設樣式 (.table>:not(caption)>*>* { background-color: unset; }) */
+.table thead th,
+table thead th {
+    border-bottom: 2px solid #666;
+    font-weight: bold;
+    background-color: #f9f9f9;
+}
+
+/* 移除預設的所有邊框，改用我們自定義的 */
+table th,
+table td {
+    border-left: none;
+    border-right: none;
+}
+
+/* 條紋樣式 (Striped) - 針對有 .striped 類別的表格 */
+.striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* ========== 圖片說明 ========== */
+figure {
+    margin: 1.5em 0;
+    text-align: center;
+}
+
+figcaption {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #666;
+    margin-top: 0.5em;
+    margin-bottom: 3em;
+}
+
+img {
+    height: auto;
+    margin-top: 2em;
+    /* 增加圖片與上方段落的距離 */
+    margin-bottom: 2em;
+    /* 增加圖片與下方內容的距離 */
+}
+
+/* ========== 版權頁 ========== */
+.copyright-page {
+    margin-top: 3em;
+    margin-bottom: 1em;
+}
+
+.copyright-page p {
+    line-height: 1.4;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    font-size: 1em;
+}
+
+.copyright-page hr {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}

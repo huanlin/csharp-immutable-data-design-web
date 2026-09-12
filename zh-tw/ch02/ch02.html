@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-TW" xml:lang="zh-TW"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>第 2 章　C# records、init 與不可變集合 – C# 不可變資料設計</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../ch03/ch03.html" rel="next">
+<link href="../ch01/ch01.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-a90b5042977bc76a464b14ca3180e4ff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "沒有結果",
+    "search-matching-documents-text": "符合的文件",
+    "search-copy-link-title": "複製搜尋連結",
+    "search-hide-matches-text": "隱藏其他符合的結果",
+    "search-more-match-text": "更多符合結果",
+    "search-more-matches-text": "更多符合結果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "送出",
+    "search-label": "搜尋"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../styles-html.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="切換側邊欄導航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ch02/ch02.html"><span class="chapter-title">第 2 章</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="切換側邊欄導航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜尋" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">C# 不可變資料設計</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/huanlin/csharp-immutable-data-design-web" title="原始碼" class="quarto-navigation-tool px-1" aria-label="原始碼"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜尋"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">首頁</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/preface.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/about-book.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">關於本書</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/about-author.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">關於作者</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/publication-notes.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">版本說明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch01/ch01.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">第 1 章</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch02/ch02.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">第 2 章</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch03/ch03.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">第 3 章</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目錄</h2>
+   
+  <ul>
+  <li><a href="#record-class不可變參考型別的主力" id="toc-record-class不可變參考型別的主力" class="nav-link active" data-scroll-target="#record-class不可變參考型別的主力">2.1　record class：不可變參考型別的主力</a>
+  <ul class="collapse">
+  <li><a href="#兩種宣告語法" id="toc-兩種宣告語法" class="nav-link" data-scroll-target="#兩種宣告語法">2.1.1　兩種宣告語法</a></li>
+  <li><a href="#值相等性record-和-class-的關鍵差異" id="toc-值相等性record-和-class-的關鍵差異" class="nav-link" data-scroll-target="#值相等性record-和-class-的關鍵差異">2.1.2　值相等性：record 和 class 的關鍵差異</a></li>
+  </ul></li>
+  <li><a href="#init-only-屬性與-required" id="toc-init-only-屬性與-required" class="nav-link" data-scroll-target="#init-only-屬性與-required">2.2　init-only 屬性與 required</a></li>
+  <li><a href="#with-運算式建立修改版本" id="toc-with-運算式建立修改版本" class="nav-link" data-scroll-target="#with-運算式建立修改版本">2.3　with 運算式：建立修改版本</a>
+  <ul class="collapse">
+  <li><a href="#巢狀更新" id="toc-巢狀更新" class="nav-link" data-scroll-target="#巢狀更新">2.3.1　巢狀更新</a></li>
+  </ul></li>
+  <li><a href="#淺層不可變的陷阱" id="toc-淺層不可變的陷阱" class="nav-link" data-scroll-target="#淺層不可變的陷阱">2.4　淺層不可變的陷阱</a>
+  <ul class="collapse">
+  <li><a href="#改用-ireadonlylistt" id="toc-改用-ireadonlylistt" class="nav-link" data-scroll-target="#改用-ireadonlylistt">2.4.1　改用 <code>IReadOnlyList&lt;T&gt;</code></a></li>
+  </ul></li>
+  <li><a href="#不可變集合的選擇指南" id="toc-不可變集合的選擇指南" class="nav-link" data-scroll-target="#不可變集合的選擇指南">2.5　不可變集合的選擇指南</a>
+  <ul class="collapse">
+  <li><a href="#immutablearrayt-的-default-陷阱" id="toc-immutablearrayt-的-default-陷阱" class="nav-link" data-scroll-target="#immutablearrayt-的-default-陷阱">2.5.1　<code>ImmutableArray&lt;T&gt;</code> 的 default 陷阱</a></li>
+  <li><a href="#集合欄位與值相等性" id="toc-集合欄位與值相等性" class="nav-link" data-scroll-target="#集合欄位與值相等性">2.5.2　集合欄位與值相等性</a></li>
+  <li><a href="#從資料生命週期看-frozendictionary" id="toc-從資料生命週期看-frozendictionary" class="nav-link" data-scroll-target="#從資料生命週期看-frozendictionary">2.5.3　從資料生命週期看 FrozenDictionary</a></li>
+  </ul></li>
+  <li><a href="#record-struct-與-readonly-record-struct" id="toc-record-struct-與-readonly-record-struct" class="nav-link" data-scroll-target="#record-struct-與-readonly-record-struct">2.6　record struct 與 readonly record struct</a>
+  <ul class="collapse">
+  <li><a href="#什麼時候使用-record-struct" id="toc-什麼時候使用-record-struct" class="nav-link" data-scroll-target="#什麼時候使用-record-struct">2.6.1　什麼時候使用 record struct？</a></li>
+  <li><a href="#record-struct-預設是可變的" id="toc-record-struct-預設是可變的" class="nav-link" data-scroll-target="#record-struct-預設是可變的">2.6.2　record struct 預設是可變的</a></li>
+  <li><a href="#避免可變-struct" id="toc-避免可變-struct" class="nav-link" data-scroll-target="#避免可變-struct">2.6.3　避免可變 struct</a></li>
+  </ul></li>
+  <li><a href="#本章回顧" id="toc-本章回顧" class="nav-link" data-scroll-target="#本章回顧">2.7　本章回顧</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">第 2 章　C# records、init 與不可變集合</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    <div>
+    <div class="quarto-title-meta-heading">修改於</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">2026-09-12</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><strong>本章內容：</strong></p>
+<ul>
+<li><code>record class</code> 作為不可變資料載體的主要功能</li>
+<li>Positional record 與 non-positional record 的寫法</li>
+<li>值相等性（value equality）的含義與實務影響</li>
+<li><code>init</code>、<code>required</code>、<code>with</code> 運算式</li>
+<li>淺層不可變的陷阱：<code>init</code>-only 不等於深層不可變</li>
+<li>不可變集合的選擇指南（含 <code>ImmutableArray&lt;T&gt;</code> 的 default 陷阱）</li>
+<li>實務補充：從資料生命週期看 <code>FrozenDictionary</code></li>
+<li><code>record struct</code> 與 <code>readonly record struct</code> 的差異與選擇</li>
+</ul>
+<hr>
+<p>第 1 章介紹了「把改變表達成轉換」的基本思維，以及 <code>record</code> 和 <code>with</code> 運算式的初步用法。這一章要深入探討 C# 提供的不可變資料工具，包括各種 record 語法、<code>init</code>、<code>required</code>，以及如何正確處理集合的不可變性（immutability）。</p>
+<p>本章不只說明「這些語法怎麼用」，更重要的是「什麼時候用哪個，以及要注意哪些陷阱」。<code>record struct</code>、<code>readonly record struct</code> 和 <code>FrozenDictionary</code> 也會出現，但它們是用來補完整個不可變資料設計的工具，而不是本章主角。</p>
+<section id="record-class不可變參考型別的主力" class="level2">
+<h2 class="anchored" data-anchor-id="record-class不可變參考型別的主力">2.1　record class：不可變參考型別的主力</h2>
+<p><code>record class</code>（或簡寫為 <code>record</code>）是本書最常使用的型別。它是一個參考型別，適合用來表示資料快照、DTO（data transfer object、資料傳輸物件）、value object（值物件），以及狀態轉換過程中的中間結果。</p>
+<p><code>record</code> 的價值，在於幫我們消除許多為資料型別反覆撰寫的瑣碎程式碼（boilerplate）。要注意的是，<code>record</code> 本身不會保證「所有東西都不可變」。它提供的是一組很適合不可變設計的語言支援，包括：</p>
+<ul>
+<li>配合「位置參數」（positional parameters）語法時，編譯器會產生 <code>init</code>-only 屬性。</li>
+<li>自動實作基於值的相等性比較（<code>Equals</code>、<code>GetHashCode</code>、<code>==</code>）。</li>
+<li>自動生成 <code>ToString</code>，方便除錯。</li>
+<li>支援 <code>with</code> 運算式，用來建立修改後的新版本。</li>
+</ul>
+<section id="兩種宣告語法" class="level3">
+<h3 class="anchored" data-anchor-id="兩種宣告語法">2.1.1　兩種宣告語法</h3>
+<p>本節介紹兩種 record 寫法：<strong>positional record</strong>（位置式 record）和 <strong>non-positional record</strong>（非位置式 record）。後者使用一般的屬性語法宣告，也有人叫它 nominal record；本書後續統一使用「非位置式 record」。</p>
+<p>Positional record 的寫法是把主要資料直接寫在型別名稱後方的小括號中，適合屬性少、資料形狀明確的型別：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">OrderLine</span><span class="op">(</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> ProductId<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> ProductName<span class="op">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> Quantity<span class="op">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">decimal</span> UnitPrice</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>編譯器會自動產生建構式（constructor）、<code>init</code>-only 屬性、<code>Deconstruct</code> 方法、相等性比較、和 <code>ToString</code>。</p>
+<p>非位置式 record 更接近傳統 class 的寫法，適合需要驗證、預設值或較複雜建構邏輯的型別。以下範例會對 <code>productId</code>、<code>quantity</code> 和 <code>unitPrice</code> 加入驗證：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record ValidatedOrderLine</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> ProductId <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> ProductName <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> Quantity <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">decimal</span> UnitPrice <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">decimal</span> LineTotal <span class="op">=&gt;</span> Quantity <span class="op">*</span> UnitPrice<span class="op">;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">ValidatedOrderLine</span><span class="op">(</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> productId<span class="op">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> productName<span class="op">,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> quantity<span class="op">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">decimal</span> unitPrice<span class="op">)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span><span class="dt">string</span><span class="op">.</span><span class="fu">IsNullOrWhiteSpace</span><span class="op">(</span>productId<span class="op">))</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">ArgumentException</span><span class="op">(</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                <span class="st">"ProductId 不能為空"</span><span class="op">,</span> <span class="fu">nameof</span><span class="op">(</span>productId<span class="op">));</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>quantity <span class="op">&lt;=</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">ArgumentOutOfRangeException</span><span class="op">(</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>                <span class="fu">nameof</span><span class="op">(</span>quantity<span class="op">),</span> <span class="st">"數量必須大於 0"</span><span class="op">);</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>unitPrice <span class="op">&lt;</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">ArgumentOutOfRangeException</span><span class="op">(</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>                <span class="fu">nameof</span><span class="op">(</span>unitPrice<span class="op">),</span> <span class="st">"單價不能為負數"</span><span class="op">);</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        ProductId <span class="op">=</span> productId<span class="op">;</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        ProductName <span class="op">=</span> productName<span class="op">;</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        Quantity <span class="op">=</span> quantity<span class="op">;</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        UnitPrice <span class="op">=</span> unitPrice<span class="op">;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoPositionalRecord">DemoPositionalRecord</a>、<a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoNonPositionalRecord">DemoNonPositionalRecord</a></p>
+</blockquote>
+<p>這裡刻意把屬性的 <code>init</code> 存取子設成 <code>private</code>。理由是：這個型別已經把驗證放進建構式，外部程式碼就不應該再透過物件初始設定式（object initializer）覆蓋 <code>Quantity</code> 或 <code>UnitPrice</code>。如果這些屬性的 <code>init</code> 存取子仍是公開的，外部程式便可以在建構式跑完後，透過物件初始設定式覆蓋它們，反而削弱了建構式維護不變條件的效果。</p>
+<blockquote class="blockquote">
+<p><strong>重點整理</strong></p>
+<p>Positional record 適合簡單的資料容器，例如 DTO 或不需要複雜驗證的 value object；非位置式 record 適合需要驗證邏輯、預設值或複雜建構流程的型別。</p>
+</blockquote>
+</section>
+<section id="值相等性record-和-class-的關鍵差異" class="level3">
+<h3 class="anchored" data-anchor-id="值相等性record-和-class-的關鍵差異">2.1.2　值相等性：record 和 class 的關鍵差異</h3>
+<p><code>record</code> 的相等性比較是基於<strong>值</strong>，而非<strong>參考</strong>。這和傳統 <code>class</code> 預設比較物件參考的行為不同。請看以下範例：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">OrderLine</span><span class="op">(</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> ProductId<span class="op">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> ProductName<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> Quantity<span class="op">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">decimal</span> UnitPrice</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> line1 <span class="op">=</span> <span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="st">"書"</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">350</span>m<span class="op">);</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> line2 <span class="op">=</span> <span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="st">"書"</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">350</span>m<span class="op">);</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>line1 <span class="op">==</span> line2<span class="op">);</span> <span class="co">// True</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>上面的範例展示了 record 的值相等性：即使 <code>line1</code> 和 <code>line2</code> 是兩個不同的物件，只要它們的屬性值完全相同，相等運算子 <code>==</code> 就會回傳 <code>true</code>。</p>
+<p>這在實務上很有用：</p>
+<ul>
+<li>在測試中比較兩個 DTO 是否相等，不需要手動逐欄位比較。</li>
+<li>把 record 放進 <code>HashSet&lt;T&gt;</code> 或作為 <code>Dictionary&lt;TKey,TValue&gt;</code> 的 key 時，會依照成員值判斷是否相同，行為比較直觀。</li>
+<li>可用來比較兩個狀態版本是否真的不同。</li>
+</ul>
+<p>考慮值相等性（value equality）時，也要先分清楚「值」和「識別」。<code>Money(100, "TWD")</code> 這類 value object 的語意通常由欄位值決定；兩個金額與幣別相同的物件，可以視為同一個值。相反地，<code>Order</code>、<code>Customer</code> 這類有生命週期的實體，即使某個時間點的欄位內容相同，也不一定代表同一個業務個體。<code>record</code> 讓你不必手寫 <code>Equals</code>、<code>GetHashCode</code>、與相等運算子，就能提供值相等性的比較；但它不會自動替你判斷這個型別是否真的應該用值相等性來表示。</p>
+<p>如果要把 record 放進 <code>HashSet&lt;T&gt;</code>，或用作 <code>Dictionary&lt;TKey,TValue&gt;</code> 的 key，還要確保參與相等性與雜湊碼計算的成員不會在放入集合後改變。否則，物件的雜湊碼可能改變，導致集合無法在原本的位置找到它。使用由不可變值組成的 record，可以避開這類問題。</p>
+<p>不過，value equality 有一個容易忽略的細節：<strong>集合欄位預設仍然依照集合型別自己的相等性規則來處理</strong>。如果 record 內含陣列或 <code>IReadOnlyList&lt;T&gt;</code>，預設比較通常不是逐一比較元素內容。這個細節會在本章後面討論集合時進一步說明。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoValueEquality">DemoValueEquality</a></p>
+</blockquote>
+</section>
+</section>
+<section id="init-only-屬性與-required" class="level2">
+<h2 class="anchored" data-anchor-id="init-only-屬性與-required">2.2　init-only 屬性與 required</h2>
+<p><code>init</code> 是 C# 9 引入的屬性存取子（property accessor）。和 <code>set</code> 不同，<code>init</code> 只允許在物件初始化期間設定屬性；物件建立完成後，就不能再修改。</p>
+<p>它很適合用在 request DTO 或設定物件：呼叫方可以使用物件初始設定式，型別本身仍然能避免建構後被隨意改寫。</p>
+<blockquote class="blockquote">
+<p>備註：request DTO 通常用來承載外部請求送進系統的資料。例如在 Web API 中，<code>CreateOrderRequest</code> 可以用來接收建立訂單請求送來的 JSON body。</p>
+</blockquote>
+<p>先看一個單純使用 <code>init</code> 的例子：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> OrderRequest</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> CustomerId <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> init<span class="op">;</span> <span class="op">}</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> ProductId <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> init<span class="op">;</span> <span class="op">}</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> request <span class="op">=</span> <span class="kw">new</span> OrderRequest</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    CustomerId <span class="op">=</span> <span class="st">"CUST-42"</span><span class="op">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    ProductId <span class="op">=</span> <span class="st">"P001"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>request<span class="op">.</span><span class="fu">CustomerId</span> <span class="op">=</span> <span class="st">"CUST-99"</span><span class="op">;</span> <span class="co">// 編譯錯誤</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>init</code> 在語意上比 <code>set</code> 更精確，它的意思是：「這個屬性可以在物件初始化期間設定，但初始化完成後就固定了。」</p>
+<p>C# 11 引入的 <code>required</code> 可以搭配 <code>init</code> 使用，強制呼叫方在初始化時設定必要屬性，否則編譯器會報錯：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> CreateOrderRequest</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> required <span class="dt">string</span> CustomerId <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> required <span class="dt">string</span> ProductId <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span><span class="op">?</span> Note <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> request <span class="op">=</span> <span class="kw">new</span> CreateOrderRequest</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    CustomerId <span class="op">=</span> <span class="st">"CUST-100"</span><span class="op">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    ProductId <span class="op">=</span> <span class="st">"PROD-200"</span><span class="op">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    Note <span class="op">=</span> <span class="st">"急件處理"</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> invalidRequest <span class="op">=</span> <span class="kw">new</span> CreateOrderRequest</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    CustomerId <span class="op">=</span> <span class="st">"CUST-100"</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="op">};</span> <span class="co">// 編譯錯誤：少了 ProductId</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>此範例會出現編譯錯誤 <code>CS9035</code>，因為在建立 <code>invalidRequest</code> 物件的時候沒有初始化必要成員 <code>CreateOrderRequest.ProductId</code>。這比把屬性宣告成 nullable 再到處檢查，更能把資料完整性的要求放在型別設計裡。</p>
+<p>不過，<code>required</code> 是編譯期的初始化契約，不是執行期驗證。呼叫方仍然可以把必要成員設定成 <code>null</code>；如果屬性型別是 non-nullable reference type，編譯器通常會提出警告，但 <code>required</code> 本身不會把這種指派變成執行期錯誤。因此，<code>required</code> 不能取代 null 檢查或業務規則驗證。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoInitRequired">DemoInitRequired</a></p>
+</blockquote>
+<p><code>required</code> + <code>init</code> 不能完全取代建構式。當型別需要複雜驗證、計算衍生欄位，或必須維持跨欄位的不變條件時，建構式仍然比較合適。簡單來說：</p>
+<ul>
+<li>DTO 或設定物件：常用 <code>required</code> + <code>init</code>。</li>
+<li>領域型別（domain type，例如 value object 或 entity）：常用建構式集中驗證。</li>
+<li>需要防止外部繞過驗證：考慮 <code>private init</code> 或只提供建構式。</li>
+</ul>
+<p>例如，<code>required</code> 可以要求呼叫方一定要提供 <code>ProductId</code> 和 <code>Quantity</code>，但不能保證 <code>ProductId</code> 不是空白字串，也不能保證 <code>Quantity</code> 大於 0。這類規則通常適合放在建構式中：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record OrderItem</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> ProductId <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> Quantity <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">OrderItem</span><span class="op">(</span><span class="dt">string</span> productId<span class="op">,</span> <span class="dt">int</span> quantity<span class="op">)</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// 驗證單一欄位的格式。</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span><span class="dt">string</span><span class="op">.</span><span class="fu">IsNullOrWhiteSpace</span><span class="op">(</span>productId<span class="op">))</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">ArgumentException</span><span class="op">(</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                <span class="st">"ProductId 不能為空"</span><span class="op">,</span> <span class="fu">nameof</span><span class="op">(</span>productId<span class="op">));</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// 驗證業務規則。</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>quantity <span class="op">&lt;=</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">ArgumentOutOfRangeException</span><span class="op">(</span><span class="fu">nameof</span><span class="op">(</span>quantity<span class="op">));</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        ProductId <span class="op">=</span> productId<span class="op">;</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        Quantity <span class="op">=</span> quantity<span class="op">;</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這類設計會把驗證集中在建構式，並避免呼叫方直接設定尚未驗證的屬性。</p>
+</section>
+<section id="with-運算式建立修改版本" class="level2">
+<h2 class="anchored" data-anchor-id="with-運算式建立修改版本">2.3　with 運算式：建立修改版本</h2>
+<p><code>with</code> 運算式讓你從現有的 record 建立一個新版本，只改指定的欄位，其他欄位沿用原本的值。如以下範例：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> original <span class="op">=</span> <span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="dv">5</span><span class="op">);</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> updated <span class="op">=</span> original with <span class="op">{</span> Quantity <span class="op">=</span> <span class="dv">10</span> <span class="op">};</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>original<span class="op">.</span><span class="fu">Quantity</span><span class="op">);</span> <span class="co">// 5</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>updated<span class="op">.</span><span class="fu">Quantity</span><span class="op">);</span>  <span class="co">// 10</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這正是第 1 章「把改變表達成轉換」的寫法。此範例中的 <code>original</code> 訂單項目沒有被修改，<code>updated</code> 則是包含新值的訂單項目。</p>
+<section id="巢狀更新" class="level3">
+<h3 class="anchored" data-anchor-id="巢狀更新">2.3.1　巢狀更新</h3>
+<p>當 record 裡面包含另一個 record 時，若要建立一個更新內層資料後的新外層物件，通常會同時寫出外層與內層的 <code>with</code> 運算式，稍嫌冗長：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">Address</span><span class="op">(</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Street<span class="op">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> City<span class="op">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> PostalCode</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">CustomerProfile</span><span class="op">(</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Name<span class="op">,</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    Address ShippingAddress</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> profile <span class="op">=</span> <span class="kw">new</span> <span class="fu">CustomerProfile</span><span class="op">(</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"C001"</span><span class="op">,</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"王小明"</span><span class="op">,</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> <span class="fu">Address</span><span class="op">(</span><span class="st">"中山路 1 號"</span><span class="op">,</span> <span class="st">"台北市"</span><span class="op">,</span> <span class="st">"10001"</span><span class="op">)</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> updated <span class="op">=</span> profile with <span class="co">// 建立新的 CustomerProfile</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    ShippingAddress <span class="op">=</span> profile<span class="op">.</span><span class="fu">ShippingAddress</span> with <span class="co">// 建立新的 Address</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        City <span class="op">=</span> <span class="st">"新北市"</span><span class="op">,</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        PostalCode <span class="op">=</span> <span class="st">"22001"</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這裡「冗長」指的是外層的 <code>profile with { ... }</code> 用來建立新的 <code>CustomerProfile</code>，內層又還有 <code>profile.ShippingAddress with { ... }</code> 用來建立新的 <code>Address</code>。寫法雖然比直接指定 <code>profile.ShippingAddress.City</code> 冗長一些，但資料流是明確的：你清楚地知道自己在建立一個新的 <code>ShippingAddress</code>，再把它放進一個新的 <code>CustomerProfile</code>。這比在原地修改更容易追蹤資料流，因為每一次更新都明確表達「從哪個舊值建立哪個新值」。</p>
+<p>如果覺得巢狀 <code>with</code> 不容易閱讀，沿用同一個 <code>profile</code>，也可以先把內層的新版本建立出來，再放進外層的新版本：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> newAddress <span class="op">=</span> profile<span class="op">.</span><span class="fu">ShippingAddress</span> with</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    City <span class="op">=</span> <span class="st">"新北市"</span><span class="op">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    PostalCode <span class="op">=</span> <span class="st">"22001"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> updated <span class="op">=</span> profile with <span class="op">{</span> ShippingAddress <span class="op">=</span> newAddress <span class="op">};</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這兩種寫法的資料流相同：先從舊的 <code>ShippingAddress</code> 建立新的 <code>Address</code>，再從舊的 <code>profile</code> 建立新的 <code>CustomerProfile</code>。</p>
+<p>如果巢狀層次很深，可以考慮在包住內層資料的型別上定義輔助方法。以上面的例子來說，我們可以在包住 <code>Address</code> 的 <code>CustomerProfile</code> 上提供 <code>WithCity</code> 方法，把更新 <code>ShippingAddress.City</code> 的細節藏在型別內部：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">CustomerProfile</span><span class="op">(</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Name<span class="op">,</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    Address ShippingAddress<span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> CustomerProfile <span class="fu">WithCity</span><span class="op">(</span><span class="dt">string</span> city<span class="op">)</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">this</span> with</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            ShippingAddress <span class="op">=</span> ShippingAddress with <span class="op">{</span> City <span class="op">=</span> city <span class="op">}</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">// 使用起來更清楚</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> updated <span class="op">=</span> profile<span class="op">.</span><span class="fu">WithCity</span><span class="op">(</span><span class="st">"新北市"</span><span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>第 3 章會深入討論如何把「狀態更新」封裝成「轉換方法」；大型物件圖的巢狀更新問題則會留到第 5 章。這裡要先記住的重點是：<code>with</code> 不是為了讓所有更新都變成一行，而是讓每一次更新都清楚表達「從舊版本建立新版本」。</p>
+<p>還要注意，<code>with</code> 可以設定呼叫端有權存取的 <code>init</code> 屬性。如果公開的 <code>init</code> 允許呼叫方組合出不合法的狀態，便需要限制存取層級，或提供目的明確的轉換方法。下一章會以訂單狀態為例，示範如何安排這些轉換方法與業務規則。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoWithExpression">DemoWithExpression</a></p>
+</blockquote>
+</section>
+</section>
+<section id="淺層不可變的陷阱" class="level2">
+<h2 class="anchored" data-anchor-id="淺層不可變的陷阱">2.4　淺層不可變的陷阱</h2>
+<p>這是本章重點之一，也是 C# 開發者最容易踩的坑：</p>
+<p><strong>具有 <code>init</code>-only 屬性的 record 提供的是「淺層不可變（shallow immutability）」，不是「深層不可變（deep immutability）」。</strong></p>
+<p>來看一個例子：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">Order</span><span class="op">(</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    List<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> Lines</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> order <span class="op">=</span> <span class="kw">new</span> <span class="fu">Order</span><span class="op">(</span><span class="st">"ORD-001"</span><span class="op">,</span> <span class="kw">new</span> List<span class="op">&lt;</span>OrderLine<span class="op">&gt;());</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">// 不能替換整個 Lines 參考。</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">// order.Lines = new List&lt;OrderLine&gt;(); // 編譯錯誤</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co">// 但可以修改 Lines 指向的 List&lt;T&gt; 內容。</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>order<span class="op">.</span><span class="fu">Lines</span><span class="op">.</span><span class="fu">Add</span><span class="op">(</span><span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="dv">5</span><span class="op">));</span> <span class="co">// 合法</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>order.Lines</code> 是 <code>init</code>-only 屬性，因此初始化完成後不能重新指向別的集合；但 <code>List&lt;T&gt;</code> 本身仍然是可變集合。<code>init</code>-only 屬性只保護集合參考不能被重新指派，不保護集合內容不能被改。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoShallowImmutability">DemoShallowImmutability</a></p>
+</blockquote>
+<section id="改用-ireadonlylistt" class="level3">
+<h3 class="anchored" data-anchor-id="改用-ireadonlylistt">2.4.1　改用 <code>IReadOnlyList&lt;T&gt;</code></h3>
+<p>比較安全的第一步，是把公開 API 從 <code>List&lt;T&gt;</code> 改成唯讀介面：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">Order</span><span class="op">(</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    IReadOnlyList<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> Lines</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>order<span class="op">.</span><span class="fu">Lines</span><span class="op">.</span><span class="fu">Add</span><span class="op">(</span><span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="dv">5</span><span class="op">));</span> <span class="co">// 編譯錯誤!</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這可以避免呼叫方透過 <code>order.Lines</code> 直接新增或刪除項目。不過，<code>IReadOnlyList&lt;T&gt;</code> 只是唯讀檢視，不是真正的 immutable collection。</p>
+<blockquote class="blockquote">
+<p>Note: <code>IReadOnlyList&lt;T&gt;</code> 只保證「透過這個介面」不能改變集合結構，例如新增、刪除或重新排序項目；它不保證底層集合不會被其他參考修改，也不保證集合裡的元素物件本身不可變。如果元素是可變的 class，呼叫端仍可取出元素後修改其屬性。簡單來說，結構是唯讀的，而元素本身是否可變，則取決於元素型別。</p>
+<p>參閱微軟文件：<a href="https://learn.microsoft.com/dotnet/api/system.collections.generic.ireadonlylist-1"><code>IReadOnlyList&lt;T&gt;</code> interface</a></p>
+</blockquote>
+<p>如果外部仍然握有原本的 <code>List&lt;T&gt;</code>，還是可以從那個參考修改集合內容。例如：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">Order</span><span class="op">(</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    IReadOnlyList<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> Lines</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> lines <span class="op">=</span> <span class="kw">new</span> List<span class="op">&lt;</span>OrderLine<span class="op">&gt;();</span> <span class="co">// (1)</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> order <span class="op">=</span> <span class="kw">new</span> <span class="fu">Order</span><span class="op">(</span><span class="st">"ORD-001"</span><span class="op">,</span> lines<span class="op">);</span> <span class="co">// (2)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>order<span class="op">.</span><span class="fu">Lines</span><span class="op">.</span><span class="fu">Count</span><span class="op">);</span> <span class="co">// 輸出 0</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>lines<span class="op">.</span><span class="fu">Add</span><span class="op">(</span><span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="dv">5</span><span class="op">));</span> <span class="co">// (3)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>order<span class="op">.</span><span class="fu">Lines</span><span class="op">.</span><span class="fu">Count</span><span class="op">);</span> <span class="co">// 輸出 1</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoReadOnlyListView">DemoReadOnlyListView</a></p>
+</blockquote>
+<p>此範例程式碼的閱讀重點：</p>
+<ol type="1">
+<li><code>lines</code> 是外部建立的可變 <code>List&lt;OrderLine&gt;</code>。</li>
+<li><code>order.Lines</code> 和 <code>lines</code> 指向同一個底層集合，只是 <code>order.Lines</code> 只顯露 <code>IReadOnlyList&lt;OrderLine&gt;</code> 介面。</li>
+<li>由於 <code>order.Lines</code> 的型別是 <code>IReadOnlyList&lt;OrderLine&gt;</code>，故無法透過 <code>order.Lines.Add()</code> 來添加元素（無法通過編譯）；但外部仍可透過原本的 <code>lines</code> 參考呼叫 <code>Add</code> 方法。</li>
+</ol>
+<p>因此，<code>IReadOnlyList&lt;T&gt;</code> 通常要搭配防禦性複製，或改用真正不可變的集合型別。下一節會整理這些選擇。</p>
+</section>
+</section>
+<section id="不可變集合的選擇指南" class="level2">
+<h2 class="anchored" data-anchor-id="不可變集合的選擇指南">2.5　不可變集合的選擇指南</h2>
+<p>處理集合時，先問一個問題：你要防止的是「呼叫方修改集合」，還是「資料結構本身在任何地方都不能被修改」？</p>
+<p>如果只是要保護 API 輸入輸出或 DTO，可以把防禦性複製再包成唯讀檢視：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> <span class="kw">class</span> SafeOrder</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> Id <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> IReadOnlyList<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> Lines <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">SafeOrder</span><span class="op">(</span><span class="dt">string</span> id<span class="op">,</span> IEnumerable<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> lines<span class="op">)</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        ArgumentNullException<span class="op">.</span><span class="fu">ThrowIfNull</span><span class="op">(</span>lines<span class="op">);</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        Id <span class="op">=</span> id<span class="op">;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        Lines <span class="op">=</span> Array<span class="op">.</span><span class="fu">AsReadOnly</span><span class="op">(</span>lines<span class="op">.</span><span class="fu">ToArray</span><span class="op">());</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這裡刻意使用一般的 <code>class</code>，因為範例要示範的是集合封裝，而不是 record 的值相等性。<code>lines.ToArray()</code> 先建立新的陣列，切斷與外部可變集合的聯繫；<code>Array.AsReadOnly</code> 再包住這份陣列，避免呼叫方把公開的 <code>IReadOnlyList&lt;T&gt;</code> 轉回陣列後修改項目。</p>
+<p>這仍然只是集合結構的保護。如果元素是可變物件，呼叫方取出元素後仍可能修改其狀態；因此，集合元素本身也應該採用合適的不可變型別。如果需要能夠建立新版本的不可變資料結構，可以改用 <code>System.Collections.Immutable</code> 家族的 <code>ImmutableList</code>：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> productIds <span class="op">=</span> ImmutableList<span class="op">.</span><span class="fu">Create</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="st">"P002"</span><span class="op">);</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> updatedProductIds <span class="op">=</span> productIds<span class="op">.</span><span class="fu">Add</span><span class="op">(</span><span class="st">"P003"</span><span class="op">);</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>productIds<span class="op">.</span><span class="fu">Count</span><span class="op">);</span>        <span class="co">// 輸出 2</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>updatedProductIds<span class="op">.</span><span class="fu">Count</span><span class="op">);</span> <span class="co">// 輸出 3</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>由此範例可知，<code>ImmutableList</code> 的 <code>Add</code> 方法不會修改原本的集合（此範例的 <code>productIds</code>），而是回傳包含新項目的集合版本。這是 <code>ImmutableList&lt;T&gt;</code> 和 <code>List&lt;T&gt;</code> 在語意上最大的差異。</p>
+<p>以下表格整理了幾種集合類型的適用場景，其中 <code>ImmutableArray&lt;T&gt;</code>、<code>ImmutableList&lt;T&gt;</code> 和 <code>ImmutableDictionary&lt;TKey, TValue&gt;</code> 屬於 <code>System.Collections.Immutable</code> 家族，<code>FrozenDictionary&lt;TKey, TValue&gt;</code> 則位於 <code>System.Collections.Frozen</code>。</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>場景</th>
+<th>建議</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>小型 DTO，只需保護公開 API</td>
+<td><code>IReadOnlyList&lt;T&gt;</code> + 防禦性複製與唯讀包裝</td>
+</tr>
+<tr class="even">
+<td>建立後很少修改，以讀取為主</td>
+<td><code>ImmutableArray&lt;T&gt;</code></td>
+</tr>
+<tr class="odd">
+<td>需要頻繁新增、刪除，且保留多個版本</td>
+<td><code>ImmutableList&lt;T&gt;</code></td>
+</tr>
+<tr class="even">
+<td>key-value 狀態表，需要不可變更新</td>
+<td><code>ImmutableDictionary&lt;TKey, TValue&gt;</code></td>
+</tr>
+<tr class="odd">
+<td>啟動時建立一次，之後大量查詢</td>
+<td><code>FrozenDictionary&lt;TKey, TValue&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>IReadOnlyList&lt;T&gt;</code> 是「介面上的唯讀」；<code>ImmutableArray&lt;T&gt;</code>、<code>ImmutableList&lt;T&gt;</code> 和 <code>ImmutableDictionary&lt;TKey, TValue&gt;</code> 是「資料結構本身不可變」，但適合的更新模式不同；<code>FrozenDictionary&lt;TKey, TValue&gt;</code> 則是建立後固定、為大量查詢最佳化的集合。</p>
+<p>這些集合類型各有不同的設計目的，不要一看到 immutable design 就全部換成 <code>ImmutableList&lt;T&gt;</code>。</p>
+<section id="immutablearrayt-的-default-陷阱" class="level3">
+<h3 class="anchored" data-anchor-id="immutablearrayt-的-default-陷阱">2.5.1　<code>ImmutableArray&lt;T&gt;</code> 的 default 陷阱</h3>
+<p><code>ImmutableArray&lt;T&gt;</code> 是 struct。當它處於未初始化狀態，例如指派為 <code>default</code>，它內部包住的陣列其實是 <code>null</code>：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> items <span class="op">=</span> <span class="kw">default</span><span class="op">;</span> <span class="co">// 小心陷阱!</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>items<span class="op">.</span><span class="fu">IsDefault</span><span class="op">);</span> <span class="co">// True</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="kw">try</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> length <span class="op">=</span> items<span class="op">.</span><span class="fu">Length</span><span class="op">;</span> <span class="co">// 拋出 NullReferenceException</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="kw">catch</span> <span class="op">(</span>NullReferenceException<span class="op">)</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span><span class="st">"items 尚未初始化。"</span><span class="op">);</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> safeItems <span class="op">=</span> ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;.</span><span class="fu">Empty</span><span class="op">;</span> <span class="co">// 推薦寫法</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>所以使用 <code>ImmutableArray&lt;T&gt;</code> 時，請明確初始化為 <code>ImmutableArray&lt;T&gt;.Empty</code>，或在使用前檢查 <code>IsDefault</code> 屬性。不要把 <code>default</code> 當成空集合（empty collection）；它代表的是未初始化狀態。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoReadOnlyCollections">DemoReadOnlyCollections</a></p>
+</blockquote>
+</section>
+<section id="集合欄位與值相等性" class="level3">
+<h3 class="anchored" data-anchor-id="集合欄位與值相等性">2.5.2　集合欄位與值相等性</h3>
+<p>Record 的值相等性（value equality）對集合欄位有一個容易忽略的細節：兩個 record 即使集合內容相同，只要集合物件不是同一個，預設相等性比較就可能回傳 <code>false</code>。請看以下範例：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="fu">Order</span><span class="op">(</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    IReadOnlyList<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> Lines</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> lines <span class="op">=</span> <span class="kw">new</span><span class="op">[]</span> <span class="op">{</span> <span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="dv">5</span><span class="op">)</span> <span class="op">};</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> a <span class="op">=</span> <span class="kw">new</span> <span class="fu">Order</span><span class="op">(</span><span class="st">"ORD-001"</span><span class="op">,</span> lines<span class="op">);</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> b <span class="op">=</span> <span class="kw">new</span> <span class="fu">Order</span><span class="op">(</span><span class="st">"ORD-001"</span><span class="op">,</span> lines<span class="op">.</span><span class="fu">ToArray</span><span class="op">());</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>a <span class="op">==</span> b<span class="op">);</span> <span class="co">// False</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>閱讀上方範例時，請留意 <code>a</code> 和 <code>b</code> 的 <code>Lines</code> 內容相同，但來自不同的陣列物件，因此 <code>a == b</code> 的結果是 <code>false</code>。<strong>如果你的設計需要「集合內容也參與相等性比較」，不能只依賴 record 的預設相等性。</strong> 請在比較時明確使用 <code>SequenceEqual</code>，或自行覆寫 <code>Equals</code> 和 <code>GetHashCode</code> 方法。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoCollectionValueEquality">DemoCollectionValueEquality</a></p>
+</blockquote>
+<blockquote class="blockquote">
+<p><strong>Note</strong></p>
+<p><code>ImmutableArray&lt;T&gt;</code> 雖然實作了 <code>IStructuralEquatable</code> 介面，但一般呼叫 <code>Equals</code> 或使用 <code>==</code> 時，並不會逐一比較元素內容，而是比較底層陣列的參考。若要逐一比較元素，請明確使用 <code>SequenceEqual</code>。</p>
+</blockquote>
+</section>
+<section id="從資料生命週期看-frozendictionary" class="level3">
+<h3 class="anchored" data-anchor-id="從資料生命週期看-frozendictionary">2.5.3　從資料生命週期看 FrozenDictionary</h3>
+<p><code>FrozenDictionary&lt;TKey,TValue&gt;</code> 的適用場景是：<strong>啟動或初始化時建立一次，之後只做大量查詢，完全不修改</strong>。</p>
+<p>例如電商系統常會有「商品分類代碼對應顯示名稱」、「付款方式代碼對應處理規則」、「國家代碼對應出貨區域」這類對照表。這些資料通常在啟動時從設定檔或資料庫載入，之後會在訂單建立、結帳流程與查詢畫面中反覆查詢，但不會在每次查詢時被修改。這時候，可以先準備好不再修改的 key 和 value，再建立 <code>FrozenDictionary</code> 作為查詢索引：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> System<span class="op">.</span><span class="fu">Collections</span><span class="op">.</span><span class="fu">Frozen</span><span class="op">;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> categoryNames <span class="op">=</span> <span class="kw">new</span> Dictionary<span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> <span class="dt">string</span><span class="op">&gt;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span><span class="st">"BOOK"</span><span class="op">]</span> <span class="op">=</span> <span class="st">"書籍"</span><span class="op">,</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">[</span><span class="st">"SOFTWARE"</span><span class="op">]</span> <span class="op">=</span> <span class="st">"軟體"</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="op">}.</span><span class="fu">ToFrozenDictionary</span><span class="op">();</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>categoryNames<span class="op">[</span><span class="st">"BOOK"</span><span class="op">]);</span> <span class="co">// 輸出：書籍</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>ToFrozenDictionary</code> 的建立成本相對高，但建立完成後能提供快速的查詢。它適合「很少建立、經常讀取」的資料，不適合每次更新都建立新版本的狀態表。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoFrozenDictionary">DemoFrozenDictionary</a></p>
+</blockquote>
+<p>這個案例的重點不是「不可變一定比較快」，而是不可變設計迫使我們釐清資料生命週期：哪些資料只在初始化階段改變？哪些資料進入查詢階段後就應該固定？當生命週期劃分清楚，就能選擇更貼合用途的資料結構。</p>
+<p>如果後台真的需要修改商品分類或出貨區域，通常也是更新資料來源後重新載入快取，而不是直接修改已建立的查詢索引。換句話說，集合選型不是語法偏好，而是資料生命週期的設計決策。</p>
+</section>
+</section>
+<section id="record-struct-與-readonly-record-struct" class="level2">
+<h2 class="anchored" data-anchor-id="record-struct-與-readonly-record-struct">2.6　record struct 與 readonly record struct</h2>
+<p><code>record struct</code> 是 C# 10 引入的型別。它是<strong>實值型別</strong>（value type），但仍保留 record 的 value equality、<code>ToString</code> 和 <code>with</code> 支援。要注意的是，語法相近的 <code>record class</code> 是<strong>參考型別</strong>（reference type）。</p>
+<p>以下是一個 <code>record struct</code> 範例：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">readonly</span> record <span class="kw">struct</span> <span class="fu">Money</span><span class="op">(</span><span class="dt">decimal</span> Amount<span class="op">,</span> <span class="dt">string</span> Currency<span class="op">);</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> price <span class="op">=</span> <span class="kw">new</span> <span class="fu">Money</span><span class="op">(</span><span class="dv">1200</span>m<span class="op">,</span> <span class="st">"TWD"</span><span class="op">);</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> discounted <span class="op">=</span> price with <span class="op">{</span> Amount <span class="op">=</span> <span class="dv">960</span>m <span class="op">};</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>談到 <code>struct</code> 時，常見的簡化說法是「struct 在 stack、class 在 heap」。這個說法不夠精確：實值型別可能出現在區域變數、物件欄位、陣列元素，boxing 時也會進入 heap。因此，選擇 <code>record struct</code> 時，不要只考慮 stack/heap，而要看它在語意上是不是一個值、實例大小與複製成本是否足夠低，以及是否會頻繁 boxing。</p>
+<section id="什麼時候使用-record-struct" class="level3">
+<h3 class="anchored" data-anchor-id="什麼時候使用-record-struct">2.6.1　什麼時候使用 record struct？</h3>
+<p><code>record struct</code> 適合以下情況：</p>
+<ul>
+<li>實例很小；常見經驗值是 16 bytes 左右或更小，但仍應依實際使用方式評估。</li>
+<li>語意上是一個「值」，例如金額、座標、時間區間。</li>
+<li>不需要繼承。</li>
+<li>不會頻繁 boxing。</li>
+<li>大量建立或內嵌在其他物件中時，希望降低 heap 配置。</li>
+</ul>
+<p>不適合的情況：</p>
+<ul>
+<li>實例很大，複製成本會變高。</li>
+<li>包含複雜參考型別欄位，使值語意變得模糊。</li>
+<li>需要繼承或追蹤長生命週期身分。</li>
+</ul>
+<p><code>record struct</code> 本身不能是 <code>null</code>，但可以使用 nullable value type，例如 <code>Money?</code>，來表示有值或缺值。如果型別在大多數使用情境都需要處理 <code>null</code>，則應重新評估參考型別是否更自然。</p>
+</section>
+<section id="record-struct-預設是可變的" class="level3">
+<h3 class="anchored" data-anchor-id="record-struct-預設是可變的">2.6.2　record struct 預設是可變的</h3>
+<p>一個容易混淆的地方是：使用位置式（positional）宣告的 <code>record class</code> 產生的是 <code>init</code>-only 屬性，但位置式 <code>record struct</code> 產生的是可讀寫屬性。</p>
+<p>範例：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">// record struct 預設可變</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> record <span class="kw">struct</span> <span class="fu">Point</span><span class="op">(</span><span class="dt">double</span> X<span class="op">,</span> <span class="dt">double</span> Y<span class="op">);</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> p <span class="op">=</span> <span class="kw">new</span> <span class="fu">Point</span><span class="op">(</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">2.0</span><span class="op">);</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>p<span class="op">.</span><span class="fu">X</span> <span class="op">=</span> <span class="fl">5.0</span><span class="op">;</span> <span class="co">// 修改成員是合法的</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>如果你要的是不可變的值型別，請明確寫成 <code>readonly record struct</code>：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">readonly</span> record <span class="kw">struct</span> <span class="fu">Point</span><span class="op">(</span><span class="dt">double</span> X<span class="op">,</span> <span class="dt">double</span> Y<span class="op">);</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> p <span class="op">=</span> <span class="kw">new</span> <span class="fu">Point</span><span class="op">(</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">2.0</span><span class="op">);</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>p<span class="op">.</span><span class="fu">X</span> <span class="op">=</span> <span class="fl">5.0</span><span class="op">;</span> <span class="co">// 編譯錯誤</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>readonly</code> 讓編譯器要求結構的實例狀態不可被修改，也能減少某些唯讀路徑上的防禦性複製（defensive copy）風險。如果非唯讀 struct 很大，又在高頻路徑中被反覆複製，應該用 profiler 確認實際成本，再決定是否需要調整。</p>
+</section>
+<section id="避免可變-struct" class="level3">
+<h3 class="anchored" data-anchor-id="避免可變-struct">2.6.3　避免可變 struct</h3>
+<p>可變 struct 的行為很容易產生誤解：程式看起來能修改原值，實際上卻可能只改到複本。以下範例中，陣列元素可以被原地修改，但透過 <code>IList&lt;T&gt;</code> 介面索引子取出的值，只是暫時複本：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> System<span class="op">.</span><span class="fu">Collections</span><span class="op">.</span><span class="fu">Generic</span><span class="op">;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> array <span class="op">=</span> <span class="kw">new</span> MutableCounter<span class="op">[]</span> <span class="op">{</span> <span class="kw">new</span><span class="op">()</span> <span class="op">};</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>array<span class="op">[</span><span class="dv">0</span><span class="op">].</span><span class="fu">Increment</span><span class="op">();</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>array<span class="op">[</span><span class="dv">0</span><span class="op">].</span><span class="fu">Value</span><span class="op">);</span> <span class="co">// 輸出：1</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>IList<span class="op">&lt;</span>MutableCounter<span class="op">&gt;</span> list <span class="op">=</span> <span class="kw">new</span> List<span class="op">&lt;</span>MutableCounter<span class="op">&gt;</span> <span class="op">{</span> <span class="kw">new</span><span class="op">()</span> <span class="op">};</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">// 透過 IList&lt;T&gt; 索引子取出的值是複本</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>list<span class="op">[</span><span class="dv">0</span><span class="op">].</span><span class="fu">Increment</span><span class="op">();</span>  <span class="co">// [A] 這裡只改動了取出的複本</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>list<span class="op">[</span><span class="dv">0</span><span class="op">].</span><span class="fu">Value</span><span class="op">);</span> <span class="co">// 輸出：0</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">struct</span> MutableCounter</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">int</span> Value<span class="op">;</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">Increment</span><span class="op">()</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        Value<span class="op">++;</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>註解標記 [A] 的程式碼修改的是複本，修改完就遺失了。因此，清單中的元素仍然是原本的值。為了避開這類難以除錯的行為，本書建議：如果要設計實值型別，優先使用不可變的 <code>readonly record struct</code>。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoRecordStruct">DemoRecordStruct</a></p>
+</blockquote>
+</section>
+</section>
+<section id="本章回顧" class="level2">
+<h2 class="anchored" data-anchor-id="本章回顧">2.7　本章回顧</h2>
+<p>這章介紹了 C# 中用來建構不可變資料的主要語言特性：</p>
+<ul>
+<li><strong><code>record class</code></strong> 是本書最常使用的不可變資料載體，提供 value equality、<code>ToString</code> 和 <code>with</code> 運算式。</li>
+<li><strong>Positional record</strong> 適合簡單資料容器；<strong>非位置式 record</strong> 適合需要驗證與建構邏輯的型別。</li>
+<li><strong><code>init</code></strong> 讓屬性只能在初始化期間設定；<strong><code>required</code></strong> 強制呼叫方提供必要資料。</li>
+<li><strong><code>with</code> 運算式</strong> 從現有 record 建立帶有修改的新版本。</li>
+<li><strong><code>record struct</code></strong> 是實值型別版本，預設可變；若要不可變值型別，優先使用 <code>readonly record struct</code>。</li>
+<li><strong>具有 <code>init</code>-only 屬性的 record 提供的是淺層不可變</strong>：集合屬性的型別要特別注意，<code>List&lt;T&gt;</code> 配合 record 不能提供真正的不可變性。</li>
+<li><strong>不可變集合的選擇</strong>：<code>IReadOnlyList&lt;T&gt;</code> 配合防禦性複製與唯讀包裝，適合多數 API 輸入輸出；<code>ImmutableArray&lt;T&gt;</code> 適合讀取為主；<code>ImmutableList&lt;T&gt;</code> 與 <code>ImmutableDictionary&lt;TKey,TValue&gt;</code> 適合需要不可變更新的集合；<code>FrozenDictionary&lt;TKey,TValue&gt;</code> 適合建立後大量查詢。</li>
+</ul>
+<p>到這裡，我們解決的是「如何表示與複製不可變資料」。不過，<code>record</code>、<code>init</code>、和 <code>with</code> 不會自動決定業務轉換應該放在哪裡，也不會自動保證每個狀態都合法。</p>
+<p>下一章是全書的核心章節，我們會深入討論「用資料轉換取代原地修改」的設計模式，以及如何判斷把行為放在 record 內部還是外部服務更合適。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+(() => {
+  const path = window.location.pathname;
+  const isZh = path.includes('/zh-tw');
+  const target = isZh ? '/en/' : '/zh-tw/';
+  const label = isZh ? '🌐 English' : '🌐 繁體中文';
+
+  const link = document.createElement('a');
+  link.className = 'language-switch';
+  link.href = target;
+  link.textContent = label;
+
+  const githubLink = document.querySelector("#quarto-sidebar .sidebar-tools-main a.quarto-navigation-tool[href*='github.com']");
+  const generatedTools = githubLink?.parentElement;
+  const tools = document.createElement('div');
+  tools.className = 'site-tools';
+  tools.appendChild(link);
+
+  if (githubLink) {
+    githubLink.className = 'github-repo-link';
+    githubLink.target = '_blank';
+    githubLink.rel = 'noopener noreferrer';
+    tools.appendChild(githubLink);
+    generatedTools?.remove();
+  }
+
+  const sidebarHeader = document.querySelector('#quarto-sidebar .sidebar-header');
+  if (sidebarHeader) {
+    tools.classList.add('site-tools-sidebar');
+    sidebarHeader.appendChild(tools);
+  }
+})();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已複製");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已複製");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../ch01/ch01.html" class="pagination-link" aria-label="第 1 章">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">第 1 章</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../ch03/ch03.html" class="pagination-link" aria-label="第 3 章">
+        <span class="nav-page-text"><span class="chapter-title">第 3 章</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></div></div></footer></body></html>

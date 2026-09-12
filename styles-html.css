@@ -1,0 +1,21 @@
+/* HTML-only refinements for the public book site. */
+@font-face {
+  font-family: "CJK Code Fallback";
+  src: local("Noto Sans Mono CJK TC"), local("PingFang TC"), local("Microsoft JhengHei");
+}
+:not(pre) > code {
+  font-family: "CJK Code Fallback", "Source Code Pro", ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+}
+body, .page-rows-contents { max-width: 1600px; margin-left: auto; margin-right: auto; }
+h2 { font-size: 1.6em; }
+h3 { font-size: 1.4em; }
+h4 { font-size: 1.2em; }
+p, li, blockquote, .blockquote, .callout { text-align: start; }
+.sidebar-navigation .sidebar-item a { padding-top: .2em; padding-bottom: .2em; text-align: left; }
+#quarto-margin-sidebar li { text-align: start; }
+.language-switch { display: inline-flex; align-items: center; min-height: 2rem; padding: .25rem .65rem; border: 1px solid #ced4da; border-radius: .25rem; background: var(--bs-body-bg,#fff); color: var(--bs-body-color,#212529); font-size: .875rem; text-decoration: none; box-shadow: 0 .125rem .35rem rgba(0,0,0,.08); }
+.site-tools { display: inline-flex; align-items: center; gap: .5rem; }
+.site-tools-sidebar { margin-top: .75rem; }
+.github-repo-link { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border: 1px solid #ced4da; border-radius: .25rem; background: var(--bs-body-bg,#fff); color: var(--bs-body-color,#212529); text-decoration: none; }
+.language-switch:hover, .github-repo-link:hover { color: var(--bs-link-color,#0d6efd); text-decoration: none; }
+.quarto-cover-image { border: 1px solid #dee2e6; border-radius: 2px; }

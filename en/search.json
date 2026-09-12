@@ -1,0 +1,12 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Immutable Data Design in C#",
+    "section": "",
+    "text": "Immutable Data Design in C# explores how records and immutable data structures can make C# programs clearer, more predictable, and easier to maintain.\nThe English manuscript is still in preparation. For now, this site provides the English book cover and publication information. Chapters will be added as the English edition becomes available.\nAuthor’s website",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Home</span>"
+    ]
+  }
+]

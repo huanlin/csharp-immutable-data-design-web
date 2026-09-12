@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DemoAbstractRecordExhaustiveness/DemoAbstractRecordExhaustiveness.csproj" />
+  <Project Path="DemoOrderUnion/DemoOrderUnion.csproj" />
+</Solution>

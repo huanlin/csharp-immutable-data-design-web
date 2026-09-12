@@ -1,0 +1,13 @@
+<Solution>
+  <Project Path="DemoPositionalRecord/DemoPositionalRecord.csproj" Type="Classic C#" />
+  <Project Path="DemoNonPositionalRecord/DemoNonPositionalRecord.csproj" Type="Classic C#" />
+  <Project Path="DemoValueEquality/DemoValueEquality.csproj" Type="Classic C#" />
+  <Project Path="DemoWithExpression/DemoWithExpression.csproj" Type="Classic C#" />
+  <Project Path="DemoInitRequired/DemoInitRequired.csproj" Type="Classic C#" />
+  <Project Path="DemoShallowImmutability/DemoShallowImmutability.csproj" Type="Classic C#" />
+  <Project Path="DemoReadOnlyListView/DemoReadOnlyListView.csproj" Type="Classic C#" />
+  <Project Path="DemoReadOnlyCollections/DemoReadOnlyCollections.csproj" Type="Classic C#" />
+  <Project Path="DemoCollectionValueEquality/DemoCollectionValueEquality.csproj" Type="Classic C#" />
+  <Project Path="DemoFrozenDictionary/DemoFrozenDictionary.csproj" Type="Classic C#" />
+  <Project Path="DemoRecordStruct/DemoRecordStruct.csproj" Type="Classic C#" />
+</Solution>

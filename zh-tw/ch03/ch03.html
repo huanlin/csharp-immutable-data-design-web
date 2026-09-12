@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-TW" xml:lang="zh-TW"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>第 3 章　用資料轉換取代原地修改 – C# 不可變資料設計</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../ch02/ch02.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-a90b5042977bc76a464b14ca3180e4ff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "沒有結果",
+    "search-matching-documents-text": "符合的文件",
+    "search-copy-link-title": "複製搜尋連結",
+    "search-hide-matches-text": "隱藏其他符合的結果",
+    "search-more-match-text": "更多符合結果",
+    "search-more-matches-text": "更多符合結果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "送出",
+    "search-label": "搜尋"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../styles-html.css">
+</head>
+
+<body class="nav-sidebar docked quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="切換側邊欄導航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ch03/ch03.html"><span class="chapter-title">第 3 章</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="切換側邊欄導航" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="搜尋" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">C# 不可變資料設計</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/huanlin/csharp-immutable-data-design-web" title="原始碼" class="quarto-navigation-tool px-1" aria-label="原始碼"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="搜尋"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">首頁</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/preface.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">前言</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/about-book.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">關於本書</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/about-author.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">關於作者</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch00/publication-notes.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">版本說明</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch01/ch01.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">第 1 章</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch02/ch02.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">第 2 章</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ch03/ch03.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">第 3 章</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目錄</h2>
+   
+  <ul>
+  <li><a href="#可變更新-vs-不可變轉換" id="toc-可變更新-vs-不可變轉換" class="nav-link active" data-scroll-target="#可變更新-vs-不可變轉換">3.1　可變更新 vs 不可變轉換</a></li>
+  <li><a href="#兩種設計風格" id="toc-兩種設計風格" class="nav-link" data-scroll-target="#兩種設計風格">3.2　兩種設計風格</a>
+  <ul class="collapse">
+  <li><a href="#風格-a行為放在-record-內部" id="toc-風格-a行為放在-record-內部" class="nav-link" data-scroll-target="#風格-a行為放在-record-內部">3.2.1　風格 A：行為放在 record 內部</a></li>
+  <li><a href="#風格-b行為放在外部函式或服務" id="toc-風格-b行為放在外部函式或服務" class="nav-link" data-scroll-target="#風格-b行為放在外部函式或服務">3.2.2　風格 B：行為放在外部函式或服務</a></li>
+  </ul></li>
+  <li><a href="#兩種風格的比較" id="toc-兩種風格的比較" class="nav-link" data-scroll-target="#兩種風格的比較">3.3　兩種風格的比較</a>
+  <ul class="collapse">
+  <li><a href="#預設建議從風格-a-開始" id="toc-預設建議從風格-a-開始" class="nav-link" data-scroll-target="#預設建議從風格-a-開始">3.3.1　預設建議：從風格 A 開始</a></li>
+  </ul></li>
+  <li><a href="#加入業務規則驗證" id="toc-加入業務規則驗證" class="nav-link" data-scroll-target="#加入業務規則驗證">3.4　加入業務規則驗證</a>
+  <ul class="collapse">
+  <li><a href="#拋出例外簡單直接" id="toc-拋出例外簡單直接" class="nav-link" data-scroll-target="#拋出例外簡單直接">3.4.1　拋出例外：簡單直接</a></li>
+  <li><a href="#回傳結果型別更明確的錯誤處理" id="toc-回傳結果型別更明確的錯誤處理" class="nav-link" data-scroll-target="#回傳結果型別更明確的錯誤處理">3.4.2　回傳結果型別：更明確的錯誤處理</a></li>
+  </ul></li>
+  <li><a href="#轉換管線把多個步驟串接起來" id="toc-轉換管線把多個步驟串接起來" class="nav-link" data-scroll-target="#轉換管線把多個步驟串接起來">3.5　轉換管線：把多個步驟串接起來</a>
+  <ul class="collapse">
+  <li><a href="#在測試中驗證每個步驟" id="toc-在測試中驗證每個步驟" class="nav-link" data-scroll-target="#在測試中驗證每個步驟">3.5.1　在測試中驗證每個步驟</a></li>
+  </ul></li>
+  <li><a href="#讓轉換函式保持純粹" id="toc-讓轉換函式保持純粹" class="nav-link" data-scroll-target="#讓轉換函式保持純粹">3.6　讓轉換函式保持純粹</a></li>
+  <li><a href="#一個完整的範例" id="toc-一個完整的範例" class="nav-link" data-scroll-target="#一個完整的範例">3.7　一個完整的範例</a></li>
+  <li><a href="#常見問題" id="toc-常見問題" class="nav-link" data-scroll-target="#常見問題">3.8　常見問題</a>
+  <ul class="collapse">
+  <li><a href="#每次都建立新物件效能不會很差嗎" id="toc-每次都建立新物件效能不會很差嗎" class="nav-link" data-scroll-target="#每次都建立新物件效能不會很差嗎">「每次都建立新物件，效能不會很差嗎？」</a></li>
+  <li><a href="#把所有方法都搬到-orderworkflow這樣好嗎" id="toc-把所有方法都搬到-orderworkflow這樣好嗎" class="nav-link" data-scroll-target="#把所有方法都搬到-orderworkflow這樣好嗎">「把所有方法都搬到 OrderWorkflow，這樣好嗎？」</a></li>
+  </ul></li>
+  <li><a href="#本章回顧" id="toc-本章回顧" class="nav-link" data-scroll-target="#本章回顧">3.9　本章回顧</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">第 3 章　用資料轉換取代原地修改</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    <div>
+    <div class="quarto-title-meta-heading">修改於</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">2026-09-12</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><strong>本章內容：</strong></p>
+<ul>
+<li>什麼是「資料轉換（data transformation）」</li>
+<li>風格 A：把行為放在 record 內部</li>
+<li>風格 B：把行為放在外部函式或服務</li>
+<li>兩種風格的比較與預設選擇建議</li>
+<li>轉換管線（transformation pipeline）的概念</li>
+<li>失敗處理和轉換管線的實務做法</li>
+</ul>
+<hr>
+<p>本章是全書的核心。</p>
+<p>前兩章建立了基礎：第 1 章介紹了「改變 = 建立新版本」的思維，第 2 章介紹了 C# 裡用來建構不可變資料的工具。現在，我們要回答一個更實際的問題：</p>
+<p><strong>當你的程式需要「更新」一筆資料時，這個邏輯應該放在哪裡？</strong></p>
+<p>這裡說的「更新」，不是直接修改既有物件，而是第 1 章介紹過的資料轉換：接收舊狀態，回傳新狀態。換句話說，本章關心的不是「如何讓物件被改掉」，而是「如何把狀態前進這件事設計成清楚、可測試、可維護的轉換」。</p>
+<p>這個問題沒有一個放諸四海皆準的答案。本章會提供一組實務判斷準則，幫助你思考幾個問題：</p>
+<ul>
+<li>這筆資料是 domain model 還是 DTO？（3.3 節）</li>
+<li>狀態轉換是否需要維護業務規則？（3.4 節）</li>
+<li>操作是否依賴資料庫、時間、或外部服務？（3.6 節）</li>
+</ul>
+<p>答案不同，更新邏輯適合放的位置也會不同。</p>
+<section id="可變更新-vs-不可變轉換" class="level2">
+<h2 class="anchored" data-anchor-id="可變更新-vs-不可變轉換">3.1　可變更新 vs 不可變轉換</h2>
+<p>在討論更新邏輯應該放在哪裡之前，本節先快速複習第 1 章提過的核心觀念：可變設計會直接修改既有物件；不可變設計則把改變表達成「接收舊狀態，回傳新狀態」的資料轉換。</p>
+<p>想像訂單系統的付款流程。使用可變設計時，你可能這樣寫：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 可變更新（mutable update）</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">void</span> <span class="fu">MarkAsPaid</span><span class="op">(</span>Order order<span class="op">,</span> DateTimeOffset paidAt<span class="op">)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    order<span class="op">.</span><span class="fu">Status</span> <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    order<span class="op">.</span><span class="fu">PaidAt</span> <span class="op">=</span> paidAt<span class="op">;</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這個方法<strong>直接修改</strong>了傳進來的 <code>order</code>。由於呼叫方的 <code>order</code> 物件在方法執行後已經變了，這種對傳入物件的原地修改就是<strong>副作用（side effect）</strong>的一種。</p>
+<blockquote class="blockquote">
+<p><strong>Note:</strong> 簡單來說，「副作用」是指方法透過回傳值以外的方式，造成呼叫方可以觀察到的狀態變化或外部互動，例如修改傳入物件或共享狀態、寫入資料庫、或輸出訊息。</p>
+</blockquote>
+<p>使用不可變設計時，同樣的邏輯可以改成：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 不可變轉換（immutable transition）</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> Order <span class="fu">MarkAsPaid</span><span class="op">(</span>Order order<span class="op">,</span> DateTimeOffset paidAt<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> order with</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        PaidAt <span class="op">=</span> paidAt</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這個方法<strong>回傳一個新物件</strong>，不修改輸入的 <code>order</code>。呼叫方需要使用回傳值。以下範例以 .NET 內建的 <code>TimeProvider</code> 取得目前時間；第 3.6 節會完整說明這個時間抽象：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> paidAt <span class="op">=</span> timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">();</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">// 可變版本的呼叫方式（會修改 order）</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>orderService<span class="op">.</span><span class="fu">MarkAsPaid</span><span class="op">(</span>order<span class="op">,</span> paidAt<span class="op">);</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">// order 已經被改了，但從程式碼看不出來</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">// 不可變版本的呼叫方式（回傳新物件）</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> paidOrder <span class="op">=</span> orderService<span class="op">.</span><span class="fu">MarkAsPaid</span><span class="op">(</span>order<span class="op">,</span> paidAt<span class="op">);</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">// order 沒有改變，paidOrder 是新的版本</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>不可變版本的回傳型別會提醒呼叫方：這個方法會回傳一個 <code>Order</code>，請把它視為新版本。不過，C# 的方法簽名本身無法保證實作沒有同時修改輸入；這仍須由型別設計與方法實作共同確保。</p>
+<p>第 1 章補充說明過，即使將參數宣告為 <code>in Order order</code>，對參考型別來說，也只能防止方法重新指派 <code>order</code> 這個參數，不會讓它指向的物件自動變成不可變。</p>
+</section>
+<section id="兩種設計風格" class="level2">
+<h2 class="anchored" data-anchor-id="兩種設計風格">3.2　兩種設計風格</h2>
+<p>「把改變表達成轉換」這個思維有兩種常見的實作風格，各有優缺點。第 1 章的 <code>OrderWorkflow</code> 範例其實已經示範了其中一種：把轉換邏輯放在 <code>Order</code> 外部。這一節會先把兩種寫法並排放在一起，接著再討論它們各自適合什麼情境。</p>
+<section id="風格-a行為放在-record-內部" class="level3">
+<h3 class="anchored" data-anchor-id="風格-a行為放在-record-內部">3.2.1　風格 A：行為放在 record 內部</h3>
+<p>這種作法類似傳統 OOP 的設計，由 record 本身提供轉換方法，但這些方法不會修改 <code>this</code>（物件本身），而是回傳新版本。為了聚焦在這個封裝方式，下面的範例只保留建立草稿和提交訂單所需的屬性：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record Order</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> OrderStatus Status <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> Lines <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> DateTimeOffset CreatedAt <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> DateTimeOffset<span class="op">?</span> SubmittedAt <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="fu">Order</span><span class="op">(</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> lines<span class="op">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        DateTimeOffset createdAt<span class="op">)</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Draft</span><span class="op">;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        Lines <span class="op">=</span> lines<span class="op">;</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        CreatedAt <span class="op">=</span> createdAt<span class="op">;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> Order <span class="fu">CreateDraft</span><span class="op">(</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> lines<span class="op">,</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        DateTimeOffset createdAt<span class="op">)</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>lines<span class="op">.</span><span class="fu">IsDefault</span><span class="op">)</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">ArgumentException</span><span class="op">(</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                <span class="st">"訂單項目尚未初始化"</span><span class="op">,</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                <span class="fu">nameof</span><span class="op">(</span>lines<span class="op">));</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">new</span> <span class="fu">Order</span><span class="op">(</span>lines<span class="op">,</span> createdAt<span class="op">);</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這裡刻意使用非位置式 record（而不是 positional record），並將建構式與所有 <code>init</code> 存取子設為 <code>private</code>，因此呼叫方無法繞過轉換方法直接改寫狀態。若要讓訂單進入下一個狀態，就必須透過 <code>Order</code> 提供的轉換方法。例如，<code>Submit</code> 方法會讀取 <code>this</code>，再用 <code>with</code> 建立新版本。</p>
+<blockquote class="blockquote">
+<p><strong>Note:</strong> 如果採用常見的 <code>public</code> positional record 寫法，由編譯器產生的 primary constructor 以及根據位置參數產生的屬性都是 <code>public</code>，而且這些屬性都具有 <code>public init</code> 存取子。<code>init</code> 只能防止物件建立後的一般指派，不會禁止呼叫方使用 <code>with</code> 在新版本中設定這些屬性。因此，呼叫方可能繞過 <code>Submit</code> 方法內的驗證邏輯，直接建立一個內容矛盾的版本，像這樣：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> invalid <span class="op">=</span> draft with</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">,</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    SubmittedAt <span class="op">=</span> <span class="kw">null</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這個問題的關鍵不是 positional record 語法本身，而是與狀態有關的建構入口和 <code>init</code> 存取子仍對外開放。這裡改用非位置式 record，是為了更明確地限制這些存取點。</p>
+</blockquote>
+<p>接著來看 <code>Order</code> 的狀態轉換方法。為了避免程式碼太過冗長，以下只展示 <code>Submit</code> 方法；其他業務規則會在第 3.4 節說明：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> Order <span class="fu">Submit</span><span class="op">(</span>DateTimeOffset now<span class="op">)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>Status <span class="op">!=</span> OrderStatus<span class="op">.</span><span class="fu">Draft</span><span class="op">)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"只有草稿可以提交"</span><span class="op">);</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> <span class="kw">this</span> with</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">,</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        SubmittedAt <span class="op">=</span> now</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>Lines</code> 也改用 <code>ImmutableArray&lt;OrderLine&gt;</code>，避免外部程式透過原本的 <code>List&lt;OrderLine&gt;</code> 參考修改訂單項目。工廠方法會拒絕處於 <code>default</code> 狀態的 <code>ImmutableArray&lt;OrderLine&gt;</code>，以呼應第 2 章介紹過的集合設計。</p>
+<p>完整版本還包含 <code>Pay</code>、<code>Ship</code>、和 <code>Cancel</code>，它們都採用相同的轉換結構。這些方法的名稱像是命令，但實際行為是轉換，所以呼叫方必須接住回傳值。因為每個方法都回傳 <code>Order</code>，呼叫方也可以將它們串接起來：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> now <span class="op">=</span> timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">();</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> shipped <span class="op">=</span> order</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">Submit</span><span class="op">(</span>now<span class="op">)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">Pay</span><span class="op">(</span>now<span class="op">.</span><span class="fu">AddHours</span><span class="op">(</span><span class="dv">2</span><span class="op">))</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">Ship</span><span class="op">(</span>now<span class="op">.</span><span class="fu">AddDays</span><span class="op">(</span><span class="dv">1</span><span class="op">));</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這種寫法可以流暢地串接（method chaining），看起來很自然。在支援程式碼補全（code completion）的 IDE 中，輸入 <code>.</code> 就能看到這個訂單支援哪些操作。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationStyleA">DemoOrderTransformationStyleA</a></p>
+</blockquote>
+</section>
+<section id="風格-b行為放在外部函式或服務" class="level3">
+<h3 class="anchored" data-anchor-id="風格-b行為放在外部函式或服務">3.2.2　風格 B：行為放在外部函式或服務</h3>
+<p>另一種作法，是像第 1 章的 <code>OrderWorkflow</code> 那樣，把轉換邏輯放在一個獨立的靜態類別（或服務）裡，讓 <code>Order</code> 本身保持為資料容器：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record <span class="fu">Order</span><span class="op">(</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Id<span class="op">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> CustomerId<span class="op">,</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    OrderStatus Status<span class="op">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> Lines<span class="op">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">decimal</span> Total<span class="op">,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    DateTimeOffset CreatedAt<span class="op">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    DateTimeOffset<span class="op">?</span> SubmittedAt <span class="op">=</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    DateTimeOffset<span class="op">?</span> PaidAt <span class="op">=</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    DateTimeOffset<span class="op">?</span> ShippedAt <span class="op">=</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span><span class="op">?</span> CancelReason <span class="op">=</span> <span class="kw">null</span><span class="op">);</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">static</span> <span class="kw">class</span> OrderWorkflow</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> Order <span class="fu">Submit</span><span class="op">(</span>Order order<span class="op">,</span> DateTimeOffset now<span class="op">)</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> order with</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">,</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>            SubmittedAt <span class="op">=</span> now</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> Order <span class="fu">Pay</span><span class="op">(</span>Order order<span class="op">,</span> DateTimeOffset now<span class="op">)</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> order with</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">,</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            PaidAt <span class="op">=</span> now</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這種風格的呼叫方式會把目前的訂單版本明確傳進每個轉換函式：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> now <span class="op">=</span> timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">();</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> submitted <span class="op">=</span> OrderWorkflow<span class="op">.</span><span class="fu">Submit</span><span class="op">(</span>order<span class="op">,</span> now<span class="op">);</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> paid <span class="op">=</span> OrderWorkflow<span class="op">.</span><span class="fu">Pay</span><span class="op">(</span>submitted<span class="op">,</span> now<span class="op">.</span><span class="fu">AddHours</span><span class="op">(</span><span class="dv">2</span><span class="op">));</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>在這個例子裡，<code>Order</code> 不需要知道有哪些操作會改變它；所有業務流程都集中在 <code>OrderWorkflow</code>。這和風格 A 使用的是同一個不可變轉換規則，只是方法的位置不同。為了聚焦在方法的位置，上面的 <code>Submit</code> 和 <code>Pay</code> 暫時省略了狀態驗證；第 3.4 節會補上這些規則。</p>
+<p>不過，這個 positional record 仍允許呼叫方自行使用 <code>with</code>；若要確保狀態轉換都經過 workflow，還需要額外的封裝設計，或明確的團隊慣例。</p>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationStyleB">DemoOrderTransformationStyleB</a></p>
+</blockquote>
+<p>這種寫法看起來很接近「<strong>貧血模型（anemic domain model）</strong>」，值得花點篇幅解釋一下。</p>
+<p>所謂貧血模型，通常是指一個 domain model 只有資料欄位，幾乎沒有行為；真正的業務規則散落在 controller、service、UI handler 或 repository 等地方。結果是 <code>Order</code> 看起來像 domain model，但它本身無法保護自己的狀態：任何地方只要拿到訂單，就可能直接把 <code>Status</code> 改成 <code>Paid</code>，卻忘了檢查訂單是否已提交、是否已取消、是否已經付款。問題不只是「方法沒有放在 <code>Order</code> 裡」，而是<strong>業務規則沒有被集中、清楚、可靠地表達</strong>。</p>
+<blockquote class="blockquote">
+<p>參閱：Martin Fowler, <a href="https://martinfowler.com/bliki/AnemicDomainModel.html">Anemic Domain Model</a></p>
+</blockquote>
+<p>因此，風格 B 不一定等於壞的貧血模型。關鍵在於轉換規則是否有明確的歸屬。如果 <code>Order</code> 本身保持為資料容器，但所有狀態變化都必須透過 <code>OrderWorkflow.Submit</code>、<code>OrderWorkflow.Pay</code> 這類轉換函式，而且這些函式集中處理業務規則，那麼這比較像是把 domain workflow 放在外部模組中，而不是讓規則散落各處。資料和行為雖然沒有放在同一個型別裡，但它們仍然透過清楚的 API 被組織在一起。</p>
+<p>反過來說，如果 <code>Order</code> 只是資料容器，而系統裡到處都可以自由改寫它的狀態，那就會落入貧血模型常見的問題：規則難以追蹤、狀態容易不一致、測試也必須追著各種呼叫路徑跑。風格 B 要成立，前提是團隊必須有清楚的慣例：狀態轉換要集中在 workflow、domain service 或其他目的明確的模組中，而不是散落在每個需要用到訂單的地方。</p>
+</section>
+</section>
+<section id="兩種風格的比較" class="level2">
+<h2 class="anchored" data-anchor-id="兩種風格的比較">3.3　兩種風格的比較</h2>
+<p>以下表格整理了風格 A 與風格 B 在幾個常見面向上的差異：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>比較面向</th>
+<th>風格 A（行為在 record 內）</th>
+<th>風格 B（行為在外部）</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>IDE 可探索性</td>
+<td>輸入 <code>.</code> 可以看到可用操作</td>
+<td>需要知道要去哪個類別找</td>
+</tr>
+<tr class="even">
+<td>資料透明度</td>
+<td>取決於公開 API；本例可讀取資料，但限制呼叫方直接重建所有狀態</td>
+<td>高（公開 positional record 可直接重建）</td>
+</tr>
+<tr class="odd">
+<td>確保狀態合法</td>
+<td>比較集中（可以在方法內做驗證）</td>
+<td>需要額外設計</td>
+</tr>
+<tr class="even">
+<td>測試</td>
+<td>容易</td>
+<td>容易</td>
+</tr>
+<tr class="odd">
+<td>適合 DTO</td>
+<td>不一定（DTO 通常不需要行為）</td>
+<td>較適合</td>
+</tr>
+<tr class="even">
+<td>適合 domain model</td>
+<td>較適合（有業務規則）</td>
+<td>視情況</td>
+</tr>
+<tr class="odd">
+<td>適合跨分層傳遞資料</td>
+<td>不一定</td>
+<td>較適合</td>
+</tr>
+</tbody>
+</table>
+<p>行為是否定義在 record 內，並不直接決定資料透明度；真正的判斷依據是，公開 API 是否足以讀取並重建其資料內容。</p>
+<p>其中的「確保狀態合法」，其實就是「這個物件在任何時候都必須符合的規則」，例如：</p>
+<ul>
+<li>已付款訂單必須有付款時間</li>
+<li>已取消訂單必須有取消原因</li>
+<li>草稿（draft）訂單才能提交</li>
+<li>已取消訂單不能再付款</li>
+</ul>
+<section id="預設建議從風格-a-開始" class="level3">
+<h3 class="anchored" data-anchor-id="預設建議從風格-a-開始">3.3.1　預設建議：從風格 A 開始</h3>
+<p>如果你不確定用哪種，建議可以從風格 A 開始——把行為放在 record 內部。</p>
+<p>理由是：</p>
+<ul>
+<li>IDE 可探索性（discoverability）更好，新加入的開發者可以透過 <code>.</code> 發現可用操作。</li>
+<li>比較容易確保狀態合法；你可以在方法內部做驗證，避免轉換後產生不合理的狀態。</li>
+<li>大多數 C# 開發者對這種寫法更熟悉，學習曲線較低。</li>
+</ul>
+<p><strong>何時考慮切換到風格 B？</strong></p>
+<p>當你遇到以下情況時，外部函式或服務的設計可能更適合：</p>
+<ul>
+<li><strong>同一筆資料有多種不同的操作邏輯</strong>，而這些邏輯分屬不同的業務領域（例如：訂單的定價邏輯、物流邏輯、財務邏輯各自獨立）。</li>
+<li><strong>資料需要跨越系統分層或 API 介面</strong>（例如 API request/response DTO），這類資料的角色是「傳遞資訊」，不應該帶著業務邏輯。</li>
+<li><strong>操作邏輯需要外部依賴</strong>（資料庫、外部服務），把它放在 record 外部的服務中更合適。</li>
+</ul>
+<p>記住：<strong>兩種風格可以混用</strong>。同一個 <code>Order</code> record 可以保留純粹的狀態轉換方法，再由 application service 取得資料庫、時間、或外部服務的結果，並把普通資料傳給這些方法。service 負責協調外部依賴，不代表業務規則也必須跟著移出 domain model。</p>
+</section>
+</section>
+<section id="加入業務規則驗證" class="level2">
+<h2 class="anchored" data-anchor-id="加入業務規則驗證">3.4　加入業務規則驗證</h2>
+<p>實務上的狀態轉換不只是「更新欄位」，還需要驗證當前狀態是否允許這個轉換。</p>
+<p>例如，一張「草稿（draft）」訂單才能被提交，一張「已取消」的訂單不能再付款。這種「從某個狀態才能轉換到另一個狀態」的約束，就是業務規則（business rule）。</p>
+<section id="拋出例外簡單直接" class="level3">
+<h3 class="anchored" data-anchor-id="拋出例外簡單直接">3.4.1　拋出例外：簡單直接</h3>
+<p>最直接的做法是在轉換方法裡驗證，如果不滿足就拋出例外：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record Order</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... 屬性與建構式略</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order <span class="fu">Submit</span><span class="op">(</span>DateTimeOffset now<span class="op">)</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>Status <span class="op">!=</span> OrderStatus<span class="op">.</span><span class="fu">Draft</span><span class="op">)</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>                $<span class="st">"只有草稿狀態的訂單可以提交，當前狀態：{Status}"</span><span class="op">);</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>Lines<span class="op">.</span><span class="fu">Count</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>                <span class="st">"訂單必須至少有一個項目才能提交"</span><span class="op">);</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">this</span> with</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">,</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>            SubmittedAt <span class="op">=</span> now</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order <span class="fu">Pay</span><span class="op">(</span>DateTimeOffset now<span class="op">)</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>Status <span class="op">!=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">)</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>                $<span class="st">"只有已提交的訂單可以付款，當前狀態：{Status}"</span><span class="op">);</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">this</span> with</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">,</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>            PaidAt <span class="op">=</span> now</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這種做法簡單，但不代表每個呼叫方都必須就地使用 <code>try</code>-<code>catch</code>。如果不合法的轉換代表程式設計錯誤，可以讓例外交由應用程式的統一錯誤處理機制接住；如果它是使用者操作時可預期的結果，下一節的結果型別通常更合適。也不要只在呼叫前重複檢查狀態，因為真正維護規則的地方仍應該是轉換方法。</p>
+</section>
+<section id="回傳結果型別更明確的錯誤處理" class="level3">
+<h3 class="anchored" data-anchor-id="回傳結果型別更明確的錯誤處理">3.4.2　回傳結果型別：更明確的錯誤處理</h3>
+<p>另一種做法是讓方法回傳一個結果型別，明確表達「成功」或「失敗」。</p>
+<p>同樣以訂單為例，我們可以先定義一個代表轉換結果的型別，名稱是 <code>OrderTransitionResult</code>：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record OrderTransitionResult</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">bool</span> IsSuccess <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order<span class="op">?</span> Order <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span><span class="op">?</span> ErrorMessage <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="fu">OrderTransitionResult</span><span class="op">(</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">bool</span> isSuccess<span class="op">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        Order<span class="op">?</span> order<span class="op">,</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span><span class="op">?</span> errorMessage<span class="op">)</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        IsSuccess <span class="op">=</span> isSuccess<span class="op">;</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        Order <span class="op">=</span> order<span class="op">;</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        ErrorMessage <span class="op">=</span> errorMessage<span class="op">;</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> OrderTransitionResult <span class="fu">Success</span><span class="op">(</span>Order order<span class="op">)</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        ArgumentNullException<span class="op">.</span><span class="fu">ThrowIfNull</span><span class="op">(</span>order<span class="op">);</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">new</span><span class="op">(</span><span class="kw">true</span><span class="op">,</span> order<span class="op">,</span> <span class="kw">null</span><span class="op">);</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> OrderTransitionResult <span class="fu">Fail</span><span class="op">(</span><span class="dt">string</span> message<span class="op">)</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>        ArgumentException<span class="op">.</span><span class="fu">ThrowIfNullOrWhiteSpace</span><span class="op">(</span>message<span class="op">);</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">new</span><span class="op">(</span><span class="kw">false</span><span class="op">,</span> <span class="kw">null</span><span class="op">,</span> message<span class="op">);</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>然後，在負責處理訂單流程（workflow）的方法中回傳這個結果型別，而不是在驗證失敗時拋出例外：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">static</span> <span class="kw">class</span> OrderWorkflow</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> OrderTransitionResult <span class="fu">Submit</span><span class="op">(</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        Order order<span class="op">,</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        DateTimeOffset now<span class="op">)</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>order<span class="op">.</span><span class="fu">Status</span> <span class="op">!=</span> OrderStatus<span class="op">.</span><span class="fu">Draft</span><span class="op">)</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span> OrderTransitionResult<span class="op">.</span><span class="fu">Fail</span><span class="op">(</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                $<span class="st">"只有草稿狀態的訂單可以提交，當前狀態：{order.Status}"</span><span class="op">);</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> submitted <span class="op">=</span> order with</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">,</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            SubmittedAt <span class="op">=</span> now</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> OrderTransitionResult<span class="op">.</span><span class="fu">Success</span><span class="op">(</span>submitted<span class="op">);</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>呼叫方：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> result <span class="op">=</span> OrderWorkflow<span class="op">.</span><span class="fu">Submit</span><span class="op">(</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    order<span class="op">,</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">());</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="op">(!</span>result<span class="op">.</span><span class="fu">IsSuccess</span><span class="op">)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    logger<span class="op">.</span><span class="fu">LogWarning</span><span class="op">(</span><span class="st">"提交訂單失敗：{Message}"</span><span class="op">,</span> result<span class="op">.</span><span class="fu">ErrorMessage</span><span class="op">);</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span><span class="op">;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> submitted <span class="op">=</span> result<span class="op">.</span><span class="fu">Order</span><span class="op">!;</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>await orderRepository<span class="op">.</span><span class="fu">SaveAsync</span><span class="op">(</span>submitted<span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這種做法讓錯誤處理更明確，呼叫方從型別就能看出這個操作可能失敗，比較不容易忽略錯誤情況。</p>
+<p>建構式設為 <code>private</code>，並由工廠方法驗證參數之後，呼叫方也不能自行建立「成功但 <code>Order</code> 是 <code>null</code>」這類互相矛盾的組合。不過，C# 的 nullable analysis 仍無法從 <code>IsSuccess</code> 推導 <code>Order</code> 一定有值，所以範例仍需要使用 <code>!</code>。進階選讀的第 6 章會把相同的型別建模思路用在訂單生命週期，讓不同訂單狀態成為不同型別；它不是專門改寫這裡的結果型別。</p>
+<p>順便提及，這個思路和 Go 語言的錯誤處理哲學相近：錯誤不是隱藏在例外流程裡，而是作為回傳值的一部分交給呼叫方判斷。</p>
+<p>.NET 基礎類別庫目前沒有內建的 <code>Result&lt;TValue, TError&gt;</code> 型別，也就是「成功時回傳 <code>TValue</code>，失敗時回傳 <code>TError</code>」的通用結果型別，但你可以用上面的方式自己定義，或引入 <a href="https://github.com/error-or/error-or">ErrorOr</a>、<a href="https://github.com/altmann/FluentResults">FluentResults</a> 等第三方套件來獲得更完整的 <code>Result</code> 型別支援。</p>
+</section>
+</section>
+<section id="轉換管線把多個步驟串接起來" class="level2">
+<h2 class="anchored" data-anchor-id="轉換管線把多個步驟串接起來">3.5　轉換管線：把多個步驟串接起來</h2>
+<p>不可變設計的另一個好處是：因為每個轉換都回傳新物件，多個步驟可以很自然地串接成一條「轉換管線」。</p>
+<p>以下範例展示的是風格 A 的串接（method chaining）寫法：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> now <span class="op">=</span> timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">();</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> finalOrder <span class="op">=</span> draft</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">Submit</span><span class="op">(</span>now<span class="op">)</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">Pay</span><span class="op">(</span>now<span class="op">.</span><span class="fu">AddHours</span><span class="op">(</span><span class="dv">2</span><span class="op">))</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">Ship</span><span class="op">(</span>now<span class="op">.</span><span class="fu">AddDays</span><span class="op">(</span><span class="dv">1</span><span class="op">));</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>接著是風格 B 的逐步轉換寫法：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> now <span class="op">=</span> timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">();</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> submitted <span class="op">=</span> OrderWorkflow<span class="op">.</span><span class="fu">Submit</span><span class="op">(</span>draft<span class="op">,</span> now<span class="op">);</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> paid <span class="op">=</span> OrderWorkflow<span class="op">.</span><span class="fu">Pay</span><span class="op">(</span>submitted<span class="op">,</span> now<span class="op">.</span><span class="fu">AddHours</span><span class="op">(</span><span class="dv">2</span><span class="op">));</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> shipped <span class="op">=</span> OrderWorkflow<span class="op">.</span><span class="fu">Ship</span><span class="op">(</span>paid<span class="op">,</span> now<span class="op">.</span><span class="fu">AddDays</span><span class="op">(</span><span class="dv">1</span><span class="op">));</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這兩種寫法都是把狀態轉換組成管線，讓整個業務流程的邏輯一目了然。你不需要在腦子裡追蹤「哪個物件在哪個步驟被改了什麼」，而是清楚地看到一個狀態如何流動轉換成下一個狀態。</p>
+<p>這裡先展示每一步成功時的資料流。如果轉換回傳的是上一節的 <code>OrderTransitionResult</code>，下一步就不能直接接收它，而必須先判斷是否成功，再把成功結果裡的 <code>Order</code> 傳下去。更通用的 <code>Result</code> 型別通常會提供 <code>Bind</code> 或 <code>Then</code> 之類的組合操作，讓失敗直接中止後續步驟；無論採用哪種 API，關鍵都是讓上一個步驟的成功輸出成為下一個步驟的輸入。</p>
+<p>下圖描繪了資料轉換的管線，圖中的每個方塊代表一個不同的 <code>Order</code> 物件。每一步都接收目前的訂單版本，產生下一個版本；原本的 <code>draft</code> 不會被修改。</p>
+<pre class="text"><code>+-----------------------+
+| Order (Draft)         |
++-----------------------+
+            |
+            | Submit(...)
+            | returns a new Order
+            v
++-----------------------+
+| Order (Submitted)     |
++-----------------------+
+            |
+            | Pay(...)
+            | returns a new Order
+            v
++-----------------------+
+| Order (Paid)          |
++-----------------------+
+            |
+            | Ship(...)
+            | returns a new Order
+            v
++-----------------------+
+| Order (Shipped)       |
++-----------------------+</code></pre>
+<p>初次改用這種風格時，最常見的錯誤是<strong>忘記接住回傳的新版本</strong>：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 錯誤示範：Submit 回傳的新版本被丟掉了</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>draft<span class="op">.</span><span class="fu">Submit</span><span class="op">(</span>timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">());</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">// draft 仍然是原本的草稿訂單，因為它沒有被修改</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>不可變轉換方法不會修改原本的物件，而是透過回傳值提供新的狀態，因此呼叫方必須把回傳值視為新的狀態來源。你可以把它想成一條資料流：每一步都接收上一個狀態，產生下一個狀態；如果中間某一步的輸出被丟掉，流程就中斷了。</p>
+<section id="在測試中驗證每個步驟" class="level3">
+<h3 class="anchored" data-anchor-id="在測試中驗證每個步驟">3.5.1　在測試中驗證每個步驟</h3>
+<p>轉換管線的另一個好處是，每一步都可以獨立驗證：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">[</span>Fact<span class="op">]</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="dt">void</span> <span class="fu">Complete_Order_Lifecycle_Should_Produce_Correct_States</span><span class="op">()</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> fixedTime <span class="op">=</span> <span class="kw">new</span> <span class="fu">DateTimeOffset</span><span class="op">(</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="dv">2026</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> TimeSpan<span class="op">.</span><span class="fu">Zero</span><span class="op">);</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 建立草稿</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> draft <span class="op">=</span> Order<span class="op">.</span><span class="fu">CreateDraft</span><span class="op">(</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        id<span class="op">:</span> <span class="st">"ORD-001"</span><span class="op">,</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        customerId<span class="op">:</span> <span class="st">"CUST-42"</span><span class="op">,</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        lines<span class="op">:</span> ImmutableArray<span class="op">.</span><span class="fu">Create</span><span class="op">(</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>            <span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="st">"書"</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">350</span>m<span class="op">)),</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>        createdAt<span class="op">:</span> fixedTime<span class="op">);</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Equal</span><span class="op">(</span>OrderStatus<span class="op">.</span><span class="fu">Draft</span><span class="op">,</span> draft<span class="op">.</span><span class="fu">Status</span><span class="op">);</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Equal</span><span class="op">(</span><span class="dv">700</span>m<span class="op">,</span> draft<span class="op">.</span><span class="fu">Total</span><span class="op">);</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 提交</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> submitted <span class="op">=</span> draft<span class="op">.</span><span class="fu">Submit</span><span class="op">(</span>fixedTime<span class="op">.</span><span class="fu">AddMinutes</span><span class="op">(</span><span class="dv">5</span><span class="op">));</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Equal</span><span class="op">(</span>OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">,</span> submitted<span class="op">.</span><span class="fu">Status</span><span class="op">);</span></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Equal</span><span class="op">(</span>fixedTime<span class="op">.</span><span class="fu">AddMinutes</span><span class="op">(</span><span class="dv">5</span><span class="op">),</span> submitted<span class="op">.</span><span class="fu">SubmittedAt</span><span class="op">);</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 確認 draft 不受影響</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Equal</span><span class="op">(</span>OrderStatus<span class="op">.</span><span class="fu">Draft</span><span class="op">,</span> draft<span class="op">.</span><span class="fu">Status</span><span class="op">);</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Null</span><span class="op">(</span>draft<span class="op">.</span><span class="fu">SubmittedAt</span><span class="op">);</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 付款</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> paid <span class="op">=</span> submitted<span class="op">.</span><span class="fu">Pay</span><span class="op">(</span>fixedTime<span class="op">.</span><span class="fu">AddHours</span><span class="op">(</span><span class="dv">1</span><span class="op">));</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Equal</span><span class="op">(</span>OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">,</span> paid<span class="op">.</span><span class="fu">Status</span><span class="op">);</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Equal</span><span class="op">(</span>fixedTime<span class="op">.</span><span class="fu">AddHours</span><span class="op">(</span><span class="dv">1</span><span class="op">),</span> paid<span class="op">.</span><span class="fu">PaidAt</span><span class="op">);</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 出貨</span></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> shipped <span class="op">=</span> paid<span class="op">.</span><span class="fu">Ship</span><span class="op">(</span>fixedTime<span class="op">.</span><span class="fu">AddDays</span><span class="op">(</span><span class="dv">1</span><span class="op">));</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>    Assert<span class="op">.</span><span class="fu">Equal</span><span class="op">(</span>OrderStatus<span class="op">.</span><span class="fu">Shipped</span><span class="op">,</span> shipped<span class="op">.</span><span class="fu">Status</span><span class="op">);</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這個測試清晰地記錄了訂單生命週期的每一個狀態，而且每個斷言都直接對應一個業務規則。</p>
+</section>
+</section>
+<section id="讓轉換函式保持純粹" class="level2">
+<h2 class="anchored" data-anchor-id="讓轉換函式保持純粹">3.6　讓轉換函式保持純粹</h2>
+<p>不管是風格 A 還是風格 B，最好讓轉換方法保持「純粹（pure）」：</p>
+<ul>
+<li><strong>給定相同的輸入，永遠回傳相同的輸出</strong></li>
+<li><strong>沒有副作用</strong>（不修改傳入物件或其他外部狀態，也不呼叫資料庫或外部服務）</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 純粹的轉換：只依賴輸入，回傳確定的輸出</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">static</span> Order <span class="fu">Pay</span><span class="op">(</span>Order order<span class="op">,</span> DateTimeOffset paidAt<span class="op">)</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> order with</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">,</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        PaidAt <span class="op">=</span> paidAt</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co">// 不純粹（impure）：直接讀取系統時間</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">static</span> Order <span class="fu">Pay</span><span class="op">(</span>Order order<span class="op">)</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> order with</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">,</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="co">// 不好：把系統的時間來源寫死在轉換函式裡</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>        PaidAt <span class="op">=</span> TimeProvider<span class="op">.</span><span class="fu">System</span><span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">()</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>純粹的函式極易測試：你只需要提供輸入，驗證輸出，不需要 mock 任何東西。</p>
+<p>這種分工常被稱為 <strong>functional core, imperative shell</strong>：核心邏輯盡量保持「資料進、資料出」的純粹轉換；至於像是讀取時間、存取資料庫、呼叫外部 API、寫入檔案等不穩定的操作，則放在外層負責協調。名字聽起來像架構模式，但實務判斷很簡單：如果一段邏輯可以用普通輸入資料測試，就不要讓它被資料庫、系統時間、或網路呼叫綁住。</p>
+<p>如果一個操作確實需要外部依賴，例如讀取當前時間或查詢資料庫，就在 application layer 使用依賴，再把取得的普通資料傳給轉換函式。以時間為例，.NET 內建的 <code>TimeProvider</code> 提供可替換的時間來源；<code>GetUtcNow()</code> 回傳 <code>DateTimeOffset</code>，測試時可以注入受控制的 <code>TimeProvider</code>，不必把系統時間寫死在 domain model 裡：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> <span class="kw">class</span> <span class="fu">OrderApplicationService</span><span class="op">(</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    IOrderRepository orderRepository<span class="op">,</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    TimeProvider timeProvider<span class="op">)</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> async Task<span class="op">&lt;</span>Order<span class="op">&gt;</span> <span class="fu">PayOrderAsync</span><span class="op">(</span><span class="dt">string</span> orderId<span class="op">)</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> order <span class="op">=</span> await orderRepository<span class="op">.</span><span class="fu">GetAsync</span><span class="op">(</span>orderId<span class="op">);</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        <span class="co">// 在外層讀取時間，再把普通的值傳給純粹轉換。</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> paidAt <span class="op">=</span> timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">();</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> paid <span class="op">=</span> OrderWorkflow<span class="op">.</span><span class="fu">Pay</span><span class="op">(</span>order<span class="op">,</span> paidAt<span class="op">);</span></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        await orderRepository<span class="op">.</span><span class="fu">SaveAsync</span><span class="op">(</span>paid<span class="op">);</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> paid<span class="op">;</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>轉換函式本身仍然是純粹的，外部依賴由組合層處理。<code>TimeProvider.System</code> 是正式環境使用的系統時間來源；測試則可以注入可控制的實作。</p>
+</section>
+<section id="一個完整的範例" class="level2">
+<h2 class="anchored" data-anchor-id="一個完整的範例">3.7　一個完整的範例</h2>
+<p>把本章所有概念整合，可以得到一個完整的訂單處理流程。</p>
+<p>為了讓重點更清楚，下面先把範例拆成兩段：第一段看 domain model 如何用不可變資料表達狀態轉換；第二段看 application layer 如何協調資料庫、時鐘這類外部依賴。</p>
+<p>完整可編譯版本請參考本節後方的原始碼連結。</p>
+<p>第一段是 <code>Order</code> record。它保存訂單狀態，也把狀態轉換規則放在 record 內部：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> record Order</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> Id <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> CustomerId <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> OrderStatus Status <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> Lines <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">decimal</span> Total <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> DateTimeOffset CreatedAt <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> DateTimeOffset<span class="op">?</span> SubmittedAt <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> DateTimeOffset<span class="op">?</span> PaidAt <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> DateTimeOffset<span class="op">?</span> ShippedAt <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span><span class="op">?</span> CancelReason <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">private</span> init<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="fu">Order</span><span class="op">(</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> id<span class="op">,</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> customerId<span class="op">,</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>        ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> lines<span class="op">,</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>        DateTimeOffset createdAt<span class="op">)</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>        Id <span class="op">=</span> id<span class="op">;</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>        CustomerId <span class="op">=</span> customerId<span class="op">;</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>        Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Draft</span><span class="op">;</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>        Lines <span class="op">=</span> lines<span class="op">;</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>        Total <span class="op">=</span> lines<span class="op">.</span><span class="fu">Sum</span><span class="op">(</span>line <span class="op">=&gt;</span> line<span class="op">.</span><span class="fu">Amount</span><span class="op">);</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>        CreatedAt <span class="op">=</span> createdAt<span class="op">;</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> Order <span class="fu">CreateDraft</span><span class="op">(</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> id<span class="op">,</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> customerId<span class="op">,</span></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>        ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;</span> lines<span class="op">,</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>        DateTimeOffset createdAt<span class="op">)</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>lines<span class="op">.</span><span class="fu">IsDefault</span><span class="op">)</span></span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">ArgumentException</span><span class="op">(</span></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>                <span class="st">"訂單項目尚未初始化"</span><span class="op">,</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>                <span class="fu">nameof</span><span class="op">(</span>lines<span class="op">));</span></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">new</span> <span class="fu">Order</span><span class="op">(</span>id<span class="op">,</span> customerId<span class="op">,</span> lines<span class="op">,</span> createdAt<span class="op">);</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order <span class="fu">Submit</span><span class="op">(</span>DateTimeOffset now<span class="op">)</span></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>Status <span class="op">!=</span> OrderStatus<span class="op">.</span><span class="fu">Draft</span><span class="op">)</span></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span><span class="st">"只有草稿可以提交"</span><span class="op">);</span></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>Lines<span class="op">.</span><span class="fu">IsEmpty</span><span class="op">)</span></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>                <span class="st">"訂單必須至少有一個項目才能提交"</span><span class="op">);</span></span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">this</span> with</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">,</span></span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>            SubmittedAt <span class="op">=</span> now</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order <span class="fu">Pay</span><span class="op">(</span>DateTimeOffset now<span class="op">)</span></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>Status <span class="op">!=</span> OrderStatus<span class="op">.</span><span class="fu">Submitted</span><span class="op">)</span></span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span></span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a>                <span class="st">"只有已提交的訂單可以付款"</span><span class="op">);</span></span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">this</span> with</span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">,</span></span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a>            PaidAt <span class="op">=</span> now</span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order <span class="fu">Ship</span><span class="op">(</span>DateTimeOffset now<span class="op">)</span></span>
+<span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>Status <span class="op">!=</span> OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">)</span></span>
+<span id="cb21-75"><a href="#cb21-75" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span></span>
+<span id="cb21-76"><a href="#cb21-76" aria-hidden="true" tabindex="-1"></a>                <span class="st">"只有已付款的訂單可以出貨"</span><span class="op">);</span></span>
+<span id="cb21-77"><a href="#cb21-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-78"><a href="#cb21-78" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">this</span> with</span>
+<span id="cb21-79"><a href="#cb21-79" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb21-80"><a href="#cb21-80" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Shipped</span><span class="op">,</span></span>
+<span id="cb21-81"><a href="#cb21-81" aria-hidden="true" tabindex="-1"></a>            ShippedAt <span class="op">=</span> now</span>
+<span id="cb21-82"><a href="#cb21-82" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb21-83"><a href="#cb21-83" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-84"><a href="#cb21-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-85"><a href="#cb21-85" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> Order <span class="fu">Cancel</span><span class="op">(</span><span class="dt">string</span> reason<span class="op">)</span></span>
+<span id="cb21-86"><a href="#cb21-86" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb21-87"><a href="#cb21-87" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>Status <span class="kw">is</span> <span class="fu">not</span> <span class="op">(</span></span>
+<span id="cb21-88"><a href="#cb21-88" aria-hidden="true" tabindex="-1"></a>            OrderStatus<span class="op">.</span><span class="fu">Draft</span> or</span>
+<span id="cb21-89"><a href="#cb21-89" aria-hidden="true" tabindex="-1"></a>            OrderStatus<span class="op">.</span><span class="fu">Submitted</span> or</span>
+<span id="cb21-90"><a href="#cb21-90" aria-hidden="true" tabindex="-1"></a>            OrderStatus<span class="op">.</span><span class="fu">Paid</span><span class="op">))</span></span>
+<span id="cb21-91"><a href="#cb21-91" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">InvalidOperationException</span><span class="op">(</span></span>
+<span id="cb21-92"><a href="#cb21-92" aria-hidden="true" tabindex="-1"></a>                <span class="st">"只有草稿、已提交、或已付款的訂單可以取消"</span><span class="op">);</span></span>
+<span id="cb21-93"><a href="#cb21-93" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span><span class="dt">string</span><span class="op">.</span><span class="fu">IsNullOrWhiteSpace</span><span class="op">(</span>reason<span class="op">))</span></span>
+<span id="cb21-94"><a href="#cb21-94" aria-hidden="true" tabindex="-1"></a>            <span class="kw">throw</span> <span class="kw">new</span> <span class="fu">ArgumentException</span><span class="op">(</span></span>
+<span id="cb21-95"><a href="#cb21-95" aria-hidden="true" tabindex="-1"></a>                <span class="st">"取消訂單必須提供原因"</span><span class="op">,</span></span>
+<span id="cb21-96"><a href="#cb21-96" aria-hidden="true" tabindex="-1"></a>                <span class="fu">nameof</span><span class="op">(</span>reason<span class="op">));</span></span>
+<span id="cb21-97"><a href="#cb21-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-98"><a href="#cb21-98" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">this</span> with</span>
+<span id="cb21-99"><a href="#cb21-99" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb21-100"><a href="#cb21-100" aria-hidden="true" tabindex="-1"></a>            Status <span class="op">=</span> OrderStatus<span class="op">.</span><span class="fu">Cancelled</span><span class="op">,</span></span>
+<span id="cb21-101"><a href="#cb21-101" aria-hidden="true" tabindex="-1"></a>            CancelReason <span class="op">=</span> reason</span>
+<span id="cb21-102"><a href="#cb21-102" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb21-103"><a href="#cb21-103" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb21-104"><a href="#cb21-104" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這段程式碼展示的是風格 A：資料和確保自身狀態合法的行為放在一起。建構式和 <code>init</code> 存取子都是 <code>private</code>，所以呼叫方只能透過 <code>CreateDraft</code>、<code>Submit</code>、<code>Pay</code> 等明確的 API 建立狀態。呼叫 <code>Pay</code> 時，它不會修改原本的 <code>Order</code>，而是回傳一個狀態為 <code>Paid</code> 的新版本。</p>
+<p>這裡允許 <code>Draft</code>、<code>Submitted</code>、和 <code>Paid</code> 訂單取消，但不允許 <code>Shipped</code> 或 <code>Cancelled</code> 訂單再次取消。<code>Paid</code> 訂單背後還需要自動退款：application service 可以先呼叫純粹的 <code>Cancel</code>，驗證規則並產生尚未儲存的候選版本；如果原訂單是 <code>Paid</code>，接著呼叫付款服務退款，成功後才儲存候選版本。退款如果失敗，就不儲存 <code>Cancelled</code> 版本，資料庫裡的訂單仍維持 <code>Paid</code>。對外應以這個 application service 流程作為取消入口，而不是讓呼叫方自行略過退款。這種外部協調不放進 <code>Order</code>，才能讓 domain transition 保持純粹。</p>
+<p>第二段是 application layer。它不負責判斷訂單能不能付款，只負責把外部依賴接起來：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> <span class="kw">class</span> OrderApplicationService</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">readonly</span> IOrderRepository _repository<span class="op">;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">readonly</span> TimeProvider _timeProvider<span class="op">;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="fu">OrderApplicationService</span><span class="op">(</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        IOrderRepository repository<span class="op">,</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        TimeProvider timeProvider<span class="op">)</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        _repository <span class="op">=</span> repository<span class="op">;</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        _timeProvider <span class="op">=</span> timeProvider<span class="op">;</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> async Task<span class="op">&lt;</span>Order<span class="op">&gt;</span> <span class="fu">PayAsync</span><span class="op">(</span><span class="dt">string</span> orderId<span class="op">)</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>        <span class="co">// 從資料庫讀取當前狀態</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> order <span class="op">=</span> await _repository<span class="op">.</span><span class="fu">GetAsync</span><span class="op">(</span>orderId<span class="op">);</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">// 純粹的狀態轉換（不涉及外部依賴）</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> paid <span class="op">=</span> order<span class="op">.</span><span class="fu">Pay</span><span class="op">(</span>_timeProvider<span class="op">.</span><span class="fu">GetUtcNow</span><span class="op">());</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>        <span class="co">// 儲存新狀態</span></span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>        await _repository<span class="op">.</span><span class="fu">SaveAsync</span><span class="op">(</span>paid<span class="op">);</span></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> paid<span class="op">;</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<blockquote class="blockquote">
+<p><strong>原始碼：</strong> - <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationStyleA">DemoOrderTransformationStyleA</a> - <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationStyleB">DemoOrderTransformationStyleB</a> - <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationPipeline">DemoOrderTransformationPipeline</a></p>
+</blockquote>
+<p>這個設計的分層很清楚：</p>
+<ul>
+<li><code>Order</code> record 負責資料的定義和狀態轉換規則。</li>
+<li><code>OrderApplicationService</code> 負責協調外部依賴（資料庫、時鐘）。</li>
+<li>轉換邏輯本身（<code>order.Pay(now)</code>）是純粹的，可以獨立測試。</li>
+</ul>
+</section>
+<section id="常見問題" class="level2">
+<h2 class="anchored" data-anchor-id="常見問題">3.8　常見問題</h2>
+<section id="每次都建立新物件效能不會很差嗎" class="level3">
+<h3 class="anchored" data-anchor-id="每次都建立新物件效能不會很差嗎">「每次都建立新物件，效能不會很差嗎？」</h3>
+<p>對於大多數業務邏輯，這個開銷可以忽略不計。現代 .NET 的 GC 對短命的小物件非常有效率，通常不需要特別優化。此外，record 的 <code>with</code> 執行的是淺層複製，不會深度複製整個物件圖；像 <code>ImmutableArray&lt;T&gt;</code> 這類本身不可變的成員，可以由新舊版本安全共用。因此，建立新版本通常只需要配置新的外層物件。</p>
+<p>真正需要注意的是<strong>高頻、低延遲的熱路徑</strong>（hot path），例如每秒處理數十萬次操作的場景。在這些場景，你應該先測量，找到真正的瓶頸，再決定是否需要優化，而不是預先優化所有程式碼。</p>
+<p>我們在第 5 章會討論哪些場景確實不適合不可變設計。</p>
+</section>
+<section id="把所有方法都搬到-orderworkflow這樣好嗎" class="level3">
+<h3 class="anchored" data-anchor-id="把所有方法都搬到-orderworkflow這樣好嗎">「把所有方法都搬到 OrderWorkflow，這樣好嗎？」</h3>
+<p>不一定。把行為放在外部是風格 B 的做法，它有它的優缺點。對於業務規則豐富的 domain model，風格 A（行為在 record 內）通常更好，因為比較容易確保狀態合法。</p>
+<p>不要為了「資料和行為分離」這個概念而分離——分離應該是因為特定場景有實際的好處，而不是因為某種設計哲學。</p>
+</section>
+</section>
+<section id="本章回顧" class="level2">
+<h2 class="anchored" data-anchor-id="本章回顧">3.9　本章回顧</h2>
+<p>這章討論了「用資料轉換取代原地修改」的核心設計模式。</p>
+<ul>
+<li><strong>資料轉換</strong>：方法接收舊狀態，回傳新狀態，不修改輸入。這是不可變設計的核心操作。</li>
+<li><strong>風格 A</strong>（行為在 record 內）和<strong>風格 B</strong>（行為在外部函式/服務）各有適用場景。不確定時，從風格 A 開始。</li>
+<li><strong>業務規則驗證</strong>：在轉換方法裡檢查前置條件，可以拋出例外或回傳結果型別。</li>
+<li><strong>純粹函式</strong>：讓轉換方法不依賴外部狀態，外部依賴由呼叫方在應用程式層注入。</li>
+<li><strong>轉換管線</strong>：多個轉換步驟可以自然串接，讓業務流程一目了然。</li>
+</ul>
+<p>本章為了聚焦資料轉換，仍以單一 <code>Order</code>、<code>OrderStatus</code> enum、和多個 nullable 欄位表達整個生命週期。轉換方法可以在執行期阻止不合法的操作，但風格 B 的公開 positional record 仍不能完整表達「某個狀態必須擁有哪些資料」。</p>
+<p>接下來的第 4 章會離開單純的 domain model，討論不可變資料最容易落地的 DTO、command、event 與設定物件。如果 enum、旗標與 nullable 欄位已經讓狀態難以管理，則可以在讀完主線後，再閱讀第 6 章的進階狀態建模。</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script>
+(() => {
+  const path = window.location.pathname;
+  const isZh = path.includes('/zh-tw');
+  const target = isZh ? '/en/' : '/zh-tw/';
+  const label = isZh ? '🌐 English' : '🌐 繁體中文';
+
+  const link = document.createElement('a');
+  link.className = 'language-switch';
+  link.href = target;
+  link.textContent = label;
+
+  const githubLink = document.querySelector("#quarto-sidebar .sidebar-tools-main a.quarto-navigation-tool[href*='github.com']");
+  const generatedTools = githubLink?.parentElement;
+  const tools = document.createElement('div');
+  tools.className = 'site-tools';
+  tools.appendChild(link);
+
+  if (githubLink) {
+    githubLink.className = 'github-repo-link';
+    githubLink.target = '_blank';
+    githubLink.rel = 'noopener noreferrer';
+    tools.appendChild(githubLink);
+    generatedTools?.remove();
+  }
+
+  const sidebarHeader = document.querySelector('#quarto-sidebar .sidebar-header');
+  if (sidebarHeader) {
+    tools.classList.add('site-tools-sidebar');
+    sidebarHeader.appendChild(tools);
+  }
+})();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已複製");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已複製");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../ch02/ch02.html" class="pagination-link" aria-label="第 2 章">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">第 2 章</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></div></div></footer></body></html>
