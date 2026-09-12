@@ -3,21 +3,96 @@
   font-family: "CJK Code Fallback";
   src: local("Noto Sans Mono CJK TC"), local("PingFang TC"), local("Microsoft JhengHei");
 }
-:not(pre) > code {
+
+:not(pre)>code {
   font-family: "CJK Code Fallback", "Source Code Pro", ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
 }
-body, .page-rows-contents { max-width: 1600px; margin-left: auto; margin-right: auto; }
-h2 { font-size: 1.6em; }
-h3 { font-size: 1.4em; }
-h4 { font-size: 1.2em; }
-p, li, blockquote, .blockquote, .callout { text-align: start; }
-.sidebar-navigation .sidebar-item a { padding-top: .2em; padding-bottom: .2em; text-align: left; }
-#quarto-margin-sidebar li { text-align: start; }
-.language-switch { display: inline-flex; align-items: center; min-height: 2rem; padding: .25rem .65rem; border: 1px solid #ced4da; border-radius: .25rem; background: var(--bs-body-bg,#fff); color: var(--bs-body-color,#212529); font-size: .875rem; text-decoration: none; box-shadow: 0 .125rem .35rem rgba(0,0,0,.08); }
-.site-tools { display: inline-flex; align-items: center; gap: .5rem; }
-.site-tools-sidebar { margin-top: .75rem; }
-.github-repo-link { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border: 1px solid #ced4da; border-radius: .25rem; background: var(--bs-body-bg,#fff); color: var(--bs-body-color,#212529); text-decoration: none; }
-.language-switch:hover, .github-repo-link:hover { color: var(--bs-link-color,#0d6efd); text-decoration: none; }
+
+body,
+.page-rows-contents {
+  max-width: 1600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h2 {
+  font-size: 1.6em;
+}
+
+h3 {
+  font-size: 1.4em;
+}
+
+h4 {
+  font-size: 1.2em;
+}
+
+p,
+li,
+blockquote,
+.blockquote,
+.callout {
+  text-align: start;
+}
+
+.sidebar-navigation .sidebar-item a {
+  padding-top: .2em;
+  padding-bottom: .2em;
+  text-align: left;
+}
+
+#quarto-margin-sidebar li {
+  text-align: start;
+}
+
+.language-switch {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: .25rem .65rem;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  font-size: .875rem;
+  text-decoration: none;
+  box-shadow: 0 .125rem .35rem rgba(0, 0, 0, .08);
+}
+
+.site-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.site-tools-sidebar {
+  margin-top: .75rem;
+}
+
+.github-repo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #212529);
+  text-decoration: none;
+}
+
+.language-switch:hover,
+.github-repo-link:hover {
+  color: var(--bs-link-color, #0d6efd);
+  text-decoration: none;
+}
+
+/* Bootstrap 已清除最後一個子元素的下邊距；同步清除第一個子元素的上邊距。 */
+blockquote > :first-child,
+.blockquote > :first-child {
+    margin-top: 0;
+}
 
 /* Title metadata: match Quarto's default selector specificity so these overrides apply. */
 /* Keep one label/value pair per row. */
@@ -25,9 +100,11 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
   display: flex;
   flex-direction: column;
   gap: .35rem;
+  padding-top: 1em;
+  padding-bottom: 1em;
 }
 
-#title-block-header.quarto-title-block.default .quarto-title-meta > div {
+#title-block-header.quarto-title-block.default .quarto-title-meta>div {
   display: flex;
   align-items: baseline;
 }
@@ -66,7 +143,7 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
 }
 
 /* Sidebar table of contents: indent subsection links. */
-.sidebar nav[role=doc-toc] ul > li > ul > li > a {
+.sidebar nav[role=doc-toc] ul>li>ul>li>a {
   padding-left: 2rem;
 }
 
