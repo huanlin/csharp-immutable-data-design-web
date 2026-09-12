@@ -523,331 +523,301 @@
   {
     "objectID": "ch99/appendix-a.html",
     "href": "ch99/appendix-a.html",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "",
     "text": "A.1　專案背景\n本附錄改編自開源點字轉換專案 BrailleToolkit 的重構歷程。它不是要示範「把所有 class 改成 record」，而是示範一個更常見、更棘手的情境：既有系統已經有可變模型、UI 編輯器、序列化格式、Undo/Redo、效能熱路徑，這時要怎麼把不可變資料設計安全地導入進去。\n這個案例的核心結論是：\nBrailleToolkit 的工作是將一般文字轉換為點字。中文字與全形標點符號使用台灣點字規則，英文與半形標點符號使用 UEB。轉換流程中有大量查表、字詞建構、後處理規則與文件排版，因此很適合觀察不可變資料設計在真實程式中的取捨。\n重構前，系統有幾個典型壓力：\n如果一開始就把核心型別全面改成不可變 record，會同時打破太多流程。這次重構採取的是漸進策略：先找出資料生命週期最清楚、效益最大的地方，再逐步收斂 mutation surface。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.1-專案背景",
     "href": "ch99/appendix-a.html#a.1-專案背景",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "",
     "text": "對照表使用 DataTable 載入 XML，轉換熱路徑中大量呼叫 Select(...)。\nBrailleWord、BrailleLine、BrailleDocument 對外暴露可變集合，呼叫端可以直接插入、刪除或替換內容。\n轉換規則、formatter、editor UI 與 Undo/Redo 都假設同一批物件會被持續原地修改。\n編輯器狀態依賴 CLR 物件參考來追蹤特定 word 或 line。\nJSON、YAML 與 clipboard 格式都需要維持相容。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.2-總體結果與-benchmark-方法",
     "href": "ch99/appendix-a.html#a.2-總體結果與-benchmark-方法",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "A.2　總體結果與 Benchmark 方法",
     "text": "A.2　總體結果與 Benchmark 方法\n效能相關重構不能只靠直覺。這次比較使用 clean worktree A/B benchmark：baseline 與 candidate 分別在乾淨 worktree 中 restore、build、執行 BenchmarkDotNet。baseline 當時尚未有 benchmark 專案，因此只補入相同 benchmark harness；harness 不修改 baseline production code。\n來源：text-to-braille/docs-dev/refactoring/immutable/benchmark-result/2026-04-06-branch-start-vs-phase4d-clean-worktree-ab.md\ndotnet run --project src/EasyBrailleEditApp/BrailleToolkit.Benchmarks/BrailleToolkit.Benchmarks.csproj -c Release -- --filter *BrailleConversionBenchmarks*\n整個 branch 從起點到 Phase 4d 的累積結果如下：\n\n\n\n\n\n\n\n\n\n\n\n\n案例\nBaseline Mean\nCandidate Mean\nMean 改善\nBaseline Alloc\nCandidate Alloc\nAlloc 改善\n\n\n\n\n中文單行轉換\n148.40 us\n61.30 us\n-58.69%\n72.84 KB\n6.03 KB\n-91.72%\n\n\n英文單行轉換\n680.40 us\n484.69 us\n-28.76%\n169.33 KB\n18.25 KB\n-89.22%\n\n\n中英混合單行轉換\n828.70 us\n374.29 us\n-54.83%\n374.43 KB\n30.17 KB\n-91.94%\n\n\n中文多行轉換\n8,614.60 us\n3,053.40 us\n-64.56%\n4,301.49 KB\n339.05 KB\n-92.12%\n\n\n英文多行轉換\n4,782.20 us\n3,443.42 us\n-28.00%\n1,041.13 KB\n115.28 KB\n-88.93%\n\n\n中英混合多行轉換\n3,580.20 us\n1,830.19 us\n-48.88%\n1,346.76 KB\n116.83 KB\n-91.33%\n\n\n長中文字串轉換\n8,368.70 us\n2,916.53 us\n-65.15%\n4,303.15 KB\n337.60 KB\n-92.15%\n\n\n\n這組數字看起來很漂亮，但解讀時要小心：它是整個 branch 的累積效果，不代表每個 immutable 相關改動都會變快。實際上，某些單一階段曾經讓 throughput 變差，必須靠後續資料流調整與 benchmark 回饋修正。\n比較精準的結論是：\n\nDataTable 到 immutable entry + frozen index，是記憶體配置與中文路徑改善的主因。\nbuilder / view / result 的分層，讓後續 model 重構能持續推進，且沒有留下 branch-level regression。\nreadonly record struct、builder、with、read-only facade 都不是效能保證；它們只是設計工具，效果必須量測。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.3-從-datatable-到-frozendictionary",
     "href": "ch99/appendix-a.html#a.3-從-datatable-到-frozendictionary",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "A.3　從 DataTable 到 FrozenDictionary",
     "text": "A.3　從 DataTable 到 FrozenDictionary\n第一個重構切入點，是 XML 點字表查詢。\n舊架構使用 DataTable 儲存 XML 載入後的資料，查詢時常見形狀如下：\nstring filter = \"type='Phonetic' and text='\" + text + \"'\";\nDataRow[] rows = m_Table.Select(filter);\nif (rows.Length &gt; 0)\n    return rows[0][\"code\"].ToString();\nreturn null;\n這段程式有幾個問題。DataTable 是很通用、也很重的容器；Select(...) 每次都要解析 filter 字串；查詢條件還要處理 escaping。對大量查表的轉換流程來說，這些成本會反覆出現在熱路徑。\n但點字表有一個很關鍵的生命週期特徵：\n載入 XML\n建立查詢資料\n之後大量查詢，不再修改\n這正是 immutable entry 與 frozen lookup 適合的位置。\n現行程式碼新增了 BrailleTableEntry：\npublic readonly record struct BrailleTableEntry(\n    string Text,\n    string Dots,\n    string Code,\n    string? Type = null,\n    string? Dots2 = null,\n    string? Code2 = null,\n    bool Joined = false,\n    bool Mono = false,\n    string? Rule = null,\n    string? Description = null);\n來源：text-to-braille/src/BrailleToolkit/Data/BrailleTableEntry.cs\nXmlBrailleTable 則改用 XDocument 解析 XML，載入時直接轉成 BrailleTableEntry[]，再建立三組索引：\nprivate FrozenDictionary&lt;string, BrailleTableEntry&gt; m_EntriesByText;\nprivate FrozenDictionary&lt;BrailleTableLookupKey, BrailleTableEntry&gt; m_EntriesByTypeAndText;\nprivate FrozenDictionary&lt;string, BrailleTableEntry[]&gt; m_EntriesByType;\n來源：text-to-braille/src/BrailleToolkit/Data/XmlBrailleTable.cs\n這裡其實還有一個值得注意的「建構期可變、完成後 freeze」細節。現行 production code 在 BuildIndexes 中，先使用可變 Dictionary 累積索引：\nvar entriesByText =\n    new Dictionary&lt;string, BrailleTableEntry&gt;(StringComparer.Ordinal);\n\nvar entriesByType =\n    new Dictionary&lt;string, List&lt;BrailleTableEntry&gt;&gt;(StringComparer.Ordinal);\n迴圈完成後，才轉成 FrozenDictionary。這種做法並不違反不可變設計：可變集合只存在於受控的建構階段，離開 BuildIndexes 之前就轉成唯讀查詢結構。\n如果專案升級到 C# 15，這段 builder 初始化也可以使用 collection expression arguments。with(...) 必須放在 collection expression 的第一個元素，並把 comparer 等參數傳給目標集合的建構式。例如：\nDictionary&lt;string, BrailleTableEntry&gt; entriesByText =\n[\n    with(StringComparer.Ordinal)\n];\n\nDictionary&lt;string, List&lt;BrailleTableEntry&gt;&gt; entriesByType =\n[\n    with(StringComparer.Ordinal)\n];\n接下來仍然可以在迴圈中呼叫 TryAdd、Add 等方法，最後再 freeze：\nm_EntriesByText =\n    entriesByText.ToFrozenDictionary(StringComparer.Ordinal);\n\nm_EntriesByType =\n    frozenEntriesByType.ToFrozenDictionary(StringComparer.Ordinal);\n這項 C# 15 語法沒有改變資料生命週期，也不會讓 Dictionary 自動變成 immutable。它只是讓「這個建構期集合需要使用哪個 comparer」可以直接寫在 collection expression 裡。真正重要的設計仍然是：mutation 被限制在初始化階段，而對外保存的是完成後的 frozen lookup。\n\nC# 版本說明： 上面的 collection expression arguments 是 C# 15 preview 語法；本附錄保留原始 production code 的歷史寫法，這裡只示範升級到 C# 15 後可以採用的等價初始化方式。\n\n查詢變成 domain-specific lookup：\nBrailleTableEntry? entry = FindEntry(text, \"Phonetic\");\nreturn entry?.Code;\nPhase 3 單獨的 clean worktree A/B 顯示，這個階段對中文與混合內容改善特別明顯，記憶體配置也大幅下降。\n來源：text-to-braille/docs-dev/refactoring/immutable/benchmark-result/2026-04-05-phase3-clean-worktree-ab.md\n\n\n\n案例\nBefore\nAfter\nMean 改善\n記憶體配置改善\n\n\n\n\n中文單行\n166.00 us\n68.70 us\n-58.61%\n-91.75%\n\n\n中英混合單行\n956.00 us\n400.45 us\n-58.11%\n-92.01%\n\n\n中文多行\n8,901.10 us\n3,420.40 us\n-61.57%\n-92.10%\n\n\n長中文字串\n6,332.10 us\n3,530.79 us\n-44.24%\n-92.07%\n\n\n英文單行\n526.20 us\n514.98 us\n-2.13%\n-89.65%\n\n\n\n這不是「不可變一定比較快」。真正發生的是：資料生命週期變清楚後，我們發現 DataTable 不適合這條熱路徑；BrailleTableEntry[] 加 frozen index 才符合「建構一次、查詢很多次」的使用模式。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.4-為什麼不能全部改成-record",
     "href": "ch99/appendix-a.html#a.4-為什麼不能全部改成-record",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "A.4　為什麼不能全部改成 record",
     "text": "A.4　為什麼不能全部改成 record\nBrailleCell 很適合改成 value object。它只包一個 byte，語意上代表一個點字方，因此可以改成 readonly record struct。\n但 BrailleWord 與 BrailleLine 不一樣。它們不只是資料容器，也牽涉到既有 editor workflow：\n\nformatter 會切行、縮排、插入或移除 word。\nbraille rules 會替換數字符號、補英文大寫符號、處理分數與表格線。\neditor grid 需要知道某個畫面格子對應哪個 word。\nUndo/Redo 會複製文件，再還原 selection。\nJSON、YAML 與 clipboard 格式必須能 round-trip。\n\n如果直接把 BrailleWord / BrailleLine 全部改成 immutable record，每個規則都要改成「輸入舊值、回傳新值」，而且整條呼叫鏈都必須接住新物件。這會牽動太多流程，也很容易在 editor 狀態與序列化相容性上出錯。\n所以這次重構選擇了比較務實的分層：\n\n\n\n\n\n\n\n型別\n重構策略\n\n\n\n\nBrailleCell\n改成小型 readonly record struct\n\n\nBrailleTableEntry\n新增為 immutable lookup entry\n\n\nBrailleWord\n保留 mutable class，新增 view / builder / result / construction boundary\n\n\nBrailleLine\n保留 mutable class，新增 view / builder / result / 明確 mutation API\n\n\nBrailleDocument\n對外公開 read-only facade，內部保留相容所需的 collection\n\n\n\n這個策略的重點是：先把任意可變性收斂到少數可理解的位置，而不是假裝整個系統已經準備好完全 immutable。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.5-公開-api-先改成-read-only-facade",
     "href": "ch99/appendix-a.html#a.5-公開-api-先改成-read-only-facade",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "A.5　公開 API 先改成 read-only facade",
     "text": "A.5　公開 API 先改成 read-only facade\n重構前，BrailleLine.Words 是公開 List&lt;BrailleWord&gt;。任何呼叫端都能直接：\nbrLine.Words.Insert(index, word);\nbrLine.Words.RemoveRange(index, count);\nbrLine.Words.Add(word);\n這讓 mutation surface 太大。你無法只看 BrailleLine 本身，就知道有哪些流程會改它。\n重構後，Words 對外改成 IReadOnlyList&lt;BrailleWord&gt;，並補上明確 mutation API，例如 AddWord(...)、InsertWords(...)、RemoveRange(...)、AssignWords(...)。BrailleDocument.Lines 與 BrailleDocument.PageTitles 也採取類似做法。\n這不是完整的 immutable collection。IReadOnlyList&lt;T&gt; 只是 read-only facade，底層仍可能是可變集合。但它是重要的中間步驟：\n\n外部呼叫端不能隨手修改集合。\n修改入口變少，後續可以逐一審查。\n序列化與 editor 相容性比較容易維持。\n測試可以針對明確 mutation API 補強。\n\n這一步看起來不像華麗的語言特性，但對大型既有系統很關鍵。先縮小修改入口，才有機會談更深的不可變設計。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.6-builder-boundary建構期可變完成後可讀",
     "href": "ch99/appendix-a.html#a.6-builder-boundary建構期可變完成後可讀",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "A.6　Builder Boundary：建構期可變，完成後可讀",
     "text": "A.6　Builder Boundary：建構期可變，完成後可讀\n接下來是 BrailleWord 與 BrailleLine 的 Builder Boundary。\nBrailleWord 新增了幾個內部角色：\nIBrailleWordView\nIBrailleWordResult\nBrailleWordBuilder\nBrailleWordMaterialized\nBrailleWord\nIBrailleWordView 是唯讀檢視。helper、formatter、font converter 只需要讀資料時，可以依賴這個介面，而不是直接依賴可變 class。\n以下是省略 metadata 後的概念化摘要：\ninternal interface IBrailleWordView\n{\n    string Text { get; }\n    string OriginalText { get; }\n    BrailleLanguage Language { get; }\n    int CellCount { get; }\n    BrailleCell GetCell(int index);\n}\nBrailleWordBuilder 則負責建構階段的 mutation。現行 source 使用 BrailleCellBuffer 管理 cell sequence，並支援從既有 BrailleWord 載入狀態、建立 materialized result，或套回既有 word。\n以下是依現行 source 簡化後的摘要：\ninternal sealed class BrailleWordBuilder\n{\n    private BrailleCellBuffer _cells;\n\n    public string Text { get; set; }\n    public string OriginalText { get; set; }\n    public BrailleLanguage Language { get; set; }\n\n    public static BrailleWordBuilder FromBrailleWord(BrailleWord source)\n    {\n        var builder = new BrailleWordBuilder(source.Text)\n        {\n            OriginalText = source.OriginalText,\n            Language = source.Language\n        };\n\n        builder.AppendCells(CollectionsMarshal.AsSpan(source.Cells));\n        return builder;\n    }\n\n    public IBrailleWordResult Build()\n    {\n        return new BrailleWordMaterialized\n        {\n            Text = Text,\n            OriginalText = OriginalText,\n            Language = Language,\n            Cells = _cells.ToArray()\n        };\n    }\n\n    public void ApplyTo(BrailleWord target)\n    {\n        target.ApplyConstruction(\n            Text,\n            OriginalText,\n            Language,\n            _cells.AsSpan());\n    }\n}\n來源：text-to-braille/src/BrailleToolkit/BrailleWordBuilder.cs\n這個 builder 有兩個重要用途。\n第一，它可以建立新的結果：\nIBrailleWordResult result = builder.Build();\nBrailleWord word = builder.ToBrailleWord();\n第二，它可以套用到既有 word：\nvar builder = BrailleWordBuilder.FromBrailleWord(existingWord);\nbuilder.PrependCell(BrailleCell.Capital);\nbuilder.ApplyTo(existingWord);\n這對既有規則很重要。很多 braille rule 不是單純建立新 word，而是在轉換後替既有 word 補 cell、換 cell 或加 metadata。FromBrailleWord(...).ApplyTo(...) 讓 mutation 集中在 construction boundary，同時保留舊流程需要的物件相容性。\nBrailleLineBuilder 採取同樣策略：建構階段可以 AddWord(...)、InsertWords(...)、RemoveContextTags()；完成後可以 Build() 成 result，也可以 ToBrailleLine() 或 ApplyTo(...) 進入仍需要可變模型的流程。\n這個設計並沒有承諾「每一步都更快」。它的價值是讓可變性出現在可命名、可測試、可量測的位置。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.7-explicit-identity不要把物件參考當成模型識別",
     "href": "ch99/appendix-a.html#a.7-explicit-identity不要把物件參考當成模型識別",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "A.7　Explicit Identity：不要把物件參考當成模型識別",
     "text": "A.7　Explicit Identity：不要把物件參考當成模型識別\n一旦系統開始使用 builder、copy、materialized result、JSON/YAML round-trip，原本依賴 ReferenceEquals 的邏輯就會變得脆弱。\n例如，文件中可能有兩個內容完全相同的 BrailleWord。值相等不代表它們是同一個位置的 word。editor selection、Undo/Redo、page title anchor 需要追蹤的是「這一個資料個體」，而不是「內容一樣的資料」。\n現行 BrailleWord 與 BrailleLine 因此加入 runtime identity：\npublic sealed class BrailleWord : IBrailleWordView\n{\n    private long m_Identity = BrailleObjectIdentityGenerator.NextWordIdentity();\n\n    public long Identity\n    {\n        get { return m_Identity; }\n    }\n}\nBrailleObjectIdentityGenerator 使用 Interlocked.Increment(...) 發號：\ninternal static class BrailleObjectIdentityGenerator\n{\n    private static long s_NextWordIdentity;\n    private static long s_NextLineIdentity;\n\n    public static long NextWordIdentity()\n    {\n        return Interlocked.Increment(ref s_NextWordIdentity);\n    }\n\n    public static long NextLineIdentity()\n    {\n        return Interlocked.Increment(ref s_NextLineIdentity);\n    }\n}\n來源：\n\ntext-to-braille/src/BrailleToolkit/BrailleWord.cs\ntext-to-braille/src/BrailleToolkit/BrailleLine.cs\ntext-to-braille/src/BrailleToolkit/BrailleObjectIdentityGenerator.cs\n\nBrailleLine.IndexOf(BrailleWord) 也改成用 word identity 比對，而不是依賴物件參考。editor 的 grid bookmark、selection restore、page title anchor 也可以用 line / word identity 找回目前文件中的位置。\n這裡的重點不是把 runtime identity 當成 domain ID 存進外部資料庫。它是 editor runtime 裡的穩定追蹤機制，用來取代「剛好同一個 CLR object」這種太脆弱的假設。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.8-序列化與相容層",
     "href": "ch99/appendix-a.html#a.8-序列化與相容層",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "A.8　序列化與相容層",
     "text": "A.8　序列化與相容層\nread-only facade 與 builder boundary 導入後，序列化也要一起處理。\nJSON / DataContract 方面，BrailleLine.Words 對外可以是 read-only facade，但序列化格式仍需要維持既有 Words 欄位。做法是保留 backing field，並讓公開屬性避開 DataContract：\n[DataMember(Name = \"Words\")]\nprivate List&lt;BrailleWord&gt; m_Words;\n\n[IgnoreDataMember]\npublic IReadOnlyList&lt;BrailleWord&gt; Words\n{\n    get { return m_Words; }\n}\nYAML 則改用 DTO model round-trip。serialize 時從 read-only view 讀取資料，deserialize 時透過 builder 或 construction boundary 建回 runtime model。\n這樣做的好處是：runtime model 可以逐步收斂 mutation surface，但外部資料格式不必跟著劇烈震盪。對有真實使用者資料的應用程式來說，這類相容層不是附屬品，而是重構設計的一部分。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/appendix-a.html#a.9-這次重構真正教會我們的事",
     "href": "ch99/appendix-a.html#a.9-這次重構真正教會我們的事",
-    "title": "附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰",
+    "title": "附錄 A　開源點字專案的不可變設計重構實戰",
     "section": "A.9　這次重構真正教會我們的事",
     "text": "A.9　這次重構真正教會我們的事\n這個案例最後留下幾個判斷原則。\n第一，先釐清生命週期，再選資料結構。載入後大量查詢、不再修改的資料，適合 immutable entry 加 frozen lookup；建構中的資料，使用 builder 反而更自然。\n第二，IReadOnlyList&lt;T&gt; 不是 immutable collection，但它可以先把公開 mutation surface 收斂起來。這在既有系統中非常有用。\n第三，value type 不保證更快。BrailleCell 改成 readonly record struct 讓語意更正確，但 Phase 4a 曾經出現 throughput regression。效能結論必須靠 benchmark，不應靠語感。\n第四，Builder Boundary 的目標不是讓每個中間步驟看起來「純函數式」，而是把可變性集中到能測試與量測的地方。\n第五，當系統需要追蹤 UI selection、Undo/Redo、page title anchor 或特定資料個體，不要依賴 ReferenceEquals。導入 copy、builder 或序列化重建之前，先設計 explicit identity。\n第六，重構不是只改型別。它通常會同時牽動 benchmark、測試、序列化、相容層與文件。真正成熟的不可變資料設計，是一組工程取捨，而不是單一語法特性。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>附錄 A</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html",
     "href": "ch99/glossary.html",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "",
     "text": "A\n本術語表收錄全書使用的重要技術術語及其英文對照。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#a",
     "href": "ch99/glossary.html#a",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "",
     "text": "Allocation（記憶體配置）\n在記憶體中劃分空間給物件使用的過程，也稱 memory allocation；在 .NET 效能討論中，常指 Heap Allocation。可能會造成 GC 壓力。\n\n\nAnemic Domain Model（貧血模型）\n一種 domain model 設計上的反模式（anti-pattern）。它看起來像 domain model，擁有 Order、Customer、Invoice 這類領域名詞，也保存了相關資料；但物件本身幾乎沒有行為，業務規則散落在 controller、service、UI handler 或 repository 等其他地方。結果是模型無法保護自己的狀態，任何地方只要拿到物件，就可能繞過必要的驗證或狀態轉換規則。\n貧血模型的問題不只是「方法沒有放在資料型別裡」，而是業務規則沒有被集中、清楚、可靠地表達。如果資料型別本身保持單純，但所有狀態轉換都集中在明確的 workflow、domain service 或其他目的明確的模組中，這不一定等於貧血模型；反之，如果規則散落各處，即使專案裡有許多 service，也很容易讓狀態變得難以追蹤與維護。\n參考：Anemic Domain Model（Martin Fowler）\n\n\nAOT（Ahead-of-Time，預先編譯）\n將程式碼直接編譯成原生機器碼（Native Code）的技術，不依賴執行時期的 JIT 編譯。\n\n\nApplication layer（應用程式層）\n負責協調一個應用流程所需的外部依賴與執行順序，例如讀取資料、取得目前時間、呼叫外部服務、以及儲存結果。Application layer 通常把取得的普通資料交給 domain model 處理，而不在這一層重複實作核心業務規則。\n\n\nAsynchronous programming（非同步程式設計）\n不需要等待作業完成即可繼續執行後續程式碼的設計模式，常用於提升應用程式的反應能力與吞吐量。\n\n\nAttribute\n附加在型別、方法、屬性等程式碼元素上的宣告式標記（如 [NotNull]、[Obsolete]），用來提供額外的中繼資料（metadata）或改變編譯器行為。本書直接使用英文 “Attribute” 而不翻譯，以避免與 property（屬性）混淆。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#b",
     "href": "ch99/glossary.html#b",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "B",
     "text": "B\n\nBoilerplate code（樣板程式碼）\n為了達成某些功能而必須重複撰寫的標準化程式碼，例如 INotifyPropertyChanged 的實作。\n\n\nBoxing（裝箱）\n將 value type 轉換為 object（reference type）的過程，會在 heap 上配置記憶體。\n\n\nBuffer（緩衝區）\n用來暫存資料的記憶體區塊，通常是陣列或記憶體片段。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#c",
     "href": "ch99/glossary.html#c",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "C",
     "text": "C\n\nCLI（command line interface）\n命令列介面。一種透過文字指令與電腦互動的使用者介面。\n\n\nCLR（common language runtime）\n通用語言執行環境。.NET 的執行時期環境，負責執行編譯後的 IL 程式碼。\n\n\nClosure（閉包）\n能夠捕獲（capture）並記憶其建立時所在作用域之變數（外部變數）的函式。\n\n\nCollection Expression（集合運算式）\nC# 12 引入的統一集合初始化語法，使用 [] 符號。支援陣列、List、Span 等類型的建立與初始化。\n\n\nConstructor（建構式）\n類別或結構中的特殊方法，用於初始化物件。建構式的名稱與類別名稱相同，且沒有回傳型別。\n\n\nContext switch（環境切換）\nCPU 從一個執行緒切換到另一個執行緒的過程，保存與恢復執行狀態需要時間，有其效能成本。\n\n\nCooperative cancellation（協同式取消）\n作業主動檢查是否收到取消請求（透過 CancellationToken）並停止執行的機制，而非由外部強制終止。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#d",
     "href": "ch99/glossary.html#d",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "D",
     "text": "D\n\nDeadlock（死結）\n兩個或多個執行緒互相等待對方釋放資源，導致程式無法繼續執行且無法恢復的狀態。\n\n\nDispose（釋放）\n明確釋放資源的動作，通常透過實作 IDisposable 介面來達成。\n\n\nDeferred Execution（延遲執行）\nLINQ 查詢的特性，查詢在建立時不會立即執行，而是在實際需要結果時才執行。\n\n\nDelegate（委派）\n一種型別安全的函式指標，可儲存對方法的參考，並在稍後呼叫該方法。是事件與回呼機制的基礎。\n\n\nData Transfer Object (DTO)（資料傳輸物件）\n用來在系統邊界或層與層之間傳遞資料的物件，例如 API request DTO、response DTO。DTO 的主要職責是承載資料，不應包含業務邏輯。\n\n\nDomain Factory（領域工廠）\n負責以受控方式建立 domain model 的方法或型別。它可以集中檢查建立物件時必須成立的業務規則，避免呼叫端直接建立不合法的狀態。\n\n\nDomain Model（領域模型）\n用程式型別表達核心業務概念、狀態與規則的模型。例如訂單系統中的 Order、OrderLine、與訂單狀態轉換。使用 domain model 這個名稱，不代表系統必須採用完整的領域驅動設計（DDD）。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#e",
     "href": "ch99/glossary.html#e",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "E",
     "text": "E\n\nEnumerator（列舉器）\n實作 IEnumerator&lt;T&gt; 介面的物件，用於巡訪序列中的元素。提供 MoveNext() 和 Current 等方法。\n\n\nEvent（事件）\n類別或物件用來通知其他類別或物件發生了某些事情的機制。基於委派實作的發布／訂閱模式。\n\n\nExtension Method（擴充方法）\n一種靜態方法，透過 this 關鍵字修飾第一個參數，使其能像實例方法一樣被呼叫。C# 3.0 引入，是 LINQ 的基礎。\n\n\nExpression Tree（運算式樹）\n將程式碼表示為樹狀資料結構。IQueryable&lt;T&gt; 使用運算式樹來儲存查詢邏輯，以便轉換為其他查詢語言（如 SQL）。\n\n\nException（例外）\n程式執行期間發生的錯誤或異常狀況。在 .NET 中，所有例外都繼承自 System.Exception。\n\n\nException Filter（例外篩選器）\n使用 when 關鍵字來篩選 catch 區塊捕捉的例外，比在區塊內重新拋出更有效率。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#f",
     "href": "ch99/glossary.html#f",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "F",
     "text": "F\n\nFinalizer（終結器）\n物件被垃圾回收（GC）前由執行環境呼叫的特殊方法，用於釋放非託管資源（unmanaged resource）。在 C# 中使用 ~ClassName 語法宣告。\n\n\nFluent API（流暢介面）\n一種 API 設計風格，透過方法鏈（method chaining）讓程式碼讀起來更接近自然語言。常與擴充方法搭配使用。\n\n\nFragmentation（碎片化）\n記憶體中有許多細小的閒置空間，卻無法配置大塊連續記憶體的現象，常見於 Large Object Heap。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#g",
     "href": "ch99/glossary.html#g",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "G",
     "text": "G\n\nGC（garbage collector）\n垃圾回收器。自動管理記憶體配置與釋放的機制。\n\n\nGuard clause（防衛子句）\n在函式開頭提早檢查（例如檢查參數是否為 null）並返回，避免錯誤擴散或巢狀縮排過深。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#h",
     "href": "ch99/glossary.html#h",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "H",
     "text": "H\n\nHeap（堆積）\n用於存放物件與較大資料的記憶體區域，由 GC 管理。\n\n\nHeap Allocation（堆積配置）\n在記憶體的堆積（Heap）區塊配置物件，需要 GC 回收。過多的堆積配置會增加 GC 壓力。\n\n\nHot path（熱點路徑）\n程式中被極度頻繁執行的程式碼路徑，是效能優化的首要目標。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#i",
     "href": "ch99/glossary.html#i",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "I",
     "text": "I\n\nIL（intermediate language）\n中介語言。C# 原始碼編譯後的中間格式，由 CLR 執行。\n\n\nImmutable collection（不可變集合）\n修改時會回傳新集合的資料結構（如 ImmutableList&lt;T&gt;），原集合內容不變。\n\n\nImmutable（不可變）\n物件一旦建立後，其內容就無法被修改的特性。例如 string。\n\n\nInit accessor（init 存取子）\nC# 9 引入的屬性存取子，限制屬性只能在物件初始化時賦值，確保不可變性。\n\n\nIterator（迭代器）\n使用 yield return 語法建立的序列產生器，能夠依需求逐個產生值，支援延遲執行。\n\n\nInner Exception（內部例外）\n引發當前例外的原始例外，通常保存在 InnerException 屬性中，用於保留錯誤的原始脈絡。\n\n\nInvariant（不變條件）\n物件或模型在有效狀態下必須永遠滿足的規則。例如訂單必須至少有一個項目，或只有已提交的訂單才能付款。建立物件與執行狀態轉換時，都不應讓結果違反這些規則。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#l",
     "href": "ch99/glossary.html#l",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "L",
     "text": "L\n\nLarge Object Heap (LOH)（大型物件堆積）\n專門存放大型物件（&gt;= 85,000 bytes）的區域，較少進行重組（compaction），容易產生碎片。\n\n\nLocal Method（區域方法）\n定義在另一個方法內部的輔助方法。可以存取外層方法的變數，常用於封裝僅在該方法內使用的邏輯。\n\n\nLazy Evaluation（惰性求值）\n與延遲執行相同，強調「需要時才計算」的特性。LINQ 查詢就是採用惰性求值。\n\n\nLambda expression（Lambda 運算式）\n一種用來建立匿名函式的簡潔語法。可包含運算式或陳述式區塊，常用於建立委派或運算式樹。\n\n\nLINQ（Language Integrated Query）\n語言整合查詢。C# 的強大特性，將查詢能力直接整合到語言中，可用於查詢記憶體集合、資料庫、XML 等資料來源。\n\n\nLINQ Provider（LINQ 提供者）\n針對特定資料來源實作的 LINQ 引擎，如 LINQ to Objects、LINQ to Entities 等。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#m",
     "href": "ch99/glossary.html#m",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "M",
     "text": "M\n\nManaged Heap（託管堆積）\n受 GC 管理的記憶體區域，存放參考型別物件。\n\n\nManaged Resource（託管資源）\n由 CLR（主要是 GC）自動管理的資源，如記憶體中的物件。相對的是 Unmanaged Resource。\n\n\nMaterialization（具體化）\n使用 ToList()、ToArray() 等方法立即執行 LINQ 查詢並將結果儲存為實體集合。\n\n\nMethod Syntax（方法語法）\nLINQ 的一種撰寫方式，使用擴充方法串接來表達查詢，也稱為串接語法（fluent syntax）。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#n",
     "href": "ch99/glossary.html#n",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "N",
     "text": "N\n\nNon-positional record（非位置式 record）\n本書用來和 positional record 對照的說法，指使用一般屬性語法宣告屬性、建構式與驗證邏輯的 record 寫法。有些資料也會稱為 nominal record。適合需要驗證、預設值或較複雜建構流程的型別。\n\n\nNull（空值）\n表示「無值」或「不存在」的特殊值。Tony Hoare 稱其為「十億美元錯誤」。\n\n\nNullable Reference Type (NRT)（可為 null 的參考型別）\nC# 8+ 引入的特性，讓編譯器能夠在編譯時期檢查參考型別的 null 安全性。\n\n\nNullable Value Type（可為 null 的實值型別）\n透過 T? 語法（如 int?），讓實值型別也能表達「無值」狀態。\n\n\nNull coalescing operator（Null 聯合運算子）\n符號為 ??，用於提供 null 時的預設值。\n\n\nNull coalescing assignment operator（Null 聯合指派運算子）\n符號為 ??=（C# 8+），當變數為 null 時才賦值。\n\n\nNull conditional operator（Null 條件運算子）\n符號為 ?. 和 ?[]，安全地存取可能為 null 的物件成員或索引。\n\n\nNull conditional assignment（Null 條件指派）\nC# 14 引入的語法，允許 ?. 出現在指派運算子左側（如 obj?.Prop = val），僅在物件非 null 時賦值。\n\n\nNull-forgiving operator（Null 寬容運算子）\n符號為 !，告訴編譯器「我確定這裡不是 null」。應謹慎使用。\n\n\nNullReferenceException（Null 參考例外）\n當嘗試存取 null 物件的成員時拋出的異常，是最常見的執行時期錯誤之一。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#o",
     "href": "ch99/glossary.html#o",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "O",
     "text": "O\n\nObject initializer（物件初始設定式）\nC# 建立物件時用大括號設定屬性或欄位的語法，例如 new Customer { Name = \"Alice\" }。常與 init 存取子搭配，用來在物件建立階段設定不可變資料。\n\n\nObject-relational mapping (ORM)（物件-關聯對應）\n將程式中的物件模型與關聯式資料庫的資料表、欄位互相對應的技術。實務上也常用 ORM 指稱提供這種能力的工具或框架，例如 Entity Framework Core。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#p",
     "href": "ch99/glossary.html#p",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "P",
     "text": "P\n\nPartial class / method（部分類別 / 方法）\n允許將類別或方法的定義分散在多個檔案中。這是 Source Generator 能夠注入程式碼的基礎。\n\n\nPattern matching（模式比對）\n現代 C# 的語法特性，提供更清晰的型別檢查、屬性解構與邏輯判斷方式。\n\nType Pattern：檢查變數是否為特定型別。\nConstant Pattern：檢查變數是否等於某個常數。\nRelational Pattern：使用 &lt;、&gt; 等運算子進行比較。\nLogical Pattern：使用 and、or、not 組合模式。\nProperty Pattern：檢查物件的屬性值。\nPositional Pattern：根據位置解構物件。\nList Pattern：檢查序列的結構與元素。\nDiscard Pattern：使用 _ 忽略不關心的部分。\nVar Pattern：將比對結果指派給變數。\n\n\n\nPersistence Entity（持久化實體）\n配合資料庫結構或資料存取工具使用的儲存模型。它可能需要可寫入的屬性、建構式或 mapping 設定，不一定和執行業務規則的 domain model 使用相同型別。\n\n\nPositional record（位置式 record）\n將主要資料成員直接寫在 record 型別名稱後方小括號中的宣告方式，例如 public record Money(decimal Amount, string Currency);。適合屬性少、資料形狀明確的 DTO 或 value object。\n相關詞彙：Non-positional record（非位置式 record）\n\n\nPrimary constructor（主要建構式）\nC# 12 引入的語法，允許在類別或結構宣告時直接定義建構式參數。\n\n\nProjection（投影）\nLINQ 中將資料轉換為另一種形狀的操作，通常使用 Select 方法。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#q",
     "href": "ch99/glossary.html#q",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "Q",
     "text": "Q\n\nQuery Syntax（查詢語法）\nLINQ 的一種撰寫方式，使用 from、where、select 等關鍵字，語法類似 SQL。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#r",
     "href": "ch99/glossary.html#r",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "R",
     "text": "R\n\nRace condition（競爭狀況）\n多個執行緒同時存取共享資源，導致結果不可預測的錯誤。\n\n\nRange Variable（範圍變數）\n在 LINQ 查詢語法中，from 子句定義的變數，代表資料來源中的每個元素。\n\n\nRecord（記錄型別）\nC# 9 引入的參考型別（C# 10 支援 record struct），專為不可變資料設計，提供值相等性與簡潔語法。\n常見寫法包含 positional record（參見 P 字部）與 non-positional record（參見 N 字部）。\n\n\nReference type（參考型別）\n另一種說法是「參考類型」。儲存記憶體位址（reference）的型別，包括 class、interface、delegate、record 等。\n\n\nReflection（反射）\n在執行時期動態檢查型別資訊、成員方法與屬性的技術。功能強大但效能開銷較大。\n\n\nRepository（儲存庫）\n提供讀取與儲存資料操作的抽象，讓呼叫端不必知道底層使用 Entity Framework Core、其他 ORM、Dapper、手寫 SQL、或其他儲存方式。具體介面與責任應依系統需求決定，不必為了採用不可變資料而固定成某一種實作。\n\n\nRequired modifier（required 修飾詞）\nC# 11 引入的關鍵字，強制使用者在物件初始化時必須設定該屬性或欄位。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#s",
     "href": "ch99/glossary.html#s",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "S",
     "text": "S\n\nScope（作用域）\n變數可以被存取的程式碼範圍。\n\n\nSequence（序列）\n可循序、單向存取的資料結構，由 IEnumerable&lt;T&gt; 和 IEnumerator&lt;T&gt; 定義。每次只能取得當前元素。\n\n\nSlicing（切片）\n建立指向現有記憶體區塊之子集的操作（如 Span&lt;T&gt;.Slice），不需複製資料，極具效能優勢。\n\n\nSource Generator（來源產生器）\n在編譯時期動態產生 C# 原始碼的編譯器功能，可取代部分 Reflection 與樣板程式碼。\n\n\nSpan\n代表一段連續記憶體的結構（Span&lt;T&gt;），支援陣列、Stack 與原生記憶體，是高效能操作的核心。\n\n\nStack（堆疊）\n用於存放區域變數與方法呼叫上下文的記憶體區域，存取速度極快但空間有限。\n\n\nStandard Query Operators（標準查詢運算子）\n標準查詢運算子（Standard Query Operators）。LINQ 提供的一組擴充方法，如 Where、Select、OrderBy 等，用於查詢和操作序列。\n\n\nStructural Equality（結構相等）\n根據物件的結構與內容（屬性值）來判斷是否相等，而非依據記憶體位址。\n\n\nStructural Sharing（結構共享）\n不可變集合內部使用的優化技術，在建立新版本集合時共用既有的節點，以節省記憶體。\n\n\nState machine（狀態機）\n編譯器為 async 方法或 yield 迭代器產生的隱藏類別/結構，用來記錄執行狀態與變數，以實現暫停與恢復執行。\n\n\nString Interpolation（字串插補；字串插值）\n允許在字串中直接嵌入運算式的語法（如 $\"Hello, {name}\"），編譯器會自動將其轉換為字串拼接或格式化操作。\n\n\nStack Trace（堆疊追蹤）\n顯示例外發生時的方法呼叫堆疊資訊，用於追蹤錯誤發生的路徑。\n\n\nStack Unwinding（堆疊展開）\n例外發生時，執行環境會逐層往上尋找合適的例外處理器（catch block）的過程。\n\n\nSwitch expression（Switch 運算式）\nC# 8+ 引入的簡潔語法，使用模式比對來回傳值，是傳統 switch 陳述式的現代替代品。\n\n\nSynchronization context（同步環境）\n用來控制非同步程式碼在恢復執行時應該回到哪個執行緒的機制（如 UI 執行緒、ASP.NET Request 執行緒）。\n\n\nSyntactic sugar（語法糖）\n簡化程式語法的機制，編譯後會還原成較複雜的底層程式碼。例如 async/await、using 陳述式。\n\n\nTester-Doer Pattern（測試者-執行者模式）\n一種 API 設計模式。提供一個測試方法（如 CanRead）和一個執行方法（如 Read），讓呼叫者先檢查再執行，避免例外。\n\n\nTry-Parse Pattern (TryXxx 模式)\n一種 API 設計模式。與 Tester-Doer 類似，但將檢查與執行合併（如 TryParse），回傳 bool 表示成功與否。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#t",
     "href": "ch99/glossary.html#t",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "T",
     "text": "T\n\nThread pool（執行緒池）\n系統預先建立並管理的執行緒集合，用來重複利用執行緒資源，避免頻繁建立與銷毀執行緒的成本。\n\n\nTop-level statements（頂層語句）\nC# 的現代語法特性，允許在 Program.cs 中直接撰寫程式碼，而不需要明確定義 class 和 Main 方法。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   },
   {
     "objectID": "ch99/glossary.html#u-z",
     "href": "ch99/glossary.html#u-z",
-    "title": "附錄 B — 術語表",
+    "title": "術語表",
     "section": "U-Z",
     "text": "U-Z\n\nUnboxing（拆箱）\n將 object 轉回 value type 的過程。\n\n\nUnmanaged Resource（非託管資源）\n不受 CLR 管理的資源，如檔案控制代碼（file handles）、視窗控制代碼（window handles）、網路連線等，需手動釋放。\n\n\nUsing Declaration（using 宣告）\nC# 8 引入的語法，不需要大括號即可在變數離開作用域時自動釋放資源。\n\n\nValue type（實值型別）\n另一種說法是「值類型」。直接包含資料的型別，包括所有數值型別、bool、char、enum、struct 等。\n\n\nValue Equality（值相等性）\n同 Structured Equality。根據屬性值判斷相等。\n\n\nValue object（值物件）\n以內容值而非物件識別來判斷相等性的物件，常用於表達領域中的小型概念，例如金額、地址或電子郵件。Value object 通常設計為不可變。\n\n\nWith expression（With 運算式）\nC# 9 引入的語法，用於建立不可變物件的複本並修改部分屬性（非破壞性修改）。\n\n\nZero runtime overhead（零執行時期開銷）\n功能的運作不會在程式執行當下增加額外的資源負擔。Source Generator 透過將工作移至編譯時期來達成此目標。",
     "crumbs": [
-      "附錄",
-      "<span class='chapter-number'>B</span>  <span class='chapter-title'>術語表</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>術語表</span>"
     ]
   }
 ]
