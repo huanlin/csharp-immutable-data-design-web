@@ -331,7 +331,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ol>
 <p>這四個方法分別會將訂單標記為已提交（<code>Submitted</code>）、已付款（<code>Paid</code>）、已出貨（<code>Shipped</code>）、已取消（<code>Cancelled</code>）。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch01/DemoMutableOrder">DemoMutableOrder</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch01/DemoMutableOrder">DemoMutableOrder</a></p>
 </blockquote>
 <p>這個設計在小程式裡跑起來沒問題，但仔細考慮一下，它有幾個隱患。</p>
 <section id="隱患一狀態和資料的對應關係不明確" class="level3">
@@ -625,7 +625,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">};</span></span>
 <span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch01/DemoImmutableOrder">DemoImmutableOrder</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch01/DemoImmutableOrder">DemoImmutableOrder</a></p>
 </blockquote>
 <p><code>Cancel</code> 特別值得注意。它只補上取消原因並改變狀態，不會清掉 <code>SubmittedAt</code> 或 <code>PaidAt</code>。這是本章範例選擇的業務語意：取消是一個新的狀態，不代表過去發生過的事應該被抹除。</p>
 <p>和原本的可變設計相比，這個版本有以下幾個改進：</p>

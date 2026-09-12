@@ -389,7 +389,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">Ship</span><span class="op">(</span>now<span class="op">.</span><span class="fu">AddDays</span><span class="op">(</span><span class="dv">1</span><span class="op">));</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <p>這種寫法可以流暢地串接（method chaining），看起來很自然。在支援程式碼補全（code completion）的 IDE 中，輸入 <code>.</code> 就能看到這個訂單支援哪些操作。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationStyleA">DemoOrderTransformationStyleA</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch03/DemoOrderTransformationStyleA">DemoOrderTransformationStyleA</a></p>
 </blockquote>
 </section>
 <section id="風格-b行為放在外部函式或服務" class="level3">
@@ -434,7 +434,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>在這個例子裡，<code>Order</code> 不需要知道有哪些操作會改變它；所有業務流程都集中在 <code>OrderWorkflow</code>。這和風格 A 使用的是同一個不可變轉換規則，只是方法的位置不同。為了聚焦在方法的位置，上面的 <code>Submit</code> 和 <code>Pay</code> 暫時省略了狀態驗證；第 3.4 節會補上這些規則。</p>
 <p>不過，這個 positional record 仍允許呼叫方自行使用 <code>with</code>；若要確保狀態轉換都經過 workflow，還需要額外的封裝設計，或明確的團隊慣例。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationStyleB">DemoOrderTransformationStyleB</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch03/DemoOrderTransformationStyleB">DemoOrderTransformationStyleB</a></p>
 </blockquote>
 <p>這種寫法看起來很接近「<strong>貧血模型（anemic domain model）</strong>」，值得花點篇幅解釋一下。</p>
 <p>所謂貧血模型，通常是指一個 domain model 只有資料欄位，幾乎沒有行為；真正的業務規則散落在 controller、service、UI handler 或 repository 等地方。結果是 <code>Order</code> 看起來像 domain model，但它本身無法保護自己的狀態：任何地方只要拿到訂單，就可能直接把 <code>Status</code> 改成 <code>Paid</code>，卻忘了檢查訂單是否已提交、是否已取消、是否已經付款。問題不只是「方法沒有放在 <code>Order</code> 裡」，而是<strong>業務規則沒有被集中、清楚、可靠地表達</strong>。</p>
@@ -925,7 +925,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> - <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationStyleA">DemoOrderTransformationStyleA</a> - <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationStyleB">DemoOrderTransformationStyleB</a> - <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch03/DemoOrderTransformationPipeline">DemoOrderTransformationPipeline</a></p>
+<p><strong>原始碼：</strong> - <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch03/DemoOrderTransformationStyleA">DemoOrderTransformationStyleA</a> - <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch03/DemoOrderTransformationStyleB">DemoOrderTransformationStyleB</a> - <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch03/DemoOrderTransformationPipeline">DemoOrderTransformationPipeline</a></p>
 </blockquote>
 <p>這個設計的分層很清楚：</p>
 <ul>

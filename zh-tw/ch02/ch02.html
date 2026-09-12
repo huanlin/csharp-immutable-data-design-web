@@ -330,7 +330,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
 <span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoPositionalRecord">DemoPositionalRecord</a>、<a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoNonPositionalRecord">DemoNonPositionalRecord</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoPositionalRecord">DemoPositionalRecord</a>、<a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoNonPositionalRecord">DemoNonPositionalRecord</a></p>
 </blockquote>
 <p>這裡刻意把屬性的 <code>init</code> 存取子設成 <code>private</code>。理由是：這個型別已經把驗證放進建構式，外部程式碼就不應該再透過物件初始設定式（object initializer）覆蓋 <code>Quantity</code> 或 <code>UnitPrice</code>。如果這些屬性的 <code>init</code> 存取子仍是公開的，外部程式便可以在建構式跑完後，透過物件初始設定式覆蓋它們，反而削弱了建構式維護不變條件的效果。</p>
 <blockquote class="blockquote">
@@ -363,7 +363,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>如果要把 record 放進 <code>HashSet&lt;T&gt;</code>，或用作 <code>Dictionary&lt;TKey,TValue&gt;</code> 的 key，還要確保參與相等性與雜湊碼計算的成員不會在放入集合後改變。否則，物件的雜湊碼可能改變，導致集合無法在原本的位置找到它。使用由不可變值組成的 record，可以避開這類問題。</p>
 <p>不過，value equality 有一個容易忽略的細節：<strong>集合欄位預設仍然依照集合型別自己的相等性規則來處理</strong>。如果 record 內含陣列或 <code>IReadOnlyList&lt;T&gt;</code>，預設比較通常不是逐一比較元素內容。這個細節會在本章後面討論集合時進一步說明。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoValueEquality">DemoValueEquality</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoValueEquality">DemoValueEquality</a></p>
 </blockquote>
 </section>
 </section>
@@ -411,7 +411,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>此範例會出現編譯錯誤 <code>CS9035</code>，因為在建立 <code>invalidRequest</code> 物件的時候沒有初始化必要成員 <code>CreateOrderRequest.ProductId</code>。這比把屬性宣告成 nullable 再到處檢查，更能把資料完整性的要求放在型別設計裡。</p>
 <p>不過，<code>required</code> 是編譯期的初始化契約，不是執行期驗證。呼叫方仍然可以把必要成員設定成 <code>null</code>；如果屬性型別是 non-nullable reference type，編譯器通常會提出警告，但 <code>required</code> 本身不會把這種指派變成執行期錯誤。因此，<code>required</code> 不能取代 null 檢查或業務規則驗證。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoInitRequired">DemoInitRequired</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoInitRequired">DemoInitRequired</a></p>
 </blockquote>
 <p><code>required</code> + <code>init</code> 不能完全取代建構式。當型別需要複雜驗證、計算衍生欄位，或必須維持跨欄位的不變條件時，建構式仍然比較合適。簡單來說：</p>
 <ul>
@@ -510,7 +510,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>第 3 章會深入討論如何把「狀態更新」封裝成「轉換方法」；大型物件圖的巢狀更新問題則會留到第 5 章。這裡要先記住的重點是：<code>with</code> 不是為了讓所有更新都變成一行，而是讓每一次更新都清楚表達「從舊版本建立新版本」。</p>
 <p>還要注意，<code>with</code> 可以設定呼叫端有權存取的 <code>init</code> 屬性。如果公開的 <code>init</code> 允許呼叫方組合出不合法的狀態，便需要限制存取層級，或提供目的明確的轉換方法。下一章會以訂單狀態為例，示範如何安排這些轉換方法與業務規則。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoWithExpression">DemoWithExpression</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoWithExpression">DemoWithExpression</a></p>
 </blockquote>
 </section>
 </section>
@@ -533,7 +533,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>order<span class="op">.</span><span class="fu">Lines</span><span class="op">.</span><span class="fu">Add</span><span class="op">(</span><span class="kw">new</span> <span class="fu">OrderLine</span><span class="op">(</span><span class="st">"P001"</span><span class="op">,</span> <span class="dv">5</span><span class="op">));</span> <span class="co">// 合法</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>order.Lines</code> 是 <code>init</code>-only 屬性，因此初始化完成後不能重新指向別的集合；但 <code>List&lt;T&gt;</code> 本身仍然是可變集合。<code>init</code>-only 屬性只保護集合參考不能被重新指派，不保護集合內容不能被改。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoShallowImmutability">DemoShallowImmutability</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoShallowImmutability">DemoShallowImmutability</a></p>
 </blockquote>
 <section id="改用-ireadonlylistt" class="level3">
 <h3 class="anchored" data-anchor-id="改用-ireadonlylistt">2.4.1　改用 <code>IReadOnlyList&lt;T&gt;</code></h3>
@@ -564,7 +564,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>order<span class="op">.</span><span class="fu">Lines</span><span class="op">.</span><span class="fu">Count</span><span class="op">);</span> <span class="co">// 輸出 1</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoReadOnlyListView">DemoReadOnlyListView</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoReadOnlyListView">DemoReadOnlyListView</a></p>
 </blockquote>
 <p>此範例程式碼的閱讀重點：</p>
 <ol type="1">
@@ -656,7 +656,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> safeItems <span class="op">=</span> ImmutableArray<span class="op">&lt;</span>OrderLine<span class="op">&gt;.</span><span class="fu">Empty</span><span class="op">;</span> <span class="co">// 推薦寫法</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <p>所以使用 <code>ImmutableArray&lt;T&gt;</code> 時，請明確初始化為 <code>ImmutableArray&lt;T&gt;.Empty</code>，或在使用前檢查 <code>IsDefault</code> 屬性。不要把 <code>default</code> 當成空集合（empty collection）；它代表的是未初始化狀態。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoReadOnlyCollections">DemoReadOnlyCollections</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoReadOnlyCollections">DemoReadOnlyCollections</a></p>
 </blockquote>
 </section>
 <section id="集合欄位與值相等性" class="level3">
@@ -675,7 +675,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>a <span class="op">==</span> b<span class="op">);</span> <span class="co">// False</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <p>閱讀上方範例時，請留意 <code>a</code> 和 <code>b</code> 的 <code>Lines</code> 內容相同，但來自不同的陣列物件，因此 <code>a == b</code> 的結果是 <code>false</code>。<strong>如果你的設計需要「集合內容也參與相等性比較」，不能只依賴 record 的預設相等性。</strong> 請在比較時明確使用 <code>SequenceEqual</code>，或自行覆寫 <code>Equals</code> 和 <code>GetHashCode</code> 方法。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoCollectionValueEquality">DemoCollectionValueEquality</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoCollectionValueEquality">DemoCollectionValueEquality</a></p>
 </blockquote>
 <blockquote class="blockquote">
 <p><strong>Note</strong></p>
@@ -697,7 +697,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>categoryNames<span class="op">[</span><span class="st">"BOOK"</span><span class="op">]);</span> <span class="co">// 輸出：書籍</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <p><code>ToFrozenDictionary</code> 的建立成本相對高，但建立完成後能提供快速的查詢。它適合「很少建立、經常讀取」的資料，不適合每次更新都建立新版本的狀態表。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoFrozenDictionary">DemoFrozenDictionary</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoFrozenDictionary">DemoFrozenDictionary</a></p>
 </blockquote>
 <p>這個案例的重點不是「不可變一定比較快」，而是不可變設計迫使我們釐清資料生命週期：哪些資料只在初始化階段改變？哪些資料進入查詢階段後就應該固定？當生命週期劃分清楚，就能選擇更貼合用途的資料結構。</p>
 <p>如果後台真的需要修改商品分類或出貨區域，通常也是更新資料來源後重新載入快取，而不是直接修改已建立的查詢索引。換句話說，集合選型不是語法偏好，而是資料生命週期的設計決策。</p>
@@ -772,7 +772,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
 <p>註解標記 [A] 的程式碼修改的是複本，修改完就遺失了。因此，清單中的元素仍然是原本的值。為了避開這類難以除錯的行為，本書建議：如果要設計實值型別，優先使用不可變的 <code>readonly record struct</code>。</p>
 <blockquote class="blockquote">
-<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-samples/tree/main/zh-tw/ch02/DemoRecordStruct">DemoRecordStruct</a></p>
+<p><strong>原始碼：</strong> <a href="https://github.com/huanlin/csharp-immutable-data-design-web/tree/main/example-code/zh-tw/ch02/DemoRecordStruct">DemoRecordStruct</a></p>
 </blockquote>
 </section>
 </section>
