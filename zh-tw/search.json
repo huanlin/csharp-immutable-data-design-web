@@ -4,7 +4,17 @@
     "href": "index.html",
     "title": "C# 不可變資料設計",
     "section": "",
-    "text": "《C# 不可變資料設計》聚焦於如何使用 records 與不可變資料結構，設計更清晰、可預測且易於維護的 C# 程式。\n這個網站目前免費公開中文版的前置內容與第 1～3 章全文。英文版網站先提供首頁與書封，英文原稿完成後再逐步加入章節。\n免費閱讀\n\n前言\n關於本書\n關於作者\n版本說明\n第 1 章\n第 2 章\n第 3 章\n\n作者網站",
+    "text": "全書目錄\n《C# 不可變資料設計》聚焦於如何使用 records 與不可變資料結構，設計更清晰、可預測且易於維護的 C# 程式。\n這個網站免費公開前置內容與第 1～3 章全文。其餘章節仍列在完整目錄中，點選後會顯示購書資訊；完整內容請購買正式版電子書。\n購買完整電子書： 購書資訊",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>首頁</span>"
+    ]
+  },
+  {
+    "objectID": "index.html#全書目錄",
+    "href": "index.html#全書目錄",
+    "title": "C# 不可變資料設計",
+    "section": "",
+    "text": "前置內容\n\n前言 — 免費閱讀\n關於本書 — 免費閱讀\n關於作者 — 免費閱讀\n版本說明 — 免費閱讀\n\n\n\nPart 1：基礎觀念與資料建模\n\n第 1 章：從可變物件到不可變資料 — 免費閱讀\n第 2 章：C# records、init 與不可變集合 — 免費閱讀\n第 3 章：用資料轉換取代原地修改 — 免費閱讀\n\n\n\nPart 2：實務應用與設計取捨\n\n第 4 章：API、DTO 與系統邊界的資料模型 — 完整版\n第 5 章：不可變設計的取捨與導入 — 完整版\n\n\n\nPart 3：進階選讀\n\n第 6 章：進階選讀：用型別排除非法狀態 — 完整版\n\n\n\n結語與附錄\n\n結語：不可變資料設計是一種取捨 — 完整版\n附錄 A — 完整版\n名詞表 — 完整版\n\n購買完整電子書： 購書資訊\n\n作者網站",
     "crumbs": [
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>首頁</span>"
     ]
@@ -176,7 +186,8 @@
     "section": "",
     "text": "1.1　可變物件的煩惱\n本章內容：\n身為程式設計師，「修改物件的狀態」就像呼吸、喝水一樣理所當然。這裡說的狀態，指的是物件在某個時間點持有的資料值，例如屬性（property）或欄位（field）的值。\n比如說，你有一張訂單，想把它標記為「已付款」。一種很直觀的寫法是：\n這種寫法直接又清楚。在一個小程式裡，這完全沒有問題。\n可是當程式慢慢長大，這種「直接改物件狀態」的做法可能會碰到麻煩：你開始難以確定某個物件在某個時間點，到底處於什麼狀態，以及是誰在什麼時候把它改成了那個狀態。\n本章從這個問題點出發，介紹不可變資料設計（immutable data design）的基本思維：不直接修改物件，而是把每一次「改變」表達成「建立一個新版本」。這個思維轉換看起來很小，但是對於以資料為核心的應用程式（data-centric applications）來說，卻會深刻影響資料建模、狀態轉換、可測試性與可維護性。這是貫穿整本書的核心概念。\n至於效能，不可變設計不是單純的一定比較快或一定比較慢：它可能減少維護和除錯成本，也可能因為建立新物件而增加記憶體配置（allocation）成本。因此，實務上必須搭配效能測試來確認其效益。\n可變物件一開始看起來通常都很合理。問題往往是在系統逐漸長大、變複雜之後才浮現：同一個物件被傳進不同方法、服務或背景流程，每個地方都可能改變它的一部分狀態。\n先來看一個具體的例子。假設你在開發一個訂單管理系統。訂單建立後，可以經過提交、付款、出貨等狀態轉換，也可以在符合某些條件的情況下取消訂單。一種直覺的設計是建立一個 Order 類別，並使用一些屬性（properties）來記錄訂單的所有資訊：\n配合一個處理訂單狀態轉換的服務，假設名稱是 OrderService：\n此訂單服務提供了四個方法：\n這四個方法分別會將訂單標記為已提交（Submitted）、已付款（Paid）、已出貨（Shipped）、已取消（Cancelled）。\n這個設計在小程式裡跑起來沒問題，但仔細考慮一下，它有幾個隱患。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -186,7 +197,8 @@
     "section": "",
     "text": "public class Order\n{\n    public string Id { get; set; } = string.Empty; // 訂單編號\n    public string CustomerId { get; set; } = string.Empty; // 客戶編號\n    public OrderStatus Status { get; set; }     // 訂單狀態\n    public List&lt;OrderLine&gt; Lines { get; set; } = []; // 訂單明細\n    public decimal Total { get; set; }          // 訂單總金額\n    public DateTimeOffset CreatedAt { get; set; }    // 建立時間\n    public DateTimeOffset? SubmittedAt { get; set; } // 提交時間\n    public DateTimeOffset? PaidAt { get; set; }      // 付款時間\n    public DateTimeOffset? ShippedAt { get; set; }   // 出貨時間\n    public string? CancelReason { get; set; }   // 取消原因\n}\n\npublic class OrderService\n{\n    public void Submit(Order order, DateTimeOffset now)  // (1)\n    {\n        order.Status = OrderStatus.Submitted;\n        order.SubmittedAt = now;\n    }\n\n    public void Pay(Order order, DateTimeOffset now)  // (2)\n    {\n        order.Status = OrderStatus.Paid;\n        order.PaidAt = now;\n    }\n\n    public void Ship(Order order, DateTimeOffset now)  // (3)\n    {\n        order.Status = OrderStatus.Shipped;\n        order.ShippedAt = now;\n    }\n\n    public void Cancel(Order order, string reason)  // (4)\n    {\n        order.Status = OrderStatus.Cancelled;\n        order.CancelReason = reason;\n        order.SubmittedAt = null;\n        order.PaidAt = null;\n    }\n}\n\n\nSubmit: 將訂單標記為已提交，並記錄提交時間。\nPay: 將訂單標記為已付款，並記錄付款時間。\nShip: 將訂單標記為已出貨，並記錄出貨時間。\nCancel: 將訂單標記為已取消，保存取消原因，並清掉提交與付款時間。\n\n\n\n原始碼： DemoMutableOrder\n\n\n\n1.1.1　隱患一：狀態和資料的對應關係不明確\n看看 Cancel 方法，它把 SubmittedAt（提交時間）和 PaidAt（付款時間）清掉了：\npublic void Cancel(Order order, string reason)\n{\n    order.Status = OrderStatus.Cancelled;\n    order.CancelReason = reason;\n    order.SubmittedAt = null;\n    order.PaidAt = null;\n}\n可是，取消訂單的時候需要清掉這些欄位嗎？如果一張訂單已經付款了才被取消，PaidAt 應該要保留（作為歷史記錄）還是清掉？\n按目前的設計，這種「欄位值和業務意義之間的對應關係」需透過閱讀程式碼來理解，無法從型別上看出來。\n更麻煩的是，Order 物件有一堆 nullable 欄位，像是 PaidAt、ShippedAt。以 PaidAt == null 為例，這可能代表訂單「尚未付款」，也可能是「曾經付款、但取消後清掉記錄」——同一個 null 值對應到兩種業務意義，因此容易造成混淆。那麼，單純把 Order 改成不可變（immutable）就能夠自動消除這種歧義嗎？答案是不行。\n如果只是把 Order 改成不可變，而 Status 屬性還是照舊搭配一堆 nullable 欄位，那麼 PaidAt == null 依然可能有多重意義，導致多種解讀。完整的改善需要更精確的型別設計：讓「狀態」和「該狀態應該攜帶哪些資料」被明確表達出來。不可變設計的價值在於，它會促使我們把「狀態轉換」這件事寫成清楚的流程，而不是在同一個物件上清空欄位、修改狀態，讓語意散落在各個方法裡。\n這是資料表示（representation）的問題。程式碼裡面的資料不只要「能存」，還要能說清楚自己代表什麼。當 Status、PaidAt、CancelReason 之間的關係只存在於開發者腦中，而沒有被型別或方法明確表達出來，每一段使用 Order 的程式都得猜一次這些欄位的語意。猜對了只是多花時間；猜錯了，便可能產生 bug。\n\n\n1.1.2　隱患二：任何方法都能修改任何欄位\nOrder 型別的所有屬性都是可設定的（例如都寫成 { get; set; }）。這代表系統中任何拿到某個 order 物件參考的程式碼，都可以在任何時候修改任何欄位。例如：\norder.Status = OrderStatus.Submitted;\norder.SubmittedAt = now;\n這在小團隊、小程式裡不是問題，但隨著程式變大，一個 Order 物件可能被傳進好幾個服務、中介軟體元件（middleware）或事件處理常式（event handler）。然後，你開始不確定：這個 order 的 Status 在這個時間點還是 Submitted 嗎？有沒有哪個地方已經改過它了？\n要回答這個問題，你必須在腦子裡重播整個執行流程，或者透過除錯工具一步步觀察物件的狀態變化。這就是我們常說的「難以推理（hard to reason about）」。\n\n\n1.1.3　隱患三：多個地方修改同一個物件\n假設有一種情況：OrderService.Pay 方法在執行的同時，有另一個非同步的（asynchronous）流程也在讀取或修改同一個 order 物件——例如一個自動通知的背景工作。\n可變物件加上多個執行路徑，是競爭狀況（race condition）的溫床。原因是這些欄位更新不是原子操作（atomic operation）：Pay 會先設定 Status，再設定 PaidAt。如果另一段程式剛好在兩次指派之間讀取同一個物件，就可能看到一個正處於「中間狀態」的訂單：Status 已經是 Paid（訂單已付款），但 PaidAt 還是 null（付款時間尚未指定）。\n這種問題很難穩定重現，所以也不容易除錯。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -196,7 +208,8 @@
     "section": "1.2　換個角度：把改變表達成轉換",
     "text": "1.2　換個角度：把改變表達成轉換\n再想想「修改訂單狀態」這件事的本質。當你「付款一張訂單」時，本質上發生了什麼？你有一張「已提交的訂單」，你想要得到一張「已付款的訂單」。這兩張訂單大部分內容相同，只有狀態和付款時間不同。\n用可變物件的思維，會是：你把同一個物件從一個狀態改到另一個狀態。這的確是最直觀的做法。\n但還有另一種做法：從舊版本的訂單，建立出一個新版本的訂單；舊物件不會在原地修改，而新物件帶著新的狀態。這種 「改變 = 建立新版本」的思維，就是不可變資料設計的核心。\n用 C# 語法來表現上述兩種思維，看起來像這樣：\n// 可變設計：直接修改現有物件\norder.Status = OrderStatus.Paid;\norder.PaidAt = now;\n\n// 不可變設計：從現有物件建立新版本\nvar paidOrder = order with\n{\n    Status = OrderStatus.Paid,\n    PaidAt = now\n};\n採用不可變設計時，order 的屬性維持原值，paidOrder 則是新建立的物件，帶著更新後的狀態。\n這裡有一個很重要、但初學時容易忽略的細節：不可變設計不是讓資料「停住不動」，而是每一次需要改變狀態時，都建立出一個新版本。如果你想讓程式繼續使用付款後的訂單，就必須把回傳的新版本放進一個新的變數，或者覆蓋原本的變數名稱，像這樣：\norder = order with\n{\n    Status = OrderStatus.Paid,\n    PaidAt = now\n};\n這段程式碼看起來像「修改 order」，但實際上是讓變數 order 指向一個新的物件。舊物件的屬性並未被重新指派。也就是說，不可變設計限制的是「物件本身不能被原地修改」，不是「變數永遠不能指向新值」。\n這只是一個表達方式的改變，但它帶來的影響遠比看起來更大。接下來我們會看到為什麼。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -206,7 +219,8 @@
     "section": "1.3　C# 的 record 和 with 運算式",
     "text": "1.3　C# 的 record 和 with 運算式\n在說明不可變設計的好處之前，先介紹 C# 對這種設計方式提供的語法支援。\n\n1.3.1　用 record 建立不可變資料\nC# 9 引入了 record 型別，其中一個主要目的就是作為不可變資料的載體。它提供了一組很適合表達「資料值」的預設行為；如果你採用位置參數（positional parameters）的寫法，或者使用 init 屬性，就能比較輕鬆地寫出建立後不再修改的資料物件。以下示範一種最簡單的寫法：\npublic record Order(\n    string Id,          // 訂單編號，用來識別這張訂單。\n    string CustomerId,  // 客戶編號，用來連結下單的客戶。\n    OrderStatus Status, // 訂單狀態。\n    decimal Total,      // 訂單總金額。\n    DateTimeOffset CreatedAt, // 訂單建立時間。\n    DateTimeOffset? PaidAt = null // 付款時間。\n);\n這種把主要資料成員直接寫在型別名稱後方小括號中的寫法，稱為 positional record（位置式 record）。這種寫法，編譯器會自動幫你：\n\n建立只能在物件初始化期間指定的屬性；這類屬性稱為 init-only 屬性，第 2 章會正式介紹。\n實作基於值的相等性比較（Equals、GetHashCode）。\n生成 ToString 方法，方便除錯。\n\n需要建立一個 Order 物件時，可以這樣寫：\nvar order = new Order(\n    Id: \"ORD-001\",\n    CustomerId: \"CUST-42\",\n    Status: OrderStatus.Draft,  // Draft 代表訂單尚未送出。\n    Total: 1200m,\n    CreatedAt: DateTimeOffset.UtcNow\n);\n建立訂單物件之後，你沒辦法直接重新指派它的 init-only 屬性：\norder.Status = OrderStatus.Paid; // 編譯錯誤！初始化已經完成\n這就是為什麼剛才說，採用 init-only 屬性能夠比較輕鬆地寫出建立後不再修改的資料物件。\n\n\n1.3.2　用 with 運算式建立新版本\nrecord 的另一個重要語法是 with 運算式。它讓你從現有的 record 建立新版本，只改你想改的屬性，其他的照搬：\nvar paidOrder = order with\n{\n    Status = OrderStatus.Paid,\n    PaidAt = DateTimeOffset.UtcNow\n};\n執行這段程式碼之後：\n\norder 的屬性維持原值，仍然是原本的狀態。\npaidOrder 是一個新的 Order 物件，帶著更新後的 Status 和 PaidAt。\n\n也就是說，with 做的是「以現有物件為基礎複製一份，再套用指定的變更」。這也是為什麼你必須把結果放進 paidOrder，或者把它傳給下一個流程：如果沒有使用 with 產生的新物件，原本的 order 不會自己變成已付款。\n這就是「把改變表達成轉換」的 C# 實作方式。\n請注意這裡的「複製」指的是淺層複製：Status、PaidAt 這類值會出現在新物件上，但如果 record 裡面放的是某個可變集合，新的 record 仍可能指向同一個集合。這是因為 record 本身不保證深層不可變，而 with 執行的是淺層複製。如果某個屬性參考可變物件，例如集合，新舊兩個 record 仍可能指向同一個物件。因此，不可變資料設計不能單靠 record，還需要搭配合適的型別；第 2 章會深入處理這個問題。\n\nNote\n適用於 record 的 with 運算式在 C# 9 中引入，並在 C# 10 中擴充支援到 struct 與匿名型別。如果專案使用 C# 8 或更早的語言版本，就需要改用手動複製等方式。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -216,7 +230,8 @@
     "section": "1.4　不可變設計的三個好處",
     "text": "1.4　不可變設計的三個好處\n現在我們有了基本的語法概念，來看看這種設計風格實際上能解決什麼問題。\n\n1.4.1　好處一：可預測（predictable）\n可預測的意思是：物件不會在你看不到的地方被原地修改。以本章的 Order 為例，它的 init-only 屬性不會在傳入方法後被重新指派。\n\n為了避免讀者誤解，這裡再次重申：此範例的作法是淺層複製。也就是說，如果物件的屬性是參考到可變物件，例如 Lines（訂單明細）背後的集合，該物件的內容仍可能改變；這是「淺層不可變」的限制。第 2 章會進一步說明解法與集合選型，第 3 章則會有比較完整的 Order 範例。\n\n以下範例展示了這種特性：\n// 不可變設計下，這段程式碼的行為是可預測的\nvar now = DateTimeOffset.UtcNow;\nvar submittedOrder = OrderWorkflow.Submit(draft, now);\nvar paidOrder = OrderWorkflow.Pay(submittedOrder, now);\n\n// submittedOrder 在這裡仍然是 Submitted 狀態\n// paidOrder 是 Paid 狀態\n// 兩者是不同的 Order 物件\nConsole.WriteLine(submittedOrder.Status); // Submitted\nConsole.WriteLine(paidOrder.Status);      // Paid\n此範例中的 OrderWorkflow 是集中放置訂單建立與狀態轉換方法的靜態類別。請先把它當作「接收舊版本、回傳新版本」的操作集合，稍後在 1.5 節會再介紹其中各個方法的實作。\n如果是可變設計，你可能會擔心：「OrderWorkflow.Pay 有沒有改動 submittedOrder？」你必須去看實作才能確認。在這個不可變設計裡，Pay 會回傳另一個 Order，不會重新指派 submittedOrder 的屬性。\n\n\n1.4.2　好處二：易測試（testable）\n不可變資料讓測試變得非常容易，原因有兩個。\n第一，轉換方法不會修改測試輸入。你準備一個 draft 訂單，把它傳進幾個方法；結束後，draft 還是原來那個 draft。\n第二，可以逐步驗證每一個狀態轉換。每個步驟產生一個獨立的新物件，你可以在任何一步暫停並驗證當時的狀態。以下以 xUnit 來展示單元測試的寫法（其中的 [Fact] 只是用來標記底下的方法是一個測試方法）：\n[Fact]\npublic void Order_Should_Track_Each_State_Transition()\n{\n    // Arrange: 建立測試起點。\n    //   draft 不會被後來的任何操作改變狀態。\n    //   fixedTime 讓時間相關斷言保持穩定、可重複。\n    var fixedTime = new DateTimeOffset(\n        2026, 1, 1, 9, 0, 0, TimeSpan.Zero);\n    var draft = OrderWorkflow.Create(\"CUST-42\", [], fixedTime);\n\n    // Act + Assert: Submit 回傳新的訂單版本。\n    var submitted = OrderWorkflow.Submit(draft, fixedTime);\n    Assert.Equal(OrderStatus.Submitted, submitted.Status);\n    Assert.Equal(fixedTime, submitted.SubmittedAt);\n\n    // Pay 接收 submitted，並回傳另一個新的訂單版本。\n    var paid = OrderWorkflow.Pay(submitted, fixedTime.AddHours(1));\n    Assert.Equal(OrderStatus.Paid, paid.Status);\n    Assert.Equal(fixedTime.AddHours(1), paid.PaidAt);\n\n    // submitted 仍然保留送出後的快照，不會被 Pay 的結果連動修改。\n    Assert.Equal(OrderStatus.Submitted, submitted.Status);\n    Assert.Null(submitted.PaidAt);\n}\n這個測試清楚地展示了整個狀態轉換的流程，而且每一次狀態轉換都能被單獨驗證。\n\n\n1.4.3　好處三：易追蹤（traceable）\n不可變資料很適合表達「快照（snapshot）」：每次轉換都能產生一個代表當時狀態的新物件。只要把需要的版本保存下來，就能建立清楚的歷史。\n這在稽核日誌（audit log）、事件溯源（event sourcing）、問題診斷上非常有用：\n// 這段流程的每一步都有一個不同的 Order 狀態快照\nvar draft = OrderWorkflow.Create(customerId, lines, clock.UtcNow);\nvar submitted = OrderWorkflow.Submit(draft, clock.UtcNow);\nvar paid = OrderWorkflow.Pay(submitted, clock.UtcNow.AddHours(2));\nvar shipped = OrderWorkflow.Ship(\n    paid,\n    clock.UtcNow.AddDays(1));\n\n// 你可以把所有版本都記錄下來\nvar auditTrail = new[]\n{\n    draft, submitted, paid, shipped\n};\n// 現在你保留了每個步驟的狀態歷史\n可變設計的問題是：一個物件被修改之後，舊的狀態就消失了，除非你額外建立快照機制。不可變設計下，物件本身的狀態不會改變，而是在需要改變狀態時產生新的版本；因此，你可以決定哪些版本要持久化成歷史紀錄，而不用在修改前手動建立物件的快照。\n\nNote: 不可變設計本身不會自動保存這些版本，也不等同於稽核日誌或事件溯源（event sourcing）。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -226,7 +241,8 @@
     "section": "1.5　回到 Order：不可變版本長什麼樣子",
     "text": "1.5　回到 Order：不可變版本長什麼樣子\n把前面的概念整合起來，讓我們重新設計 Order。\n首先，用 record 定義 Order：\npublic sealed record Order( // (1)\n    string Id,\n    string CustomerId,\n    OrderStatus Status,\n    IReadOnlyList&lt;OrderLine&gt; Lines, // (2)\n    DateTimeOffset CreatedAt,\n    DateTimeOffset? SubmittedAt = null, // (3)\n    DateTimeOffset? PaidAt = null,\n    DateTimeOffset? ShippedAt = null,\n    string? CancelReason = null\n)\n{\n    public decimal Total =&gt; Lines.Sum(\n        line =&gt; line.UnitPrice * line.Quantity); // (4)\n}\n這裡有幾個設計決策值得留意：\n\n使用 sealed：表示這個型別不打算被繼承，亦即禁止建立衍生類別。\n使用 IReadOnlyList&lt;OrderLine&gt; 而非 List&lt;OrderLine&gt;：讓 Order 的公開 API 不提供修改明細的入口。不過，這只是第一層保護；如何確保集合真的不可變，第 2 章會再深入討論。\n有預設值的 nullable 欄位放在後面：像 SubmittedAt = null 這類欄位可以在建立物件時省略；前面沒有預設值的欄位則必須由呼叫端明確提供。這也符合 C# 的參數規則：有預設值的參數必須放在沒有預設值的參數後面（換言之，必要參數要寫在可選參數的前面）。\nTotal 是根據 Lines 計算的衍生屬性，呼叫端無法讓訂單明細與總金額產生不一致。\n\n\nNote\nIReadOnlyList&lt;T&gt; 不等於 immutable collection。它只表示呼叫端不能透過這個介面直接新增或刪除項目；如果底層集合仍被其他程式碼持有，內容仍可能改變。相關細節在第 2 章有更完整的說明。\n\n接下來，在 OrderWorkflow 類別中定義狀態轉換的方法，總共有以下方法：\n\nCreate: 建立 Draft 狀態的訂單，即尚未提交的草稿訂單。\nSubmit: 提交訂單，會把訂單從草稿狀態轉成「已提交」。\nPay: 把已提交的訂單轉成「已付款」。\nShip: 把已付款的訂單轉成「已出貨」。\nCancel: 建立「已取消」的訂單版本，並保留取消前的歷史欄位。\n\n這裡先用一張簡化的狀態轉換圖，以便了解這幾個方法之間的關係：\n\n\n這張圖只是本章範例的簡化流程。至於如何限制不合法的狀態轉換，後面的章節會再處理。\n\n為了方便閱讀，我們把同一個類別拆成幾段來看。以下片段都是 OrderWorkflow 類別的方法，且省略外層的 public static class OrderWorkflow 宣告。\n先看建立訂單的部分。Create 的責任是建立一個 Draft 狀態的訂單：\npublic static Order Create(\n    string customerId,\n    IReadOnlyList&lt;OrderLine&gt; lines,\n    DateTimeOffset now)\n{\n    return new Order(\n        Id: Guid.NewGuid().ToString(),\n        CustomerId: customerId,\n        Status: OrderStatus.Draft,\n        Lines: lines,\n        CreatedAt: now\n    );\n}\n開單時間 CreatedAt 由外部傳入，而不是在方法裡直接讀取系統時間。這樣測試程式就可以傳入固定時間，不會因為每次執行時間不同，而讓單元測試或整合測試的結果變得不穩定。訂單總金額則由 Order.Total 根據明細即時計算，確保兩者一致。\n這裡為了讓第一章的範例保持簡潔，Create 仍在內部呼叫 Guid.NewGuid()，因此它的輸出尚未完全由參數決定。第 4 章會改由 application layer 取得 ID 與目前時間，再以普通值傳入 domain factory；application layer 負責協調外部依賴與流程，domain factory 則負責建立符合業務規則的 domain model。\n接著是典型的狀態轉換：Submit 和 Pay。它們都接收一個既有的 Order，再用 with 建立新的版本：\npublic static Order Submit(Order order, DateTimeOffset now)\n{\n    return order with\n    {\n        Status = OrderStatus.Submitted,\n        SubmittedAt = now\n    };\n}\n\npublic static Order Pay(Order order, DateTimeOffset now)\n{\n    return order with\n    {\n        Status = OrderStatus.Paid,\n        PaidAt = now\n    };\n}\n這裡的重點是：Submit 和 Pay 方法都沒有重新指派傳入 order 的屬性。訂單提交時間 SubmittedAt 和付款時間 PaidAt 只會出現在回傳的新版本上，原本訂單的屬性仍然維持原值。\n最後看兩個稍微有業務語意的轉換：出貨與取消。\npublic static Order Ship(\n    Order order,\n    DateTimeOffset now)\n{\n    return order with\n    {\n        Status = OrderStatus.Shipped,\n        ShippedAt = now\n    };\n}\n\npublic static Order Cancel(Order order, string reason)\n{\n    return order with\n    {\n        Status = OrderStatus.Cancelled,\n        CancelReason = reason\n        // 注意：SubmittedAt 和 PaidAt 都完整保留\n        // 它們是歷史記錄，不應該清掉\n    };\n}\n\n原始碼： DemoImmutableOrder\n\nCancel 特別值得注意。它只補上取消原因並改變狀態，不會清掉 SubmittedAt 或 PaidAt。這是本章範例選擇的業務語意：取消是一個新的狀態，不代表過去發生過的事應該被抹除。\n和原本的可變設計相比，這個版本有以下幾個改進：\n\n每個方法的意圖清楚。 Submit 接收一個 Order，回傳一個 Order——這樣的簽名暗示它被設計成「接收舊版本、回傳新版本」的轉換操作，而不是去修改傳入物件。只要整個訂單處理流程維持一致的設計，呼叫端就能用同一套方式理解這些方法。\n取消訂單時會保留歷史欄位。 在本章假設的業務規則下，取消不會抹除先前發生的事件，因此被取消的訂單仍保留 SubmittedAt 和 PaidAt。其他系統仍應依自己的取消、作廢與退款規則決定資料如何表示。\n可以在多個地方使用同一個 order 物件，而不用擔心物件狀態被原地修改。 某個地方呼叫 Pay(order, now)，不會讓另一個地方手上的 order 突然變成已付款。\n\n\nNote\nin 與 ref readonly 不是物件不可變的保證。C# 的方法參數可以使用 in 或 ref readonly，在方法簽名中表示「以唯讀參考傳入」。這代表方法內不能把該參數重新指派成另一個值。（參閱 C# language reference: Method parameters and modifiers）\n不過，這不是 C++ const 那種「此物件不會被修改」的保證。若參數型別是 class 或 record class，宣告為 in Order order 只能保護 order 這個參數變數本身，不能防止方法呼叫物件上的可變成員來改變其內部狀態，也不能讓 order.Lines 背後的集合因此變成真正不可變。\n因此，在這個例子中，不可變設計主要不是靠參數修飾詞完成，而是靠 Order 型別本身不提供修改入口，以及整個 OrderWorkflow 維持「接收舊版本、回傳新版本」的一致慣例。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -236,7 +252,8 @@
     "section": "1.6　何時修改狀態？",
     "text": "1.6　何時修改狀態？\n初次接觸不可變設計時，常見的一個困惑是：「那什麼時候才會修改物件的狀態呢？」\n答案是：你會改變「應用程式的狀態」，但不修改個別的資料物件。\n想像一個應用程式的某個地方：\n// 從資料庫讀取訂單（這個 order 是某個時間點的快照）\nvar order = await orderRepository.GetAsync(orderId);\n\n// 建立付款後的新版本\nvar paidOrder = OrderWorkflow.Pay(order, clock.UtcNow);\n\n// 把新版本存回資料庫（這是對「應用程式狀態」的修改）\nawait orderRepository.SaveAsync(paidOrder);\n這裡的 orderRepository 代表持久化抽象層（persistence abstraction layer），不預設底層使用 Entity Framework Core、其他 ORM（object-relational mapping）、Dapper、手寫 SQL、或其他儲存方式。SaveAsync 的具體實作會依技術選擇而異；此處只強調呼叫端會把新的訂單版本交給 repository 持久化。第 5 章會再討論採用 ORM tracking 時的取捨。\n「應用程式狀態」（資料庫裡的記錄）確實被更新了。但 order 這個 C# 物件本身從來沒有被修改過。整個過程是：讀取舊狀態 → 計算新狀態 → 儲存新狀態。\n這個模式讓每個步驟都可以獨立測試，也讓整個流程更容易理解。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -246,7 +263,8 @@
     "section": "1.7　可變設計的適用場景",
     "text": "1.7　可變設計的適用場景\n在進一步討論之前，先釐清一件事：不是所有的東西都適合不可變設計。\n在以下這些情況，可變設計往往更自然：\n\nORM 實體（entity）：Entity Framework Core 的傳統追蹤更新模式，通常會追蹤同一個實體物件上的屬性變化，再把變更寫回資料庫。如果完全改成每次都建立新物件，就需要額外處理實體識別與追蹤狀態，使用上可能變得彆扭。不可變實體並非絕對不可行，但需要不同的對應與更新策略。\n採用傳統 MVVM 的 UI 狀態：WPF、MAUI 等框架常搭配可變的 ViewModel 和雙向綁定（two-way binding），讓畫面輸入立即反映到目前正在編輯的狀態。如果每次輸入都建立整個畫面的新版本，可能讓資料綁定、驗證訊息與焦點狀態更難管理。採用單向資料流的 UI 架構則可能適合不可變狀態。\n建構過程中的臨時物件：在方法內部用 List&lt;T&gt; 蒐集資料，最後再轉成不可變集合，是很正常的做法。\n效能敏感的熱路徑：每次「更新」都建立新物件會增加記憶體配置次數與 GC 壓力；在高頻低延遲的場景，這些額外成本可能直接反映在延遲或吞吐量上。\n\n我們會在第 5 章完整討論這些場景。現在先記住：這本書介紹的是一個工具，不是教條。學會在什麼情況下使用它，比學會語法更重要。\n\n不可變設計、DOP 與 DOD 的關係\n本書所說的不可變資料設計，不等同於一套完整的資料導向程式設計（data-oriented programming, DOP）方法論。DOP 並沒有唯一的原則表述。以 Yehonathan Sharvit 提出的版本為例，DOP 包含四項相互配合的原則：分離程式碼與資料、以通用資料結構表示資料、將資料視為不可變，以及將資料結構描述（schema）與資料表示分離。不可變性只是其中一項。（參閱 Principles of Data-Oriented Programming）\n本書聚焦於不可變資料設計，但仍然重視 C# 的具名型別，並依情境判斷行為應該放在資料型別內，還是放在外部服務。換句話說，本書與 DOP 的部分觀念相通，但並未建議讀者遵循完整的 DOP 方法論。\n不可變資料設計也不同於高效能程式設計領域常說的資料導向設計（data-oriented design, DOD）。DOD 關注資料的實際使用方式，以及資料在記憶體中的排列方式，常依照存取模式重新組織資料，以改善 CPU 快取使用率與執行效能。它常見於遊戲與其他效能敏感系統，而「不可變性」並非其必要條件。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -256,7 +274,8 @@
     "section": "1.8　本書採取的設計立場",
     "text": "1.8　本書採取的設計立場\n本書的設計立場受到 Brian Goetz 對資料導向程式設計的討論啟發，但依 C# 的型別系統與一般應用程式的實務需求做了調整。（參閱 Data Oriented Programming in Java）以下六項立場不是用來判定一段程式碼是否符合某種方法論，而是作為判斷何時採用不可變設計的思考依據。\n\n精確表示資料：對於以承載資料為主要責任的型別，使用透明、具名的型別，清楚表達資料的完整內容與意義。這裡所說的「透明」，是指型別提供足以讀取並重建其資料內容的公開 API。\n優先保持不可變：對需要共享、傳遞、或長期保存的資料，優先避免原地修改，降低追蹤狀態變化時的推理成本。\n以轉換表達改變：需要更新狀態時，根據舊版本建立新版本，讓輸入、輸出與狀態變化都能明確辨識。\n用型別排除非法狀態：能由型別系統表達的規則，就交給編譯器檢查；其餘規則則在建立物件或接收外部資料時驗證。\n依內聚性安排行為：行為可以放在資料型別內，也可以放在外部服務。判斷依據是業務內聚性、外部相依性與流程責任，而不是預設所有方法都必須放在同一種位置。\n有意識地保留可變設計：ORM 實體、UI 狀態、建構過程中的臨時物件、以及效能敏感的熱路徑，仍可採用受控的可變設計。\n\n後續章節會從 C# 語言工具、資料轉換、API 資料模型、實務取捨與狀態建模等角度，逐步展開這六項立場。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -266,7 +285,8 @@
     "section": "1.9　本章回顧",
     "text": "1.9　本章回顧\n這章介紹了不可變資料設計的基本思維。我們從一個可變的 Order 類別出發，看到了可變設計在大型程式中帶來的問題，然後改寫成不可變版本。\n核心的思維轉換是：不直接修改物件，而是建立帶有新狀態的新版本。 在 C# 裡，record 和 with 運算式是實現這個思維的主要工具。\n不可變設計帶來三個核心好處：\n\n可預測：轉換方法不會原地修改輸入物件，狀態變化更加明確。\n易測試：轉換方法不會原地修改輸入物件的屬性，每個狀態轉換都可以獨立驗證。\n易追蹤：每個保留下來的版本都可作為狀態快照，方便建立稽核軌跡（audit trail）。\n\n同時，不可變設計不是讓應用程式狀態永遠停住不動，而是避免原地修改個別資料物件；當狀態需要前進時，程式會根據舊版本計算出新版本，再把新版本存回資料庫、記憶體狀態或下一個處理流程。\n也要記得，不可變設計是一種工具，不是教條。ORM 實體、UI 狀態、建構過程中的臨時物件，以及效能敏感的熱路徑，仍可能更適合使用可變設計。\n接下來的第 2 章，我們會深入探討 C# 中用來建構不可變資料的語言特性，包括 record、init、with，以及不可變集合的選擇方法。",
     "crumbs": [
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>第 1 章：從可變物件到不可變資料</span>"
     ]
   },
   {
@@ -276,7 +296,8 @@
     "section": "",
     "text": "2.1　record class：不可變參考型別的主力\n本章內容：\n第 1 章介紹了「把改變表達成轉換」的基本思維，以及 record 和 with 運算式的初步用法。這一章要深入探討 C# 提供的不可變資料工具，包括各種 record 語法、init、required，以及如何正確處理集合的不可變性（immutability）。\n本章不只說明「這些語法怎麼用」，更重要的是「什麼時候用哪個，以及要注意哪些陷阱」。record struct、readonly record struct 和 FrozenDictionary 也會出現，但它們是用來補完整個不可變資料設計的工具，而不是本章主角。\nrecord class（或簡寫為 record）是本書最常使用的型別。它是一個參考型別，適合用來表示資料快照、DTO（data transfer object、資料傳輸物件）、value object（值物件），以及狀態轉換過程中的中間結果。\nrecord 的價值，在於幫我們消除許多為資料型別反覆撰寫的瑣碎程式碼（boilerplate）。要注意的是，record 本身不會保證「所有東西都不可變」。它提供的是一組很適合不可變設計的語言支援，包括：",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章：C# records、init 與不可變集合</span>"
     ]
   },
   {
@@ -286,7 +307,8 @@
     "section": "",
     "text": "配合「位置參數」（positional parameters）語法時，編譯器會產生 init-only 屬性。\n自動實作基於值的相等性比較（Equals、GetHashCode、==）。\n自動生成 ToString，方便除錯。\n支援 with 運算式，用來建立修改後的新版本。\n\n\n2.1.1　兩種宣告語法\n本節介紹兩種 record 寫法：positional record（位置式 record）和 non-positional record（非位置式 record）。後者使用一般的屬性語法宣告，也有人叫它 nominal record；本書後續統一使用「非位置式 record」。\nPositional record 的寫法是把主要資料直接寫在型別名稱後方的小括號中，適合屬性少、資料形狀明確的型別：\npublic record OrderLine(\n    string ProductId,\n    string ProductName,\n    int Quantity,\n    decimal UnitPrice\n);\n編譯器會自動產生建構式（constructor）、init-only 屬性、Deconstruct 方法、相等性比較、和 ToString。\n非位置式 record 更接近傳統 class 的寫法，適合需要驗證、預設值或較複雜建構邏輯的型別。以下範例會對 productId、quantity 和 unitPrice 加入驗證：\npublic sealed record ValidatedOrderLine\n{\n    public string ProductId { get; private init; }\n    public string ProductName { get; private init; }\n    public int Quantity { get; private init; }\n    public decimal UnitPrice { get; private init; }\n    public decimal LineTotal =&gt; Quantity * UnitPrice;\n\n    public ValidatedOrderLine(\n        string productId,\n        string productName,\n        int quantity,\n        decimal unitPrice)\n    {\n        if (string.IsNullOrWhiteSpace(productId))\n            throw new ArgumentException(\n                \"ProductId 不能為空\", nameof(productId));\n\n        if (quantity &lt;= 0)\n            throw new ArgumentOutOfRangeException(\n                nameof(quantity), \"數量必須大於 0\");\n\n        if (unitPrice &lt; 0)\n            throw new ArgumentOutOfRangeException(\n                nameof(unitPrice), \"單價不能為負數\");\n\n        ProductId = productId;\n        ProductName = productName;\n        Quantity = quantity;\n        UnitPrice = unitPrice;\n    }\n}\n\n原始碼： DemoPositionalRecord、DemoNonPositionalRecord\n\n這裡刻意把屬性的 init 存取子設成 private。理由是：這個型別已經把驗證放進建構式，外部程式碼就不應該再透過物件初始設定式（object initializer）覆蓋 Quantity 或 UnitPrice。如果這些屬性的 init 存取子仍是公開的，外部程式便可以在建構式跑完後，透過物件初始設定式覆蓋它們，反而削弱了建構式維護不變條件的效果。\n\n重點整理\nPositional record 適合簡單的資料容器，例如 DTO 或不需要複雜驗證的 value object；非位置式 record 適合需要驗證邏輯、預設值或複雜建構流程的型別。\n\n\n\n2.1.2　值相等性：record 和 class 的關鍵差異\nrecord 的相等性比較是基於值，而非參考。這和傳統 class 預設比較物件參考的行為不同。請看以下範例：\npublic record OrderLine(\n    string ProductId,\n    string ProductName,\n    int Quantity,\n    decimal UnitPrice\n);\n\nvar line1 = new OrderLine(\"P001\", \"書\", 2, 350m);\nvar line2 = new OrderLine(\"P001\", \"書\", 2, 350m);\n\nConsole.WriteLine(line1 == line2); // True\n上面的範例展示了 record 的值相等性：即使 line1 和 line2 是兩個不同的物件，只要它們的屬性值完全相同，相等運算子 == 就會回傳 true。\n這在實務上很有用：\n\n在測試中比較兩個 DTO 是否相等，不需要手動逐欄位比較。\n把 record 放進 HashSet&lt;T&gt; 或作為 Dictionary&lt;TKey,TValue&gt; 的 key 時，會依照成員值判斷是否相同，行為比較直觀。\n可用來比較兩個狀態版本是否真的不同。\n\n考慮值相等性（value equality）時，也要先分清楚「值」和「識別」。Money(100, \"TWD\") 這類 value object 的語意通常由欄位值決定；兩個金額與幣別相同的物件，可以視為同一個值。相反地，Order、Customer 這類有生命週期的實體，即使某個時間點的欄位內容相同，也不一定代表同一個業務個體。record 讓你不必手寫 Equals、GetHashCode、與相等運算子，就能提供值相等性的比較；但它不會自動替你判斷這個型別是否真的應該用值相等性來表示。\n如果要把 record 放進 HashSet&lt;T&gt;，或用作 Dictionary&lt;TKey,TValue&gt; 的 key，還要確保參與相等性與雜湊碼計算的成員不會在放入集合後改變。否則，物件的雜湊碼可能改變，導致集合無法在原本的位置找到它。使用由不可變值組成的 record，可以避開這類問題。\n不過，value equality 有一個容易忽略的細節：集合欄位預設仍然依照集合型別自己的相等性規則來處理。如果 record 內含陣列或 IReadOnlyList&lt;T&gt;，預設比較通常不是逐一比較元素內容。這個細節會在本章後面討論集合時進一步說明。\n\n原始碼： DemoValueEquality",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章：C# records、init 與不可變集合</span>"
     ]
   },
   {
@@ -296,7 +318,8 @@
     "section": "2.2　init-only 屬性與 required",
     "text": "2.2　init-only 屬性與 required\ninit 是 C# 9 引入的屬性存取子（property accessor）。和 set 不同，init 只允許在物件初始化期間設定屬性；物件建立完成後，就不能再修改。\n它很適合用在 request DTO 或設定物件：呼叫方可以使用物件初始設定式，型別本身仍然能避免建構後被隨意改寫。\n\n備註：request DTO 通常用來承載外部請求送進系統的資料。例如在 Web API 中，CreateOrderRequest 可以用來接收建立訂單請求送來的 JSON body。\n\n先看一個單純使用 init 的例子：\npublic class OrderRequest\n{\n    public string CustomerId { get; init; } = \"\";\n    public string ProductId { get; init; } = \"\";\n}\n\nvar request = new OrderRequest\n{\n    CustomerId = \"CUST-42\",\n    ProductId = \"P001\"\n};\n\nrequest.CustomerId = \"CUST-99\"; // 編譯錯誤\ninit 在語意上比 set 更精確，它的意思是：「這個屬性可以在物件初始化期間設定，但初始化完成後就固定了。」\nC# 11 引入的 required 可以搭配 init 使用，強制呼叫方在初始化時設定必要屬性，否則編譯器會報錯：\npublic class CreateOrderRequest\n{\n    public required string CustomerId { get; init; }\n    public required string ProductId { get; init; }\n    public string? Note { get; init; }\n}\n\nvar request = new CreateOrderRequest\n{\n    CustomerId = \"CUST-100\",\n    ProductId = \"PROD-200\",\n    Note = \"急件處理\"\n};\n\nvar invalidRequest = new CreateOrderRequest\n{\n    CustomerId = \"CUST-100\"\n}; // 編譯錯誤：少了 ProductId\n此範例會出現編譯錯誤 CS9035，因為在建立 invalidRequest 物件的時候沒有初始化必要成員 CreateOrderRequest.ProductId。這比把屬性宣告成 nullable 再到處檢查，更能把資料完整性的要求放在型別設計裡。\n不過，required 是編譯期的初始化契約，不是執行期驗證。呼叫方仍然可以把必要成員設定成 null；如果屬性型別是 non-nullable reference type，編譯器通常會提出警告，但 required 本身不會把這種指派變成執行期錯誤。因此，required 不能取代 null 檢查或業務規則驗證。\n\n原始碼： DemoInitRequired\n\nrequired + init 不能完全取代建構式。當型別需要複雜驗證、計算衍生欄位，或必須維持跨欄位的不變條件時，建構式仍然比較合適。簡單來說：\n\nDTO 或設定物件：常用 required + init。\n領域型別（domain type，例如 value object 或 entity）：常用建構式集中驗證。\n需要防止外部繞過驗證：考慮 private init 或只提供建構式。\n\n例如，required 可以要求呼叫方一定要提供 ProductId 和 Quantity，但不能保證 ProductId 不是空白字串，也不能保證 Quantity 大於 0。這類規則通常適合放在建構式中：\npublic sealed record OrderItem\n{\n    public string ProductId { get; }\n    public int Quantity { get; }\n\n    public OrderItem(string productId, int quantity)\n    {\n        // 驗證單一欄位的格式。\n        if (string.IsNullOrWhiteSpace(productId))\n            throw new ArgumentException(\n                \"ProductId 不能為空\", nameof(productId));\n\n        // 驗證業務規則。\n        if (quantity &lt;= 0)\n            throw new ArgumentOutOfRangeException(nameof(quantity));\n\n        ProductId = productId;\n        Quantity = quantity;\n    }\n}\n這類設計會把驗證集中在建構式，並避免呼叫方直接設定尚未驗證的屬性。",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章：C# records、init 與不可變集合</span>"
     ]
   },
   {
@@ -306,7 +329,8 @@
     "section": "2.3　with 運算式：建立修改版本",
     "text": "2.3　with 運算式：建立修改版本\nwith 運算式讓你從現有的 record 建立一個新版本，只改指定的欄位，其他欄位沿用原本的值。如以下範例：\nvar original = new OrderLine(\"P001\", 5);\nvar updated = original with { Quantity = 10 };\n\nConsole.WriteLine(original.Quantity); // 5\nConsole.WriteLine(updated.Quantity);  // 10\n這正是第 1 章「把改變表達成轉換」的寫法。此範例中的 original 訂單項目沒有被修改，updated 則是包含新值的訂單項目。\n\n2.3.1　巢狀更新\n當 record 裡面包含另一個 record 時，若要建立一個更新內層資料後的新外層物件，通常會同時寫出外層與內層的 with 運算式，稍嫌冗長：\npublic record Address(\n    string Street,\n    string City,\n    string PostalCode\n);\n\npublic record CustomerProfile(\n    string Id,\n    string Name,\n    Address ShippingAddress\n);\n\nvar profile = new CustomerProfile(\n    \"C001\",\n    \"王小明\",\n    new Address(\"中山路 1 號\", \"台北市\", \"10001\")\n);\n\nvar updated = profile with // 建立新的 CustomerProfile\n{\n    ShippingAddress = profile.ShippingAddress with // 建立新的 Address\n    {\n        City = \"新北市\",\n        PostalCode = \"22001\"\n    }\n};\n這裡「冗長」指的是外層的 profile with { ... } 用來建立新的 CustomerProfile，內層又還有 profile.ShippingAddress with { ... } 用來建立新的 Address。寫法雖然比直接指定 profile.ShippingAddress.City 冗長一些，但資料流是明確的：你清楚地知道自己在建立一個新的 ShippingAddress，再把它放進一個新的 CustomerProfile。這比在原地修改更容易追蹤資料流，因為每一次更新都明確表達「從哪個舊值建立哪個新值」。\n如果覺得巢狀 with 不容易閱讀，沿用同一個 profile，也可以先把內層的新版本建立出來，再放進外層的新版本：\nvar newAddress = profile.ShippingAddress with\n{\n    City = \"新北市\",\n    PostalCode = \"22001\"\n};\n\nvar updated = profile with { ShippingAddress = newAddress };\n這兩種寫法的資料流相同：先從舊的 ShippingAddress 建立新的 Address，再從舊的 profile 建立新的 CustomerProfile。\n如果巢狀層次很深，可以考慮在包住內層資料的型別上定義輔助方法。以上面的例子來說，我們可以在包住 Address 的 CustomerProfile 上提供 WithCity 方法，把更新 ShippingAddress.City 的細節藏在型別內部：\npublic record CustomerProfile(\n    string Id,\n    string Name,\n    Address ShippingAddress)\n{\n    public CustomerProfile WithCity(string city)\n    {\n        return this with\n        {\n            ShippingAddress = ShippingAddress with { City = city }\n        };\n    }\n}\n\n// 使用起來更清楚\nvar updated = profile.WithCity(\"新北市\");\n第 3 章會深入討論如何把「狀態更新」封裝成「轉換方法」；大型物件圖的巢狀更新問題則會留到第 5 章。這裡要先記住的重點是：with 不是為了讓所有更新都變成一行，而是讓每一次更新都清楚表達「從舊版本建立新版本」。\n還要注意，with 可以設定呼叫端有權存取的 init 屬性。如果公開的 init 允許呼叫方組合出不合法的狀態，便需要限制存取層級，或提供目的明確的轉換方法。下一章會以訂單狀態為例，示範如何安排這些轉換方法與業務規則。\n\n原始碼： DemoWithExpression",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章：C# records、init 與不可變集合</span>"
     ]
   },
   {
@@ -316,7 +340,8 @@
     "section": "2.4　淺層不可變的陷阱",
     "text": "2.4　淺層不可變的陷阱\n這是本章重點之一，也是 C# 開發者最容易踩的坑：\n具有 init-only 屬性的 record 提供的是「淺層不可變（shallow immutability）」，不是「深層不可變（deep immutability）」。\n來看一個例子：\npublic record Order(\n    string Id,\n    List&lt;OrderLine&gt; Lines\n);\n\nvar order = new Order(\"ORD-001\", new List&lt;OrderLine&gt;());\n\n// 不能替換整個 Lines 參考。\n// order.Lines = new List&lt;OrderLine&gt;(); // 編譯錯誤\n\n// 但可以修改 Lines 指向的 List&lt;T&gt; 內容。\norder.Lines.Add(new OrderLine(\"P001\", 5)); // 合法\norder.Lines 是 init-only 屬性，因此初始化完成後不能重新指向別的集合；但 List&lt;T&gt; 本身仍然是可變集合。init-only 屬性只保護集合參考不能被重新指派，不保護集合內容不能被改。\n\n原始碼： DemoShallowImmutability\n\n\n2.4.1　改用 IReadOnlyList&lt;T&gt;\n比較安全的第一步，是把公開 API 從 List&lt;T&gt; 改成唯讀介面：\npublic record Order(\n    string Id,\n    IReadOnlyList&lt;OrderLine&gt; Lines\n);\n\norder.Lines.Add(new OrderLine(\"P001\", 5)); // 編譯錯誤!\n這可以避免呼叫方透過 order.Lines 直接新增或刪除項目。不過，IReadOnlyList&lt;T&gt; 只是唯讀檢視，不是真正的 immutable collection。\n\nNote: IReadOnlyList&lt;T&gt; 只保證「透過這個介面」不能改變集合結構，例如新增、刪除或重新排序項目；它不保證底層集合不會被其他參考修改，也不保證集合裡的元素物件本身不可變。如果元素是可變的 class，呼叫端仍可取出元素後修改其屬性。簡單來說，結構是唯讀的，而元素本身是否可變，則取決於元素型別。\n參閱微軟文件：IReadOnlyList&lt;T&gt; interface\n\n如果外部仍然握有原本的 List&lt;T&gt;，還是可以從那個參考修改集合內容。例如：\npublic record Order(\n    string Id,\n    IReadOnlyList&lt;OrderLine&gt; Lines\n);\n\nvar lines = new List&lt;OrderLine&gt;(); // (1)\nvar order = new Order(\"ORD-001\", lines); // (2)\n\nConsole.WriteLine(order.Lines.Count); // 輸出 0\n\nlines.Add(new OrderLine(\"P001\", 5)); // (3)\n\nConsole.WriteLine(order.Lines.Count); // 輸出 1\n\n原始碼： DemoReadOnlyListView\n\n此範例程式碼的閱讀重點：\n\nlines 是外部建立的可變 List&lt;OrderLine&gt;。\norder.Lines 和 lines 指向同一個底層集合，只是 order.Lines 只顯露 IReadOnlyList&lt;OrderLine&gt; 介面。\n由於 order.Lines 的型別是 IReadOnlyList&lt;OrderLine&gt;，故無法透過 order.Lines.Add() 來添加元素（無法通過編譯）；但外部仍可透過原本的 lines 參考呼叫 Add 方法。\n\n因此，IReadOnlyList&lt;T&gt; 通常要搭配防禦性複製，或改用真正不可變的集合型別。下一節會整理這些選擇。",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章：C# records、init 與不可變集合</span>"
     ]
   },
   {
@@ -326,7 +351,8 @@
     "section": "2.5　不可變集合的選擇指南",
     "text": "2.5　不可變集合的選擇指南\n處理集合時，先問一個問題：你要防止的是「呼叫方修改集合」，還是「資料結構本身在任何地方都不能被修改」？\n如果只是要保護 API 輸入輸出或 DTO，可以把防禦性複製再包成唯讀檢視：\npublic sealed class SafeOrder\n{\n    public string Id { get; }\n    public IReadOnlyList&lt;OrderLine&gt; Lines { get; }\n\n    public SafeOrder(string id, IEnumerable&lt;OrderLine&gt; lines)\n    {\n        ArgumentNullException.ThrowIfNull(lines);\n        Id = id;\n        Lines = Array.AsReadOnly(lines.ToArray());\n    }\n}\n這裡刻意使用一般的 class，因為範例要示範的是集合封裝，而不是 record 的值相等性。lines.ToArray() 先建立新的陣列，切斷與外部可變集合的聯繫；Array.AsReadOnly 再包住這份陣列，避免呼叫方把公開的 IReadOnlyList&lt;T&gt; 轉回陣列後修改項目。\n這仍然只是集合結構的保護。如果元素是可變物件，呼叫方取出元素後仍可能修改其狀態；因此，集合元素本身也應該採用合適的不可變型別。如果需要能夠建立新版本的不可變資料結構，可以改用 System.Collections.Immutable 家族的 ImmutableList：\nvar productIds = ImmutableList.Create(\"P001\", \"P002\");\n\nvar updatedProductIds = productIds.Add(\"P003\");\n\nConsole.WriteLine(productIds.Count);        // 輸出 2\nConsole.WriteLine(updatedProductIds.Count); // 輸出 3\n由此範例可知，ImmutableList 的 Add 方法不會修改原本的集合（此範例的 productIds），而是回傳包含新項目的集合版本。這是 ImmutableList&lt;T&gt; 和 List&lt;T&gt; 在語意上最大的差異。\n以下表格整理了幾種集合類型的適用場景，其中 ImmutableArray&lt;T&gt;、ImmutableList&lt;T&gt; 和 ImmutableDictionary&lt;TKey, TValue&gt; 屬於 System.Collections.Immutable 家族，FrozenDictionary&lt;TKey, TValue&gt; 則位於 System.Collections.Frozen。\n\n\n\n\n\n\n\n場景\n建議\n\n\n\n\n小型 DTO，只需保護公開 API\nIReadOnlyList&lt;T&gt; + 防禦性複製與唯讀包裝\n\n\n建立後很少修改，以讀取為主\nImmutableArray&lt;T&gt;\n\n\n需要頻繁新增、刪除，且保留多個版本\nImmutableList&lt;T&gt;\n\n\nkey-value 狀態表，需要不可變更新\nImmutableDictionary&lt;TKey, TValue&gt;\n\n\n啟動時建立一次，之後大量查詢\nFrozenDictionary&lt;TKey, TValue&gt;\n\n\n\nIReadOnlyList&lt;T&gt; 是「介面上的唯讀」；ImmutableArray&lt;T&gt;、ImmutableList&lt;T&gt; 和 ImmutableDictionary&lt;TKey, TValue&gt; 是「資料結構本身不可變」，但適合的更新模式不同；FrozenDictionary&lt;TKey, TValue&gt; 則是建立後固定、為大量查詢最佳化的集合。\n這些集合類型各有不同的設計目的，不要一看到 immutable design 就全部換成 ImmutableList&lt;T&gt;。\n\n2.5.1　ImmutableArray&lt;T&gt; 的 default 陷阱\nImmutableArray&lt;T&gt; 是 struct。當它處於未初始化狀態，例如指派為 default，它內部包住的陣列其實是 null：\nImmutableArray&lt;OrderLine&gt; items = default; // 小心陷阱!\n\nConsole.WriteLine(items.IsDefault); // True\n\ntry\n{\n    int length = items.Length; // 拋出 NullReferenceException\n}\ncatch (NullReferenceException)\n{\n    Console.WriteLine(\"items 尚未初始化。\");\n}\n\nvar safeItems = ImmutableArray&lt;OrderLine&gt;.Empty; // 推薦寫法\n所以使用 ImmutableArray&lt;T&gt; 時，請明確初始化為 ImmutableArray&lt;T&gt;.Empty，或在使用前檢查 IsDefault 屬性。不要把 default 當成空集合（empty collection）；它代表的是未初始化狀態。\n\n原始碼： DemoReadOnlyCollections\n\n\n\n2.5.2　集合欄位與值相等性\nRecord 的值相等性（value equality）對集合欄位有一個容易忽略的細節：兩個 record 即使集合內容相同，只要集合物件不是同一個，預設相等性比較就可能回傳 false。請看以下範例：\npublic record Order(\n    string Id,\n    IReadOnlyList&lt;OrderLine&gt; Lines\n);\n\nvar lines = new[] { new OrderLine(\"P001\", 5) };\n\nvar a = new Order(\"ORD-001\", lines);\nvar b = new Order(\"ORD-001\", lines.ToArray());\n\nConsole.WriteLine(a == b); // False\n閱讀上方範例時，請留意 a 和 b 的 Lines 內容相同，但來自不同的陣列物件，因此 a == b 的結果是 false。如果你的設計需要「集合內容也參與相等性比較」，不能只依賴 record 的預設相等性。 請在比較時明確使用 SequenceEqual，或自行覆寫 Equals 和 GetHashCode 方法。\n\n原始碼： DemoCollectionValueEquality\n\n\nNote\nImmutableArray&lt;T&gt; 雖然實作了 IStructuralEquatable 介面，但一般呼叫 Equals 或使用 == 時，並不會逐一比較元素內容，而是比較底層陣列的參考。若要逐一比較元素，請明確使用 SequenceEqual。\n\n\n\n2.5.3　從資料生命週期看 FrozenDictionary\nFrozenDictionary&lt;TKey,TValue&gt; 的適用場景是：啟動或初始化時建立一次，之後只做大量查詢，完全不修改。\n例如電商系統常會有「商品分類代碼對應顯示名稱」、「付款方式代碼對應處理規則」、「國家代碼對應出貨區域」這類對照表。這些資料通常在啟動時從設定檔或資料庫載入，之後會在訂單建立、結帳流程與查詢畫面中反覆查詢，但不會在每次查詢時被修改。這時候，可以先準備好不再修改的 key 和 value，再建立 FrozenDictionary 作為查詢索引：\nusing System.Collections.Frozen;\n\nvar categoryNames = new Dictionary&lt;string, string&gt;\n{\n    [\"BOOK\"] = \"書籍\",\n    [\"SOFTWARE\"] = \"軟體\"\n}.ToFrozenDictionary();\n\nConsole.WriteLine(categoryNames[\"BOOK\"]); // 輸出：書籍\nToFrozenDictionary 的建立成本相對高，但建立完成後能提供快速的查詢。它適合「很少建立、經常讀取」的資料，不適合每次更新都建立新版本的狀態表。\n\n原始碼： DemoFrozenDictionary\n\n這個案例的重點不是「不可變一定比較快」，而是不可變設計迫使我們釐清資料生命週期：哪些資料只在初始化階段改變？哪些資料進入查詢階段後就應該固定？當生命週期劃分清楚，就能選擇更貼合用途的資料結構。\n如果後台真的需要修改商品分類或出貨區域，通常也是更新資料來源後重新載入快取，而不是直接修改已建立的查詢索引。換句話說，集合選型不是語法偏好，而是資料生命週期的設計決策。",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章：C# records、init 與不可變集合</span>"
     ]
   },
   {
@@ -336,7 +362,8 @@
     "section": "2.6　record struct 與 readonly record struct",
     "text": "2.6　record struct 與 readonly record struct\nrecord struct 是 C# 10 引入的型別。它是實值型別（value type），但仍保留 record 的 value equality、ToString 和 with 支援。要注意的是，語法相近的 record class 是參考型別（reference type）。\n以下是一個 record struct 範例：\npublic readonly record struct Money(decimal Amount, string Currency);\n\nvar price = new Money(1200m, \"TWD\");\nvar discounted = price with { Amount = 960m };\n談到 struct 時，常見的簡化說法是「struct 在 stack、class 在 heap」。這個說法不夠精確：實值型別可能出現在區域變數、物件欄位、陣列元素，boxing 時也會進入 heap。因此，選擇 record struct 時，不要只考慮 stack/heap，而要看它在語意上是不是一個值、實例大小與複製成本是否足夠低，以及是否會頻繁 boxing。\n\n2.6.1　什麼時候使用 record struct？\nrecord struct 適合以下情況：\n\n實例很小；常見經驗值是 16 bytes 左右或更小，但仍應依實際使用方式評估。\n語意上是一個「值」，例如金額、座標、時間區間。\n不需要繼承。\n不會頻繁 boxing。\n大量建立或內嵌在其他物件中時，希望降低 heap 配置。\n\n不適合的情況：\n\n實例很大，複製成本會變高。\n包含複雜參考型別欄位，使值語意變得模糊。\n需要繼承或追蹤長生命週期身分。\n\nrecord struct 本身不能是 null，但可以使用 nullable value type，例如 Money?，來表示有值或缺值。如果型別在大多數使用情境都需要處理 null，則應重新評估參考型別是否更自然。\n\n\n2.6.2　record struct 預設是可變的\n一個容易混淆的地方是：使用位置式（positional）宣告的 record class 產生的是 init-only 屬性，但位置式 record struct 產生的是可讀寫屬性。\n範例：\n// record struct 預設可變\npublic record struct Point(double X, double Y);\n\nvar p = new Point(1.0, 2.0);\np.X = 5.0; // 修改成員是合法的\n如果你要的是不可變的值型別，請明確寫成 readonly record struct：\npublic readonly record struct Point(double X, double Y);\n\nvar p = new Point(1.0, 2.0);\np.X = 5.0; // 編譯錯誤\nreadonly 讓編譯器要求結構的實例狀態不可被修改，也能減少某些唯讀路徑上的防禦性複製（defensive copy）風險。如果非唯讀 struct 很大，又在高頻路徑中被反覆複製，應該用 profiler 確認實際成本，再決定是否需要調整。\n\n\n2.6.3　避免可變 struct\n可變 struct 的行為很容易產生誤解：程式看起來能修改原值，實際上卻可能只改到複本。以下範例中，陣列元素可以被原地修改，但透過 IList&lt;T&gt; 介面索引子取出的值，只是暫時複本：\nusing System.Collections.Generic;\n\nvar array = new MutableCounter[] { new() };\narray[0].Increment();\nConsole.WriteLine(array[0].Value); // 輸出：1\n\nIList&lt;MutableCounter&gt; list = new List&lt;MutableCounter&gt; { new() };\n\n// 透過 IList&lt;T&gt; 索引子取出的值是複本\nlist[0].Increment();  // [A] 這裡只改動了取出的複本\nConsole.WriteLine(list[0].Value); // 輸出：0\n\npublic struct MutableCounter\n{\n    public int Value;\n\n    public void Increment()\n    {\n        Value++;\n    }\n}\n註解標記 [A] 的程式碼修改的是複本，修改完就遺失了。因此，清單中的元素仍然是原本的值。為了避開這類難以除錯的行為，本書建議：如果要設計實值型別，優先使用不可變的 readonly record struct。\n\n原始碼： DemoRecordStruct",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章：C# records、init 與不可變集合</span>"
     ]
   },
   {
@@ -346,7 +373,8 @@
     "section": "2.7　本章回顧",
     "text": "2.7　本章回顧\n這章介紹了 C# 中用來建構不可變資料的主要語言特性：\n\nrecord class 是本書最常使用的不可變資料載體，提供 value equality、ToString 和 with 運算式。\nPositional record 適合簡單資料容器；非位置式 record 適合需要驗證與建構邏輯的型別。\ninit 讓屬性只能在初始化期間設定；required 強制呼叫方提供必要資料。\nwith 運算式 從現有 record 建立帶有修改的新版本。\nrecord struct 是實值型別版本，預設可變；若要不可變值型別，優先使用 readonly record struct。\n具有 init-only 屬性的 record 提供的是淺層不可變：集合屬性的型別要特別注意，List&lt;T&gt; 配合 record 不能提供真正的不可變性。\n不可變集合的選擇：IReadOnlyList&lt;T&gt; 配合防禦性複製與唯讀包裝，適合多數 API 輸入輸出；ImmutableArray&lt;T&gt; 適合讀取為主；ImmutableList&lt;T&gt; 與 ImmutableDictionary&lt;TKey,TValue&gt; 適合需要不可變更新的集合；FrozenDictionary&lt;TKey,TValue&gt; 適合建立後大量查詢。\n\n到這裡，我們解決的是「如何表示與複製不可變資料」。不過，record、init、和 with 不會自動決定業務轉換應該放在哪裡，也不會自動保證每個狀態都合法。\n下一章是全書的核心章節，我們會深入討論「用資料轉換取代原地修改」的設計模式，以及如何判斷把行為放在 record 內部還是外部服務更合適。",
     "crumbs": [
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>第 2 章：C# records、init 與不可變集合</span>"
     ]
   },
   {
@@ -356,7 +384,8 @@
     "section": "",
     "text": "3.1　可變更新 vs 不可變轉換\n本章內容：\n本章是全書的核心。\n前兩章建立了基礎：第 1 章介紹了「改變 = 建立新版本」的思維，第 2 章介紹了 C# 裡用來建構不可變資料的工具。現在，我們要回答一個更實際的問題：\n當你的程式需要「更新」一筆資料時，這個邏輯應該放在哪裡？\n這裡說的「更新」，不是直接修改既有物件，而是第 1 章介紹過的資料轉換：接收舊狀態，回傳新狀態。換句話說，本章關心的不是「如何讓物件被改掉」，而是「如何把狀態前進這件事設計成清楚、可測試、可維護的轉換」。\n這個問題沒有一個放諸四海皆準的答案。本章會提供一組實務判斷準則，幫助你思考幾個問題：\n答案不同，更新邏輯適合放的位置也會不同。\n在討論更新邏輯應該放在哪裡之前，本節先快速複習第 1 章提過的核心觀念：可變設計會直接修改既有物件；不可變設計則把改變表達成「接收舊狀態，回傳新狀態」的資料轉換。\n想像訂單系統的付款流程。使用可變設計時，你可能這樣寫：\n這個方法直接修改了傳進來的 order。由於呼叫方的 order 物件在方法執行後已經變了，這種對傳入物件的原地修改就是副作用（side effect）的一種。\n使用不可變設計時，同樣的邏輯可以改成：\n這個方法回傳一個新物件，不修改輸入的 order。呼叫方需要使用回傳值。以下範例以 .NET 內建的 TimeProvider 取得目前時間；第 3.6 節會完整說明這個時間抽象：\n不可變版本的回傳型別會提醒呼叫方：這個方法會回傳一個 Order，請把它視為新版本。不過，C# 的方法簽名本身無法保證實作沒有同時修改輸入；這仍須由型別設計與方法實作共同確保。\n第 1 章補充說明過，即使將參數宣告為 in Order order，對參考型別來說，也只能防止方法重新指派 order 這個參數，不會讓它指向的物件自動變成不可變。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -366,7 +395,8 @@
     "section": "",
     "text": "// 可變更新（mutable update）\npublic void MarkAsPaid(Order order, DateTimeOffset paidAt)\n{\n    order.Status = OrderStatus.Paid;\n    order.PaidAt = paidAt;\n}\n\n\nNote: 簡單來說，「副作用」是指方法透過回傳值以外的方式，造成呼叫方可以觀察到的狀態變化或外部互動，例如修改傳入物件或共享狀態、寫入資料庫、或輸出訊息。\n\n\n// 不可變轉換（immutable transition）\npublic Order MarkAsPaid(Order order, DateTimeOffset paidAt)\n{\n    return order with\n    {\n        Status = OrderStatus.Paid,\n        PaidAt = paidAt\n    };\n}\n\nvar paidAt = timeProvider.GetUtcNow();\n\n// 可變版本的呼叫方式（會修改 order）\norderService.MarkAsPaid(order, paidAt);\n// order 已經被改了，但從程式碼看不出來\n\n// 不可變版本的呼叫方式（回傳新物件）\nvar paidOrder = orderService.MarkAsPaid(order, paidAt);\n// order 沒有改變，paidOrder 是新的版本",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -376,7 +406,8 @@
     "section": "3.2　兩種設計風格",
     "text": "3.2　兩種設計風格\n「把改變表達成轉換」這個思維有兩種常見的實作風格，各有優缺點。第 1 章的 OrderWorkflow 範例其實已經示範了其中一種：把轉換邏輯放在 Order 外部。這一節會先把兩種寫法並排放在一起，接著再討論它們各自適合什麼情境。\n\n3.2.1　風格 A：行為放在 record 內部\n這種作法類似傳統 OOP 的設計，由 record 本身提供轉換方法，但這些方法不會修改 this（物件本身），而是回傳新版本。為了聚焦在這個封裝方式，下面的範例只保留建立草稿和提交訂單所需的屬性：\npublic sealed record Order\n{\n    public OrderStatus Status { get; private init; }\n    public ImmutableArray&lt;OrderLine&gt; Lines { get; private init; }\n    public DateTimeOffset CreatedAt { get; private init; }\n    public DateTimeOffset? SubmittedAt { get; private init; }\n\n    private Order(\n        ImmutableArray&lt;OrderLine&gt; lines,\n        DateTimeOffset createdAt)\n    {\n        Status = OrderStatus.Draft;\n        Lines = lines;\n        CreatedAt = createdAt;\n    }\n\n    public static Order CreateDraft(\n        ImmutableArray&lt;OrderLine&gt; lines,\n        DateTimeOffset createdAt)\n    {\n        if (lines.IsDefault)\n        {\n            throw new ArgumentException(\n                \"訂單項目尚未初始化\",\n                nameof(lines));\n        }\n\n        return new Order(lines, createdAt);\n    }\n}\n這裡刻意使用非位置式 record（而不是 positional record），並將建構式與所有 init 存取子設為 private，因此呼叫方無法繞過轉換方法直接改寫狀態。若要讓訂單進入下一個狀態，就必須透過 Order 提供的轉換方法。例如，Submit 方法會讀取 this，再用 with 建立新版本。\n\nNote: 如果採用常見的 public positional record 寫法，由編譯器產生的 primary constructor 以及根據位置參數產生的屬性都是 public，而且這些屬性都具有 public init 存取子。init 只能防止物件建立後的一般指派，不會禁止呼叫方使用 with 在新版本中設定這些屬性。因此，呼叫方可能繞過 Submit 方法內的驗證邏輯，直接建立一個內容矛盾的版本，像這樣：\nvar invalid = draft with\n{\n    Status = OrderStatus.Submitted,\n    SubmittedAt = null\n};\n這個問題的關鍵不是 positional record 語法本身，而是與狀態有關的建構入口和 init 存取子仍對外開放。這裡改用非位置式 record，是為了更明確地限制這些存取點。\n\n接著來看 Order 的狀態轉換方法。為了避免程式碼太過冗長，以下只展示 Submit 方法；其他業務規則會在第 3.4 節說明：\npublic Order Submit(DateTimeOffset now)\n{\n    if (Status != OrderStatus.Draft)\n    {\n        throw new InvalidOperationException(\n            \"只有草稿可以提交\");\n    }\n\n    return this with\n    {\n        Status = OrderStatus.Submitted,\n        SubmittedAt = now\n    };\n}\nLines 也改用 ImmutableArray&lt;OrderLine&gt;，避免外部程式透過原本的 List&lt;OrderLine&gt; 參考修改訂單項目。工廠方法會拒絕處於 default 狀態的 ImmutableArray&lt;OrderLine&gt;，以呼應第 2 章介紹過的集合設計。\n完整版本還包含 Pay、Ship、和 Cancel，它們都採用相同的轉換結構。這些方法的名稱像是命令，但實際行為是轉換，所以呼叫方必須接住回傳值。因為每個方法都回傳 Order，呼叫方也可以將它們串接起來：\nvar now = timeProvider.GetUtcNow();\n\nvar shipped = order\n    .Submit(now)\n    .Pay(now.AddHours(2))\n    .Ship(now.AddDays(1));\n這種寫法可以流暢地串接（method chaining），看起來很自然。在支援程式碼補全（code completion）的 IDE 中，輸入 . 就能看到這個訂單支援哪些操作。\n\n原始碼： DemoOrderTransformationStyleA\n\n\n\n3.2.2　風格 B：行為放在外部函式或服務\n另一種作法，是像第 1 章的 OrderWorkflow 那樣，把轉換邏輯放在一個獨立的靜態類別（或服務）裡，讓 Order 本身保持為資料容器：\npublic sealed record Order(\n    string Id,\n    string CustomerId,\n    OrderStatus Status,\n    ImmutableArray&lt;OrderLine&gt; Lines,\n    decimal Total,\n    DateTimeOffset CreatedAt,\n    DateTimeOffset? SubmittedAt = null,\n    DateTimeOffset? PaidAt = null,\n    DateTimeOffset? ShippedAt = null,\n    string? CancelReason = null);\n\npublic static class OrderWorkflow\n{\n    public static Order Submit(Order order, DateTimeOffset now)\n    {\n        return order with\n        {\n            Status = OrderStatus.Submitted,\n            SubmittedAt = now\n        };\n    }\n\n    public static Order Pay(Order order, DateTimeOffset now)\n    {\n        return order with\n        {\n            Status = OrderStatus.Paid,\n            PaidAt = now\n        };\n    }\n}\n這種風格的呼叫方式會把目前的訂單版本明確傳進每個轉換函式：\nvar now = timeProvider.GetUtcNow();\nvar submitted = OrderWorkflow.Submit(order, now);\nvar paid = OrderWorkflow.Pay(submitted, now.AddHours(2));\n在這個例子裡，Order 不需要知道有哪些操作會改變它；所有業務流程都集中在 OrderWorkflow。這和風格 A 使用的是同一個不可變轉換規則，只是方法的位置不同。為了聚焦在方法的位置，上面的 Submit 和 Pay 暫時省略了狀態驗證；第 3.4 節會補上這些規則。\n不過，這個 positional record 仍允許呼叫方自行使用 with；若要確保狀態轉換都經過 workflow，還需要額外的封裝設計，或明確的團隊慣例。\n\n原始碼： DemoOrderTransformationStyleB\n\n這種寫法看起來很接近「貧血模型（anemic domain model）」，值得花點篇幅解釋一下。\n所謂貧血模型，通常是指一個 domain model 只有資料欄位，幾乎沒有行為；真正的業務規則散落在 controller、service、UI handler 或 repository 等地方。結果是 Order 看起來像 domain model，但它本身無法保護自己的狀態：任何地方只要拿到訂單，就可能直接把 Status 改成 Paid，卻忘了檢查訂單是否已提交、是否已取消、是否已經付款。問題不只是「方法沒有放在 Order 裡」，而是業務規則沒有被集中、清楚、可靠地表達。\n\n參閱：Martin Fowler, Anemic Domain Model\n\n因此，風格 B 不一定等於壞的貧血模型。關鍵在於轉換規則是否有明確的歸屬。如果 Order 本身保持為資料容器，但所有狀態變化都必須透過 OrderWorkflow.Submit、OrderWorkflow.Pay 這類轉換函式，而且這些函式集中處理業務規則，那麼這比較像是把 domain workflow 放在外部模組中，而不是讓規則散落各處。資料和行為雖然沒有放在同一個型別裡，但它們仍然透過清楚的 API 被組織在一起。\n反過來說，如果 Order 只是資料容器，而系統裡到處都可以自由改寫它的狀態，那就會落入貧血模型常見的問題：規則難以追蹤、狀態容易不一致、測試也必須追著各種呼叫路徑跑。風格 B 要成立，前提是團隊必須有清楚的慣例：狀態轉換要集中在 workflow、domain service 或其他目的明確的模組中，而不是散落在每個需要用到訂單的地方。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -386,7 +417,8 @@
     "section": "3.3　兩種風格的比較",
     "text": "3.3　兩種風格的比較\n以下表格整理了風格 A 與風格 B 在幾個常見面向上的差異：\n\n\n\n\n\n\n\n\n比較面向\n風格 A（行為在 record 內）\n風格 B（行為在外部）\n\n\n\n\nIDE 可探索性\n輸入 . 可以看到可用操作\n需要知道要去哪個類別找\n\n\n資料透明度\n取決於公開 API；本例可讀取資料，但限制呼叫方直接重建所有狀態\n高（公開 positional record 可直接重建）\n\n\n確保狀態合法\n比較集中（可以在方法內做驗證）\n需要額外設計\n\n\n測試\n容易\n容易\n\n\n適合 DTO\n不一定（DTO 通常不需要行為）\n較適合\n\n\n適合 domain model\n較適合（有業務規則）\n視情況\n\n\n適合跨分層傳遞資料\n不一定\n較適合\n\n\n\n行為是否定義在 record 內，並不直接決定資料透明度；真正的判斷依據是，公開 API 是否足以讀取並重建其資料內容。\n其中的「確保狀態合法」，其實就是「這個物件在任何時候都必須符合的規則」，例如：\n\n已付款訂單必須有付款時間\n已取消訂單必須有取消原因\n草稿（draft）訂單才能提交\n已取消訂單不能再付款\n\n\n3.3.1　預設建議：從風格 A 開始\n如果你不確定用哪種，建議可以從風格 A 開始——把行為放在 record 內部。\n理由是：\n\nIDE 可探索性（discoverability）更好，新加入的開發者可以透過 . 發現可用操作。\n比較容易確保狀態合法；你可以在方法內部做驗證，避免轉換後產生不合理的狀態。\n大多數 C# 開發者對這種寫法更熟悉，學習曲線較低。\n\n何時考慮切換到風格 B？\n當你遇到以下情況時，外部函式或服務的設計可能更適合：\n\n同一筆資料有多種不同的操作邏輯，而這些邏輯分屬不同的業務領域（例如：訂單的定價邏輯、物流邏輯、財務邏輯各自獨立）。\n資料需要跨越系統分層或 API 介面（例如 API request/response DTO），這類資料的角色是「傳遞資訊」，不應該帶著業務邏輯。\n操作邏輯需要外部依賴（資料庫、外部服務），把它放在 record 外部的服務中更合適。\n\n記住：兩種風格可以混用。同一個 Order record 可以保留純粹的狀態轉換方法，再由 application service 取得資料庫、時間、或外部服務的結果，並把普通資料傳給這些方法。service 負責協調外部依賴，不代表業務規則也必須跟著移出 domain model。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -396,7 +428,8 @@
     "section": "3.4　加入業務規則驗證",
     "text": "3.4　加入業務規則驗證\n實務上的狀態轉換不只是「更新欄位」，還需要驗證當前狀態是否允許這個轉換。\n例如，一張「草稿（draft）」訂單才能被提交，一張「已取消」的訂單不能再付款。這種「從某個狀態才能轉換到另一個狀態」的約束，就是業務規則（business rule）。\n\n3.4.1　拋出例外：簡單直接\n最直接的做法是在轉換方法裡驗證，如果不滿足就拋出例外：\npublic sealed record Order\n{\n    // ... 屬性與建構式略\n\n    public Order Submit(DateTimeOffset now)\n    {\n        if (Status != OrderStatus.Draft)\n        {\n            throw new InvalidOperationException(\n                $\"只有草稿狀態的訂單可以提交，當前狀態：{Status}\");\n        }\n        if (Lines.Count == 0)\n        {\n            throw new InvalidOperationException(\n                \"訂單必須至少有一個項目才能提交\");\n        }\n\n        return this with\n        {\n            Status = OrderStatus.Submitted,\n            SubmittedAt = now\n        };\n    }\n\n    public Order Pay(DateTimeOffset now)\n    {\n        if (Status != OrderStatus.Submitted)\n        {\n            throw new InvalidOperationException(\n                $\"只有已提交的訂單可以付款，當前狀態：{Status}\");\n        }\n\n        return this with\n        {\n            Status = OrderStatus.Paid,\n            PaidAt = now\n        };\n    }\n}\n這種做法簡單，但不代表每個呼叫方都必須就地使用 try-catch。如果不合法的轉換代表程式設計錯誤，可以讓例外交由應用程式的統一錯誤處理機制接住；如果它是使用者操作時可預期的結果，下一節的結果型別通常更合適。也不要只在呼叫前重複檢查狀態，因為真正維護規則的地方仍應該是轉換方法。\n\n\n3.4.2　回傳結果型別：更明確的錯誤處理\n另一種做法是讓方法回傳一個結果型別，明確表達「成功」或「失敗」。\n同樣以訂單為例，我們可以先定義一個代表轉換結果的型別，名稱是 OrderTransitionResult：\npublic sealed record OrderTransitionResult\n{\n    public bool IsSuccess { get; }\n    public Order? Order { get; }\n    public string? ErrorMessage { get; }\n\n    private OrderTransitionResult(\n        bool isSuccess,\n        Order? order,\n        string? errorMessage)\n    {\n        IsSuccess = isSuccess;\n        Order = order;\n        ErrorMessage = errorMessage;\n    }\n\n    public static OrderTransitionResult Success(Order order)\n    {\n        ArgumentNullException.ThrowIfNull(order);\n        return new(true, order, null);\n    }\n\n    public static OrderTransitionResult Fail(string message)\n    {\n        ArgumentException.ThrowIfNullOrWhiteSpace(message);\n        return new(false, null, message);\n    }\n}\n然後，在負責處理訂單流程（workflow）的方法中回傳這個結果型別，而不是在驗證失敗時拋出例外：\npublic static class OrderWorkflow\n{\n    public static OrderTransitionResult Submit(\n        Order order,\n        DateTimeOffset now)\n    {\n        if (order.Status != OrderStatus.Draft)\n        {\n            return OrderTransitionResult.Fail(\n                $\"只有草稿狀態的訂單可以提交，當前狀態：{order.Status}\");\n        }\n\n        var submitted = order with\n        {\n            Status = OrderStatus.Submitted,\n            SubmittedAt = now\n        };\n\n        return OrderTransitionResult.Success(submitted);\n    }\n}\n呼叫方：\nvar result = OrderWorkflow.Submit(\n    order,\n    timeProvider.GetUtcNow());\n\nif (!result.IsSuccess)\n{\n    logger.LogWarning(\"提交訂單失敗：{Message}\", result.ErrorMessage);\n    return;\n}\n\nvar submitted = result.Order!;\nawait orderRepository.SaveAsync(submitted);\n這種做法讓錯誤處理更明確，呼叫方從型別就能看出這個操作可能失敗，比較不容易忽略錯誤情況。\n建構式設為 private，並由工廠方法驗證參數之後，呼叫方也不能自行建立「成功但 Order 是 null」這類互相矛盾的組合。不過，C# 的 nullable analysis 仍無法從 IsSuccess 推導 Order 一定有值，所以範例仍需要使用 !。進階選讀的第 6 章會把相同的型別建模思路用在訂單生命週期，讓不同訂單狀態成為不同型別；它不是專門改寫這裡的結果型別。\n順便提及，這個思路和 Go 語言的錯誤處理哲學相近：錯誤不是隱藏在例外流程裡，而是作為回傳值的一部分交給呼叫方判斷。\n.NET 基礎類別庫目前沒有內建的 Result&lt;TValue, TError&gt; 型別，也就是「成功時回傳 TValue，失敗時回傳 TError」的通用結果型別，但你可以用上面的方式自己定義，或引入 ErrorOr、FluentResults 等第三方套件來獲得更完整的 Result 型別支援。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -406,7 +439,8 @@
     "section": "3.5　轉換管線：把多個步驟串接起來",
     "text": "3.5　轉換管線：把多個步驟串接起來\n不可變設計的另一個好處是：因為每個轉換都回傳新物件，多個步驟可以很自然地串接成一條「轉換管線」。\n以下範例展示的是風格 A 的串接（method chaining）寫法：\nvar now = timeProvider.GetUtcNow();\n\nvar finalOrder = draft\n    .Submit(now)\n    .Pay(now.AddHours(2))\n    .Ship(now.AddDays(1));\n接著是風格 B 的逐步轉換寫法：\nvar now = timeProvider.GetUtcNow();\nvar submitted = OrderWorkflow.Submit(draft, now);\nvar paid = OrderWorkflow.Pay(submitted, now.AddHours(2));\nvar shipped = OrderWorkflow.Ship(paid, now.AddDays(1));\n這兩種寫法都是把狀態轉換組成管線，讓整個業務流程的邏輯一目了然。你不需要在腦子裡追蹤「哪個物件在哪個步驟被改了什麼」，而是清楚地看到一個狀態如何流動轉換成下一個狀態。\n這裡先展示每一步成功時的資料流。如果轉換回傳的是上一節的 OrderTransitionResult，下一步就不能直接接收它，而必須先判斷是否成功，再把成功結果裡的 Order 傳下去。更通用的 Result 型別通常會提供 Bind 或 Then 之類的組合操作，讓失敗直接中止後續步驟；無論採用哪種 API，關鍵都是讓上一個步驟的成功輸出成為下一個步驟的輸入。\n下圖描繪了資料轉換的管線，圖中的每個方塊代表一個不同的 Order 物件。每一步都接收目前的訂單版本，產生下一個版本；原本的 draft 不會被修改。\n+-----------------------+\n| Order (Draft)         |\n+-----------------------+\n            |\n            | Submit(...)\n            | returns a new Order\n            v\n+-----------------------+\n| Order (Submitted)     |\n+-----------------------+\n            |\n            | Pay(...)\n            | returns a new Order\n            v\n+-----------------------+\n| Order (Paid)          |\n+-----------------------+\n            |\n            | Ship(...)\n            | returns a new Order\n            v\n+-----------------------+\n| Order (Shipped)       |\n+-----------------------+\n初次改用這種風格時，最常見的錯誤是忘記接住回傳的新版本：\n// 錯誤示範：Submit 回傳的新版本被丟掉了\ndraft.Submit(timeProvider.GetUtcNow());\n\n// draft 仍然是原本的草稿訂單，因為它沒有被修改\n不可變轉換方法不會修改原本的物件，而是透過回傳值提供新的狀態，因此呼叫方必須把回傳值視為新的狀態來源。你可以把它想成一條資料流：每一步都接收上一個狀態，產生下一個狀態；如果中間某一步的輸出被丟掉，流程就中斷了。\n\n3.5.1　在測試中驗證每個步驟\n轉換管線的另一個好處是，每一步都可以獨立驗證：\n[Fact]\npublic void Complete_Order_Lifecycle_Should_Produce_Correct_States()\n{\n    var fixedTime = new DateTimeOffset(\n        2026, 1, 1, 10, 0, 0, TimeSpan.Zero);\n\n    // 建立草稿\n    var draft = Order.CreateDraft(\n        id: \"ORD-001\",\n        customerId: \"CUST-42\",\n        lines: ImmutableArray.Create(\n            new OrderLine(\"P001\", \"書\", 2, 350m)),\n        createdAt: fixedTime);\n\n    Assert.Equal(OrderStatus.Draft, draft.Status);\n    Assert.Equal(700m, draft.Total);\n\n    // 提交\n    var submitted = draft.Submit(fixedTime.AddMinutes(5));\n    Assert.Equal(OrderStatus.Submitted, submitted.Status);\n    Assert.Equal(fixedTime.AddMinutes(5), submitted.SubmittedAt);\n\n    // 確認 draft 不受影響\n    Assert.Equal(OrderStatus.Draft, draft.Status);\n    Assert.Null(draft.SubmittedAt);\n\n    // 付款\n    var paid = submitted.Pay(fixedTime.AddHours(1));\n    Assert.Equal(OrderStatus.Paid, paid.Status);\n    Assert.Equal(fixedTime.AddHours(1), paid.PaidAt);\n\n    // 出貨\n    var shipped = paid.Ship(fixedTime.AddDays(1));\n    Assert.Equal(OrderStatus.Shipped, shipped.Status);\n}\n這個測試清晰地記錄了訂單生命週期的每一個狀態，而且每個斷言都直接對應一個業務規則。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -416,7 +450,8 @@
     "section": "3.6　讓轉換函式保持純粹",
     "text": "3.6　讓轉換函式保持純粹\n不管是風格 A 還是風格 B，最好讓轉換方法保持「純粹（pure）」：\n\n給定相同的輸入，永遠回傳相同的輸出\n沒有副作用（不修改傳入物件或其他外部狀態，也不呼叫資料庫或外部服務）\n\n// 純粹的轉換：只依賴輸入，回傳確定的輸出\npublic static Order Pay(Order order, DateTimeOffset paidAt)\n{\n    return order with\n    {\n        Status = OrderStatus.Paid,\n        PaidAt = paidAt\n    };\n}\n\n// 不純粹（impure）：直接讀取系統時間\npublic static Order Pay(Order order)\n{\n    return order with\n    {\n        Status = OrderStatus.Paid,\n        // 不好：把系統的時間來源寫死在轉換函式裡\n        PaidAt = TimeProvider.System.GetUtcNow()\n    };\n}\n純粹的函式極易測試：你只需要提供輸入，驗證輸出，不需要 mock 任何東西。\n這種分工常被稱為 functional core, imperative shell：核心邏輯盡量保持「資料進、資料出」的純粹轉換；至於像是讀取時間、存取資料庫、呼叫外部 API、寫入檔案等不穩定的操作，則放在外層負責協調。名字聽起來像架構模式，但實務判斷很簡單：如果一段邏輯可以用普通輸入資料測試，就不要讓它被資料庫、系統時間、或網路呼叫綁住。\n如果一個操作確實需要外部依賴，例如讀取當前時間或查詢資料庫，就在 application layer 使用依賴，再把取得的普通資料傳給轉換函式。以時間為例，.NET 內建的 TimeProvider 提供可替換的時間來源；GetUtcNow() 回傳 DateTimeOffset，測試時可以注入受控制的 TimeProvider，不必把系統時間寫死在 domain model 裡：\npublic sealed class OrderApplicationService(\n    IOrderRepository orderRepository,\n    TimeProvider timeProvider)\n{\n    public async Task&lt;Order&gt; PayOrderAsync(string orderId)\n    {\n        var order = await orderRepository.GetAsync(orderId);\n\n        // 在外層讀取時間，再把普通的值傳給純粹轉換。\n        var paidAt = timeProvider.GetUtcNow();\n        var paid = OrderWorkflow.Pay(order, paidAt);\n\n        await orderRepository.SaveAsync(paid);\n        return paid;\n    }\n}\n轉換函式本身仍然是純粹的，外部依賴由組合層處理。TimeProvider.System 是正式環境使用的系統時間來源；測試則可以注入可控制的實作。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -426,7 +461,8 @@
     "section": "3.7　一個完整的範例",
     "text": "3.7　一個完整的範例\n把本章所有概念整合，可以得到一個完整的訂單處理流程。\n為了讓重點更清楚，下面先把範例拆成兩段：第一段看 domain model 如何用不可變資料表達狀態轉換；第二段看 application layer 如何協調資料庫、時鐘這類外部依賴。\n完整可編譯版本請參考本節後方的原始碼連結。\n第一段是 Order record。它保存訂單狀態，也把狀態轉換規則放在 record 內部：\npublic sealed record Order\n{\n    public string Id { get; private init; }\n    public string CustomerId { get; private init; }\n    public OrderStatus Status { get; private init; }\n    public ImmutableArray&lt;OrderLine&gt; Lines { get; private init; }\n    public decimal Total { get; private init; }\n    public DateTimeOffset CreatedAt { get; private init; }\n    public DateTimeOffset? SubmittedAt { get; private init; }\n    public DateTimeOffset? PaidAt { get; private init; }\n    public DateTimeOffset? ShippedAt { get; private init; }\n    public string? CancelReason { get; private init; }\n\n    private Order(\n        string id,\n        string customerId,\n        ImmutableArray&lt;OrderLine&gt; lines,\n        DateTimeOffset createdAt)\n    {\n        Id = id;\n        CustomerId = customerId;\n        Status = OrderStatus.Draft;\n        Lines = lines;\n        Total = lines.Sum(line =&gt; line.Amount);\n        CreatedAt = createdAt;\n    }\n\n    public static Order CreateDraft(\n        string id,\n        string customerId,\n        ImmutableArray&lt;OrderLine&gt; lines,\n        DateTimeOffset createdAt)\n    {\n        if (lines.IsDefault)\n        {\n            throw new ArgumentException(\n                \"訂單項目尚未初始化\",\n                nameof(lines));\n        }\n\n        return new Order(id, customerId, lines, createdAt);\n    }\n\n    public Order Submit(DateTimeOffset now)\n    {\n        if (Status != OrderStatus.Draft)\n            throw new InvalidOperationException(\"只有草稿可以提交\");\n        if (Lines.IsEmpty)\n            throw new InvalidOperationException(\n                \"訂單必須至少有一個項目才能提交\");\n\n        return this with\n        {\n            Status = OrderStatus.Submitted,\n            SubmittedAt = now\n        };\n    }\n\n    public Order Pay(DateTimeOffset now)\n    {\n        if (Status != OrderStatus.Submitted)\n            throw new InvalidOperationException(\n                \"只有已提交的訂單可以付款\");\n\n        return this with\n        {\n            Status = OrderStatus.Paid,\n            PaidAt = now\n        };\n    }\n\n    public Order Ship(DateTimeOffset now)\n    {\n        if (Status != OrderStatus.Paid)\n            throw new InvalidOperationException(\n                \"只有已付款的訂單可以出貨\");\n\n        return this with\n        {\n            Status = OrderStatus.Shipped,\n            ShippedAt = now\n        };\n    }\n\n    public Order Cancel(string reason)\n    {\n        if (Status is not (\n            OrderStatus.Draft or\n            OrderStatus.Submitted or\n            OrderStatus.Paid))\n            throw new InvalidOperationException(\n                \"只有草稿、已提交、或已付款的訂單可以取消\");\n        if (string.IsNullOrWhiteSpace(reason))\n            throw new ArgumentException(\n                \"取消訂單必須提供原因\",\n                nameof(reason));\n\n        return this with\n        {\n            Status = OrderStatus.Cancelled,\n            CancelReason = reason\n        };\n    }\n}\n這段程式碼展示的是風格 A：資料和確保自身狀態合法的行為放在一起。建構式和 init 存取子都是 private，所以呼叫方只能透過 CreateDraft、Submit、Pay 等明確的 API 建立狀態。呼叫 Pay 時，它不會修改原本的 Order，而是回傳一個狀態為 Paid 的新版本。\n這裡允許 Draft、Submitted、和 Paid 訂單取消，但不允許 Shipped 或 Cancelled 訂單再次取消。Paid 訂單背後還需要自動退款：application service 可以先呼叫純粹的 Cancel，驗證規則並產生尚未儲存的候選版本；如果原訂單是 Paid，接著呼叫付款服務退款，成功後才儲存候選版本。退款如果失敗，就不儲存 Cancelled 版本，資料庫裡的訂單仍維持 Paid。對外應以這個 application service 流程作為取消入口，而不是讓呼叫方自行略過退款。這種外部協調不放進 Order，才能讓 domain transition 保持純粹。\n第二段是 application layer。它不負責判斷訂單能不能付款，只負責把外部依賴接起來：\npublic sealed class OrderApplicationService\n{\n    private readonly IOrderRepository _repository;\n    private readonly TimeProvider _timeProvider;\n\n    public OrderApplicationService(\n        IOrderRepository repository,\n        TimeProvider timeProvider)\n    {\n        _repository = repository;\n        _timeProvider = timeProvider;\n    }\n\n    public async Task&lt;Order&gt; PayAsync(string orderId)\n    {\n        // 從資料庫讀取當前狀態\n        var order = await _repository.GetAsync(orderId);\n\n        // 純粹的狀態轉換（不涉及外部依賴）\n        var paid = order.Pay(_timeProvider.GetUtcNow());\n\n        // 儲存新狀態\n        await _repository.SaveAsync(paid);\n\n        return paid;\n    }\n}\n\n原始碼： - DemoOrderTransformationStyleA - DemoOrderTransformationStyleB - DemoOrderTransformationPipeline\n\n這個設計的分層很清楚：\n\nOrder record 負責資料的定義和狀態轉換規則。\nOrderApplicationService 負責協調外部依賴（資料庫、時鐘）。\n轉換邏輯本身（order.Pay(now)）是純粹的，可以獨立測試。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -436,7 +472,8 @@
     "section": "3.8　常見問題",
     "text": "3.8　常見問題\n\n「每次都建立新物件，效能不會很差嗎？」\n對於大多數業務邏輯，這個開銷可以忽略不計。現代 .NET 的 GC 對短命的小物件非常有效率，通常不需要特別優化。此外，record 的 with 執行的是淺層複製，不會深度複製整個物件圖；像 ImmutableArray&lt;T&gt; 這類本身不可變的成員，可以由新舊版本安全共用。因此，建立新版本通常只需要配置新的外層物件。\n真正需要注意的是高頻、低延遲的熱路徑（hot path），例如每秒處理數十萬次操作的場景。在這些場景，你應該先測量，找到真正的瓶頸，再決定是否需要優化，而不是預先優化所有程式碼。\n我們在第 5 章會討論哪些場景確實不適合不可變設計。\n\n\n「把所有方法都搬到 OrderWorkflow，這樣好嗎？」\n不一定。把行為放在外部是風格 B 的做法，它有它的優缺點。對於業務規則豐富的 domain model，風格 A（行為在 record 內）通常更好，因為比較容易確保狀態合法。\n不要為了「資料和行為分離」這個概念而分離——分離應該是因為特定場景有實際的好處，而不是因為某種設計哲學。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
     ]
   },
   {
@@ -446,7 +483,73 @@
     "section": "3.9　本章回顧",
     "text": "3.9　本章回顧\n這章討論了「用資料轉換取代原地修改」的核心設計模式。\n\n資料轉換：方法接收舊狀態，回傳新狀態，不修改輸入。這是不可變設計的核心操作。\n風格 A（行為在 record 內）和風格 B（行為在外部函式/服務）各有適用場景。不確定時，從風格 A 開始。\n業務規則驗證：在轉換方法裡檢查前置條件，可以拋出例外或回傳結果型別。\n純粹函式：讓轉換方法不依賴外部狀態，外部依賴由呼叫方在應用程式層注入。\n轉換管線：多個轉換步驟可以自然串接，讓業務流程一目了然。\n\n本章為了聚焦資料轉換，仍以單一 Order、OrderStatus enum、和多個 nullable 欄位表達整個生命週期。轉換方法可以在執行期阻止不合法的操作，但風格 B 的公開 positional record 仍不能完整表達「某個狀態必須擁有哪些資料」。\n接下來的第 4 章會離開單純的 domain model，討論不可變資料最容易落地的 DTO、command、event 與設定物件。如果 enum、旗標與 nullable 欄位已經讓狀態難以管理，則可以在讀完主線後，再閱讀第 6 章的進階狀態建模。",
     "crumbs": [
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章</span>"
+      "Part 1: 基礎觀念與資料建模",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>第 3 章：用資料轉換取代原地修改</span>"
+    ]
+  },
+  {
+    "objectID": "ch04/ch04.html",
+    "href": "ch04/ch04.html",
+    "title": "第 4 章　API、DTO 與系統邊界的資料模型",
+    "section": "",
+    "text": "本章收錄於《C# 不可變資料設計》完整版，目前不提供免費全文閱讀。\n本章討論如何在 API、DTO 與系統邊界中應用不可變資料設計，包括 request/response DTO、序列化、validation 分層，以及 DTO 與 domain model 的分離。\n購買完整電子書： 購書資訊",
+    "crumbs": [
+      "Part 2: 實務應用與設計取捨",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>第 4 章：API、DTO 與系統邊界的資料模型</span>"
+    ]
+  },
+  {
+    "objectID": "ch05/ch05.html",
+    "href": "ch05/ch05.html",
+    "title": "第 5 章　不可變設計的取捨與導入",
+    "section": "",
+    "text": "本章收錄於《C# 不可變資料設計》完整版，目前不提供免費全文閱讀。\n本章整理不可變設計的適用情境、成本與導入方式，包含可追蹤性、測試、並行讀取、ORM／UI 整合，以及如何從低成本、高收益的位置漸進採用。\n購買完整電子書： 購書資訊",
+    "crumbs": [
+      "Part 2: 實務應用與設計取捨",
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>第 5 章：不可變設計的取捨與導入</span>"
+    ]
+  },
+  {
+    "objectID": "ch06/ch06.html",
+    "href": "ch06/ch06.html",
+    "title": "第 6 章　進階選讀：用型別排除非法狀態",
+    "section": "",
+    "text": "本章收錄於《C# 不可變資料設計》完整版，目前不提供免費全文閱讀。\n本章進一步討論如何用型別系統降低非法狀態出現的機會，包括 C# 15 union、closed hierarchy、精確的狀態轉換簽名，以及 exhaustive pattern matching。\n購買完整電子書： 購書資訊",
+    "crumbs": [
+      "Part 3: 進階選讀",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>第 6 章：進階選讀：用型別排除非法狀態</span>"
+    ]
+  },
+  {
+    "objectID": "afterword.html",
+    "href": "afterword.html",
+    "title": "結語：不可變資料設計是一種取捨",
+    "section": "",
+    "text": "結語收錄於《C# 不可變資料設計》完整版，目前不提供免費全文閱讀。\n本節回顧全書的核心觀點：不可變資料設計不是絕對規則，而是在可預測性、封裝、效能與維護成本之間做出的設計取捨。\n購買完整電子書： 購書資訊",
+    "crumbs": [
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>結語：不可變資料設計是一種取捨</span>"
+    ]
+  },
+  {
+    "objectID": "appendix-a.html",
+    "href": "appendix-a.html",
+    "title": "附錄 A — 附錄 A",
+    "section": "",
+    "text": "附錄 A 收錄於《C# 不可變資料設計》完整版，目前不提供免費全文閱讀。\n本附錄以實際程式碼與重構案例補充正文，展示不可變資料設計在較完整程式中的應用方式。\n購買完整電子書： 購書資訊",
+    "crumbs": [
+      "附錄",
+      "<span class='chapter-number'>A</span>  <span class='chapter-title'>附錄 A</span>"
+    ]
+  },
+  {
+    "objectID": "glossary.html",
+    "href": "glossary.html",
+    "title": "附錄 B — 名詞表",
+    "section": "",
+    "text": "名詞表收錄於《C# 不可變資料設計》完整版，目前不提供免費全文閱讀。\n完整版提供本書使用的重要 C#、.NET、資料建模與不可變設計術語整理，方便閱讀時快速查找。\n購買完整電子書： 購書資訊",
+    "crumbs": [
+      "附錄",
+      "<span class='chapter-number'>B</span>  <span class='chapter-title'>名詞表</span>"
     ]
   }
 ]
