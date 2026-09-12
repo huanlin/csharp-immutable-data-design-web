@@ -148,8 +148,7 @@ blockquote > :first-child,
 }
 
 div.code-copy-outer-scaffold {
-  padding-top: 1.5em;
-  padding-bottom: 1.5em;
+  padding-bottom: 0.1em;
 }
 
 pre.sourceCode {
