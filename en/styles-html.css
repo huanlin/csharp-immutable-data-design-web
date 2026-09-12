@@ -69,6 +69,7 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
    styles.css centers all images inside paragraphs, so the HTML site needs a
    more specific override for the generated book cover. */
 .quarto-cover-image {
+  max-width: 25%;
   border: 1px solid #dee2e6;
   border-radius: 2px;
 }
