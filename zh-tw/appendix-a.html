@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>附錄 A — 附錄 A – C# 不可變資料設計</title>
+<title>附錄 A — 附錄 A 開源點字專案的不可變設計重構實戰 – C# 不可變資料設計</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +25,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -237,15 +272,29 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目錄</h2>
+   
+  <ul>
+  <li><a href="#a.1-專案背景" id="toc-a.1-專案背景" class="nav-link active" data-scroll-target="#a.1-專案背景">A.1　專案背景</a></li>
+  <li><a href="#a.2-總體結果與-benchmark-方法" id="toc-a.2-總體結果與-benchmark-方法" class="nav-link" data-scroll-target="#a.2-總體結果與-benchmark-方法">A.2　總體結果與 Benchmark 方法</a></li>
+  <li><a href="#a.3-從-datatable-到-frozendictionary" id="toc-a.3-從-datatable-到-frozendictionary" class="nav-link" data-scroll-target="#a.3-從-datatable-到-frozendictionary">A.3　從 DataTable 到 FrozenDictionary</a></li>
+  <li><a href="#a.4-為什麼不能全部改成-record" id="toc-a.4-為什麼不能全部改成-record" class="nav-link" data-scroll-target="#a.4-為什麼不能全部改成-record">A.4　為什麼不能全部改成 record</a></li>
+  <li><a href="#a.5-公開-api-先改成-read-only-facade" id="toc-a.5-公開-api-先改成-read-only-facade" class="nav-link" data-scroll-target="#a.5-公開-api-先改成-read-only-facade">A.5　公開 API 先改成 read-only facade</a></li>
+  <li><a href="#a.6-builder-boundary建構期可變完成後可讀" id="toc-a.6-builder-boundary建構期可變完成後可讀" class="nav-link" data-scroll-target="#a.6-builder-boundary建構期可變完成後可讀">A.6　Builder Boundary：建構期可變，完成後可讀</a></li>
+  <li><a href="#a.7-explicit-identity不要把物件參考當成模型識別" id="toc-a.7-explicit-identity不要把物件參考當成模型識別" class="nav-link" data-scroll-target="#a.7-explicit-identity不要把物件參考當成模型識別">A.7　Explicit Identity：不要把物件參考當成模型識別</a></li>
+  <li><a href="#a.8-序列化與相容層" id="toc-a.8-序列化與相容層" class="nav-link" data-scroll-target="#a.8-序列化與相容層">A.8　序列化與相容層</a></li>
+  <li><a href="#a.9-這次重構真正教會我們的事" id="toc-a.9-這次重構真正教會我們的事" class="nav-link" data-scroll-target="#a.9-這次重構真正教會我們的事">A.9　這次重構真正教會我們的事</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix-a.html">附錄</a></li><li class="breadcrumb-item"><a href="./appendix-a.html"><span class="chapter-title">附錄 A</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">附錄 A — 附錄 A</h1>
+<h1 class="title">附錄 A — 附錄 A　開源點字專案的不可變設計重構實戰</h1>
 </div>
 
 
@@ -268,12 +317,446 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>附錄 A 收錄於《C# 不可變資料設計》完整版，目前不提供免費全文閱讀。</p>
-<p>本附錄以實際程式碼與重構案例補充正文，展示不可變資料設計在較完整程式中的應用方式。</p>
-<p>購買完整電子書： <a href="https://huanlin.cc/" class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">購書資訊</a></p>
-<!-- 正式上架後，將上方連結替換為本書實際商品頁；若有多個平台，可在此並列 Google Play 圖書、Readmoo、Kobo 等連結。 -->
+<p>本附錄改編自開源點字轉換專案 <code>BrailleToolkit</code> 的重構歷程。它不是要示範「把所有 class 改成 record」，而是示範一個更常見、更棘手的情境：既有系統已經有可變模型、UI 編輯器、序列化格式、Undo/Redo、效能熱路徑，這時要怎麼把不可變資料設計安全地導入進去。</p>
+<p>這個案例的核心結論是：</p>
+<blockquote class="blockquote">
+<p>不可變設計的價值，不是消滅所有 mutation，而是迫使你說清楚資料的生命週期：哪些資料載入後只查詢，哪些資料仍在建構中，哪些資料必須保留相容性，哪些地方需要明確的 identity。</p>
+</blockquote>
+<section id="a.1-專案背景" class="level2">
+<h2 class="anchored" data-anchor-id="a.1-專案背景">A.1　專案背景</h2>
+<p><code>BrailleToolkit</code> 的工作是將一般文字轉換為點字。中文字與全形標點符號使用台灣點字規則，英文與半形標點符號使用 UEB。轉換流程中有大量查表、字詞建構、後處理規則與文件排版，因此很適合觀察不可變資料設計在真實程式中的取捨。</p>
+<p>重構前，系統有幾個典型壓力：</p>
+<ul>
+<li>對照表使用 <code>DataTable</code> 載入 XML，轉換熱路徑中大量呼叫 <code>Select(...)</code>。</li>
+<li><code>BrailleWord</code>、<code>BrailleLine</code>、<code>BrailleDocument</code> 對外暴露可變集合，呼叫端可以直接插入、刪除或替換內容。</li>
+<li>轉換規則、formatter、editor UI 與 Undo/Redo 都假設同一批物件會被持續原地修改。</li>
+<li>編輯器狀態依賴 CLR 物件參考來追蹤特定 word 或 line。</li>
+<li>JSON、YAML 與 clipboard 格式都需要維持相容。</li>
+</ul>
+<p>如果一開始就把核心型別全面改成不可變 record，會同時打破太多流程。這次重構採取的是漸進策略：先找出資料生命週期最清楚、效益最大的地方，再逐步收斂 mutation surface。</p>
+</section>
+<section id="a.2-總體結果與-benchmark-方法" class="level2">
+<h2 class="anchored" data-anchor-id="a.2-總體結果與-benchmark-方法">A.2　總體結果與 Benchmark 方法</h2>
+<p>效能相關重構不能只靠直覺。這次比較使用 clean worktree A/B benchmark：baseline 與 candidate 分別在乾淨 worktree 中 restore、build、執行 BenchmarkDotNet。baseline 當時尚未有 benchmark 專案，因此只補入相同 benchmark harness；harness 不修改 baseline production code。</p>
+<p>來源：<code>text-to-braille/docs-dev/refactoring/immutable/benchmark-result/2026-04-06-branch-start-vs-phase4d-clean-worktree-ab.md</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode powershell code-with-copy"><code class="sourceCode powershell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dotnet run <span class="op">--</span>project src<span class="op">/</span>EasyBrailleEditApp<span class="op">/</span>BrailleToolkit<span class="op">.</span><span class="fu">Benchmarks</span><span class="op">/</span>BrailleToolkit<span class="op">.</span><span class="fu">Benchmarks</span><span class="op">.</span><span class="fu">csproj</span> <span class="op">-</span>c Release <span class="op">--</span> <span class="op">--</span>filter <span class="op">*</span>BrailleConversionBenchmarks<span class="op">*</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>整個 branch 從起點到 Phase 4d 的累積結果如下：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>案例</th>
+<th style="text-align: right;">Baseline Mean</th>
+<th style="text-align: right;">Candidate Mean</th>
+<th style="text-align: right;">Mean 改善</th>
+<th style="text-align: right;">Baseline Alloc</th>
+<th style="text-align: right;">Candidate Alloc</th>
+<th style="text-align: right;">Alloc 改善</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>中文單行轉換</td>
+<td style="text-align: right;">148.40 us</td>
+<td style="text-align: right;">61.30 us</td>
+<td style="text-align: right;">-58.69%</td>
+<td style="text-align: right;">72.84 KB</td>
+<td style="text-align: right;">6.03 KB</td>
+<td style="text-align: right;">-91.72%</td>
+</tr>
+<tr class="even">
+<td>英文單行轉換</td>
+<td style="text-align: right;">680.40 us</td>
+<td style="text-align: right;">484.69 us</td>
+<td style="text-align: right;">-28.76%</td>
+<td style="text-align: right;">169.33 KB</td>
+<td style="text-align: right;">18.25 KB</td>
+<td style="text-align: right;">-89.22%</td>
+</tr>
+<tr class="odd">
+<td>中英混合單行轉換</td>
+<td style="text-align: right;">828.70 us</td>
+<td style="text-align: right;">374.29 us</td>
+<td style="text-align: right;">-54.83%</td>
+<td style="text-align: right;">374.43 KB</td>
+<td style="text-align: right;">30.17 KB</td>
+<td style="text-align: right;">-91.94%</td>
+</tr>
+<tr class="even">
+<td>中文多行轉換</td>
+<td style="text-align: right;">8,614.60 us</td>
+<td style="text-align: right;">3,053.40 us</td>
+<td style="text-align: right;">-64.56%</td>
+<td style="text-align: right;">4,301.49 KB</td>
+<td style="text-align: right;">339.05 KB</td>
+<td style="text-align: right;">-92.12%</td>
+</tr>
+<tr class="odd">
+<td>英文多行轉換</td>
+<td style="text-align: right;">4,782.20 us</td>
+<td style="text-align: right;">3,443.42 us</td>
+<td style="text-align: right;">-28.00%</td>
+<td style="text-align: right;">1,041.13 KB</td>
+<td style="text-align: right;">115.28 KB</td>
+<td style="text-align: right;">-88.93%</td>
+</tr>
+<tr class="even">
+<td>中英混合多行轉換</td>
+<td style="text-align: right;">3,580.20 us</td>
+<td style="text-align: right;">1,830.19 us</td>
+<td style="text-align: right;">-48.88%</td>
+<td style="text-align: right;">1,346.76 KB</td>
+<td style="text-align: right;">116.83 KB</td>
+<td style="text-align: right;">-91.33%</td>
+</tr>
+<tr class="odd">
+<td>長中文字串轉換</td>
+<td style="text-align: right;">8,368.70 us</td>
+<td style="text-align: right;">2,916.53 us</td>
+<td style="text-align: right;">-65.15%</td>
+<td style="text-align: right;">4,303.15 KB</td>
+<td style="text-align: right;">337.60 KB</td>
+<td style="text-align: right;">-92.15%</td>
+</tr>
+</tbody>
+</table>
+<p>這組數字看起來很漂亮，但解讀時要小心：它是整個 branch 的累積效果，不代表每個 immutable 相關改動都會變快。實際上，某些單一階段曾經讓 throughput 變差，必須靠後續資料流調整與 benchmark 回饋修正。</p>
+<p>比較精準的結論是：</p>
+<ul>
+<li><code>DataTable</code> 到 immutable entry + frozen index，是記憶體配置與中文路徑改善的主因。</li>
+<li>builder / view / result 的分層，讓後續 model 重構能持續推進，且沒有留下 branch-level regression。</li>
+<li><code>readonly record struct</code>、builder、<code>with</code>、read-only facade 都不是效能保證；它們只是設計工具，效果必須量測。</li>
+</ul>
+</section>
+<section id="a.3-從-datatable-到-frozendictionary" class="level2">
+<h2 class="anchored" data-anchor-id="a.3-從-datatable-到-frozendictionary">A.3　從 DataTable 到 FrozenDictionary</h2>
+<p>第一個重構切入點，是 XML 點字表查詢。</p>
+<p>舊架構使用 <code>DataTable</code> 儲存 XML 載入後的資料，查詢時常見形狀如下：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">string</span> filter <span class="op">=</span> <span class="st">"type='Phonetic' and text='"</span> <span class="op">+</span> text <span class="op">+</span> <span class="st">"'"</span><span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>DataRow<span class="op">[]</span> rows <span class="op">=</span> m_Table<span class="op">.</span><span class="fu">Select</span><span class="op">(</span>filter<span class="op">);</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="op">(</span>rows<span class="op">.</span><span class="fu">Length</span> <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> rows<span class="op">[</span><span class="dv">0</span><span class="op">][</span><span class="st">"code"</span><span class="op">].</span><span class="fu">ToString</span><span class="op">();</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">return</span> <span class="kw">null</span><span class="op">;</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這段程式有幾個問題。<code>DataTable</code> 是很通用、也很重的容器；<code>Select(...)</code> 每次都要解析 filter 字串；查詢條件還要處理 escaping。對大量查表的轉換流程來說，這些成本會反覆出現在熱路徑。</p>
+<p>但點字表有一個很關鍵的生命週期特徵：</p>
+<pre class="text"><code>載入 XML
+建立查詢資料
+之後大量查詢，不再修改</code></pre>
+<p>這正是 immutable entry 與 frozen lookup 適合的位置。</p>
+<p>現行程式碼新增了 <code>BrailleTableEntry</code>：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">readonly</span> record <span class="kw">struct</span> <span class="fu">BrailleTableEntry</span><span class="op">(</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Text<span class="op">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Dots<span class="op">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Code<span class="op">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span><span class="op">?</span> Type <span class="op">=</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span><span class="op">?</span> Dots2 <span class="op">=</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span><span class="op">?</span> Code2 <span class="op">=</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> Joined <span class="op">=</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">bool</span> Mono <span class="op">=</span> <span class="kw">false</span><span class="op">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span><span class="op">?</span> Rule <span class="op">=</span> <span class="kw">null</span><span class="op">,</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span><span class="op">?</span> Description <span class="op">=</span> <span class="kw">null</span><span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>來源：<code>text-to-braille/src/BrailleToolkit/Data/BrailleTableEntry.cs</code></p>
+<p><code>XmlBrailleTable</code> 則改用 <code>XDocument</code> 解析 XML，載入時直接轉成 <code>BrailleTableEntry[]</code>，再建立三組索引：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> FrozenDictionary<span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> BrailleTableEntry<span class="op">&gt;</span> m_EntriesByText<span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> FrozenDictionary<span class="op">&lt;</span>BrailleTableLookupKey<span class="op">,</span> BrailleTableEntry<span class="op">&gt;</span> m_EntriesByTypeAndText<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> FrozenDictionary<span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> BrailleTableEntry<span class="op">[]&gt;</span> m_EntriesByType<span class="op">;</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>來源：<code>text-to-braille/src/BrailleToolkit/Data/XmlBrailleTable.cs</code></p>
+<p>這裡其實還有一個值得注意的「建構期可變、完成後 freeze」細節。現行 production code 在 <code>BuildIndexes</code> 中，先使用可變 <code>Dictionary</code> 累積索引：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> entriesByText <span class="op">=</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> Dictionary<span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> BrailleTableEntry<span class="op">&gt;(</span>StringComparer<span class="op">.</span><span class="fu">Ordinal</span><span class="op">);</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> entriesByType <span class="op">=</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> Dictionary<span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> List<span class="op">&lt;</span>BrailleTableEntry<span class="op">&gt;&gt;(</span>StringComparer<span class="op">.</span><span class="fu">Ordinal</span><span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>迴圈完成後，才轉成 <code>FrozenDictionary</code>。這種做法並不違反不可變設計：可變集合只存在於受控的建構階段，離開 <code>BuildIndexes</code> 之前就轉成唯讀查詢結構。</p>
+<p>如果專案升級到 C# 15，這段 builder 初始化也可以使用 <strong>collection expression arguments</strong>。<code>with(...)</code> 必須放在 collection expression 的第一個元素，並把 comparer 等參數傳給目標集合的建構式。例如：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Dictionary<span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> BrailleTableEntry<span class="op">&gt;</span> entriesByText <span class="op">=</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="op">[</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">with</span><span class="op">(</span>StringComparer<span class="op">.</span><span class="fu">Ordinal</span><span class="op">)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="op">];</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>Dictionary<span class="op">&lt;</span><span class="dt">string</span><span class="op">,</span> List<span class="op">&lt;</span>BrailleTableEntry<span class="op">&gt;&gt;</span> entriesByType <span class="op">=</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">[</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">with</span><span class="op">(</span>StringComparer<span class="op">.</span><span class="fu">Ordinal</span><span class="op">)</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="op">];</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>接下來仍然可以在迴圈中呼叫 <code>TryAdd</code>、<code>Add</code> 等方法，最後再 freeze：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>m_EntriesByText <span class="op">=</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    entriesByText<span class="op">.</span><span class="fu">ToFrozenDictionary</span><span class="op">(</span>StringComparer<span class="op">.</span><span class="fu">Ordinal</span><span class="op">);</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>m_EntriesByType <span class="op">=</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    frozenEntriesByType<span class="op">.</span><span class="fu">ToFrozenDictionary</span><span class="op">(</span>StringComparer<span class="op">.</span><span class="fu">Ordinal</span><span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這項 C# 15 語法沒有改變資料生命週期，也不會讓 <code>Dictionary</code> 自動變成 immutable。它只是讓「這個建構期集合需要使用哪個 comparer」可以直接寫在 collection expression 裡。真正重要的設計仍然是：<strong>mutation 被限制在初始化階段，而對外保存的是完成後的 frozen lookup。</strong></p>
+<blockquote class="blockquote">
+<p><strong>C# 版本說明：</strong> 上面的 collection expression arguments 是 C# 15 preview 語法；本附錄保留原始 production code 的歷史寫法，這裡只示範升級到 C# 15 後可以採用的等價初始化方式。</p>
+</blockquote>
+<p>查詢變成 domain-specific lookup：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>BrailleTableEntry<span class="op">?</span> entry <span class="op">=</span> <span class="fu">FindEntry</span><span class="op">(</span>text<span class="op">,</span> <span class="st">"Phonetic"</span><span class="op">);</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">return</span> entry<span class="op">?.</span><span class="fu">Code</span><span class="op">;</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Phase 3 單獨的 clean worktree A/B 顯示，這個階段對中文與混合內容改善特別明顯，記憶體配置也大幅下降。</p>
+<p>來源：<code>text-to-braille/docs-dev/refactoring/immutable/benchmark-result/2026-04-05-phase3-clean-worktree-ab.md</code></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>案例</th>
+<th style="text-align: right;">Before</th>
+<th style="text-align: right;">After</th>
+<th style="text-align: right;">Mean 改善</th>
+<th style="text-align: right;">記憶體配置改善</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>中文單行</td>
+<td style="text-align: right;">166.00 us</td>
+<td style="text-align: right;">68.70 us</td>
+<td style="text-align: right;">-58.61%</td>
+<td style="text-align: right;">-91.75%</td>
+</tr>
+<tr class="even">
+<td>中英混合單行</td>
+<td style="text-align: right;">956.00 us</td>
+<td style="text-align: right;">400.45 us</td>
+<td style="text-align: right;">-58.11%</td>
+<td style="text-align: right;">-92.01%</td>
+</tr>
+<tr class="odd">
+<td>中文多行</td>
+<td style="text-align: right;">8,901.10 us</td>
+<td style="text-align: right;">3,420.40 us</td>
+<td style="text-align: right;">-61.57%</td>
+<td style="text-align: right;">-92.10%</td>
+</tr>
+<tr class="even">
+<td>長中文字串</td>
+<td style="text-align: right;">6,332.10 us</td>
+<td style="text-align: right;">3,530.79 us</td>
+<td style="text-align: right;">-44.24%</td>
+<td style="text-align: right;">-92.07%</td>
+</tr>
+<tr class="odd">
+<td>英文單行</td>
+<td style="text-align: right;">526.20 us</td>
+<td style="text-align: right;">514.98 us</td>
+<td style="text-align: right;">-2.13%</td>
+<td style="text-align: right;">-89.65%</td>
+</tr>
+</tbody>
+</table>
+<p>這不是「不可變一定比較快」。真正發生的是：資料生命週期變清楚後，我們發現 <code>DataTable</code> 不適合這條熱路徑；<code>BrailleTableEntry[]</code> 加 frozen index 才符合「建構一次、查詢很多次」的使用模式。</p>
+</section>
+<section id="a.4-為什麼不能全部改成-record" class="level2">
+<h2 class="anchored" data-anchor-id="a.4-為什麼不能全部改成-record">A.4　為什麼不能全部改成 record</h2>
+<p><code>BrailleCell</code> 很適合改成 value object。它只包一個 byte，語意上代表一個點字方，因此可以改成 <code>readonly record struct</code>。</p>
+<p>但 <code>BrailleWord</code> 與 <code>BrailleLine</code> 不一樣。它們不只是資料容器，也牽涉到既有 editor workflow：</p>
+<ul>
+<li>formatter 會切行、縮排、插入或移除 word。</li>
+<li>braille rules 會替換數字符號、補英文大寫符號、處理分數與表格線。</li>
+<li>editor grid 需要知道某個畫面格子對應哪個 word。</li>
+<li>Undo/Redo 會複製文件，再還原 selection。</li>
+<li>JSON、YAML 與 clipboard 格式必須能 round-trip。</li>
+</ul>
+<p>如果直接把 <code>BrailleWord</code> / <code>BrailleLine</code> 全部改成 immutable record，每個規則都要改成「輸入舊值、回傳新值」，而且整條呼叫鏈都必須接住新物件。這會牽動太多流程，也很容易在 editor 狀態與序列化相容性上出錯。</p>
+<p>所以這次重構選擇了比較務實的分層：</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>型別</th>
+<th>重構策略</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>BrailleCell</code></td>
+<td>改成小型 <code>readonly record struct</code></td>
+</tr>
+<tr class="even">
+<td><code>BrailleTableEntry</code></td>
+<td>新增為 immutable lookup entry</td>
+</tr>
+<tr class="odd">
+<td><code>BrailleWord</code></td>
+<td>保留 mutable class，新增 view / builder / result / construction boundary</td>
+</tr>
+<tr class="even">
+<td><code>BrailleLine</code></td>
+<td>保留 mutable class，新增 view / builder / result / 明確 mutation API</td>
+</tr>
+<tr class="odd">
+<td><code>BrailleDocument</code></td>
+<td>對外公開 read-only facade，內部保留相容所需的 collection</td>
+</tr>
+</tbody>
+</table>
+<p>這個策略的重點是：先把任意可變性收斂到少數可理解的位置，而不是假裝整個系統已經準備好完全 immutable。</p>
+</section>
+<section id="a.5-公開-api-先改成-read-only-facade" class="level2">
+<h2 class="anchored" data-anchor-id="a.5-公開-api-先改成-read-only-facade">A.5　公開 API 先改成 read-only facade</h2>
+<p>重構前，<code>BrailleLine.Words</code> 是公開 <code>List&lt;BrailleWord&gt;</code>。任何呼叫端都能直接：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>brLine<span class="op">.</span><span class="fu">Words</span><span class="op">.</span><span class="fu">Insert</span><span class="op">(</span>index<span class="op">,</span> word<span class="op">);</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>brLine<span class="op">.</span><span class="fu">Words</span><span class="op">.</span><span class="fu">RemoveRange</span><span class="op">(</span>index<span class="op">,</span> count<span class="op">);</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>brLine<span class="op">.</span><span class="fu">Words</span><span class="op">.</span><span class="fu">Add</span><span class="op">(</span>word<span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這讓 mutation surface 太大。你無法只看 <code>BrailleLine</code> 本身，就知道有哪些流程會改它。</p>
+<p>重構後，<code>Words</code> 對外改成 <code>IReadOnlyList&lt;BrailleWord&gt;</code>，並補上明確 mutation API，例如 <code>AddWord(...)</code>、<code>InsertWords(...)</code>、<code>RemoveRange(...)</code>、<code>AssignWords(...)</code>。<code>BrailleDocument.Lines</code> 與 <code>BrailleDocument.PageTitles</code> 也採取類似做法。</p>
+<p>這不是完整的 immutable collection。<code>IReadOnlyList&lt;T&gt;</code> 只是 read-only facade，底層仍可能是可變集合。但它是重要的中間步驟：</p>
+<ul>
+<li>外部呼叫端不能隨手修改集合。</li>
+<li>修改入口變少，後續可以逐一審查。</li>
+<li>序列化與 editor 相容性比較容易維持。</li>
+<li>測試可以針對明確 mutation API 補強。</li>
+</ul>
+<p>這一步看起來不像華麗的語言特性，但對大型既有系統很關鍵。先縮小修改入口，才有機會談更深的不可變設計。</p>
+</section>
+<section id="a.6-builder-boundary建構期可變完成後可讀" class="level2">
+<h2 class="anchored" data-anchor-id="a.6-builder-boundary建構期可變完成後可讀">A.6　Builder Boundary：建構期可變，完成後可讀</h2>
+<p>接下來是 <code>BrailleWord</code> 與 <code>BrailleLine</code> 的 Builder Boundary。</p>
+<p><code>BrailleWord</code> 新增了幾個內部角色：</p>
+<pre class="text"><code>IBrailleWordView
+IBrailleWordResult
+BrailleWordBuilder
+BrailleWordMaterialized
+BrailleWord</code></pre>
+<p><code>IBrailleWordView</code> 是唯讀檢視。helper、formatter、font converter 只需要讀資料時，可以依賴這個介面，而不是直接依賴可變 class。</p>
+<p>以下是省略 metadata 後的概念化摘要：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">interface</span> IBrailleWordView</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> Text <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">string</span> OriginalText <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    BrailleLanguage Language <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> CellCount <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    BrailleCell <span class="fu">GetCell</span><span class="op">(</span><span class="dt">int</span> index<span class="op">);</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>BrailleWordBuilder</code> 則負責建構階段的 mutation。現行 source 使用 <code>BrailleCellBuffer</code> 管理 cell sequence，並支援從既有 <code>BrailleWord</code> 載入狀態、建立 materialized result，或套回既有 word。</p>
+<p>以下是依現行 source 簡化後的摘要：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">sealed</span> <span class="kw">class</span> BrailleWordBuilder</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> BrailleCellBuffer _cells<span class="op">;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> Text <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">set</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">string</span> OriginalText <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">set</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> BrailleLanguage Language <span class="op">{</span> <span class="kw">get</span><span class="op">;</span> <span class="kw">set</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> BrailleWordBuilder <span class="fu">FromBrailleWord</span><span class="op">(</span>BrailleWord source<span class="op">)</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="dt">var</span> builder <span class="op">=</span> <span class="kw">new</span> <span class="fu">BrailleWordBuilder</span><span class="op">(</span>source<span class="op">.</span><span class="fu">Text</span><span class="op">)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>            OriginalText <span class="op">=</span> source<span class="op">.</span><span class="fu">OriginalText</span><span class="op">,</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>            Language <span class="op">=</span> source<span class="op">.</span><span class="fu">Language</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        builder<span class="op">.</span><span class="fu">AppendCells</span><span class="op">(</span>CollectionsMarshal<span class="op">.</span><span class="fu">AsSpan</span><span class="op">(</span>source<span class="op">.</span><span class="fu">Cells</span><span class="op">));</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> builder<span class="op">;</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> IBrailleWordResult <span class="fu">Build</span><span class="op">()</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">new</span> BrailleWordMaterialized</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>            Text <span class="op">=</span> Text<span class="op">,</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>            OriginalText <span class="op">=</span> OriginalText<span class="op">,</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>            Language <span class="op">=</span> Language<span class="op">,</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>            Cells <span class="op">=</span> _cells<span class="op">.</span><span class="fu">ToArray</span><span class="op">()</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">};</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">ApplyTo</span><span class="op">(</span>BrailleWord target<span class="op">)</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>        target<span class="op">.</span><span class="fu">ApplyConstruction</span><span class="op">(</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>            Text<span class="op">,</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>            OriginalText<span class="op">,</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>            Language<span class="op">,</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>            _cells<span class="op">.</span><span class="fu">AsSpan</span><span class="op">());</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>來源：<code>text-to-braille/src/BrailleToolkit/BrailleWordBuilder.cs</code></p>
+<p>這個 builder 有兩個重要用途。</p>
+<p>第一，它可以建立新的結果：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>IBrailleWordResult result <span class="op">=</span> builder<span class="op">.</span><span class="fu">Build</span><span class="op">();</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>BrailleWord word <span class="op">=</span> builder<span class="op">.</span><span class="fu">ToBrailleWord</span><span class="op">();</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>第二，它可以套用到既有 word：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> builder <span class="op">=</span> BrailleWordBuilder<span class="op">.</span><span class="fu">FromBrailleWord</span><span class="op">(</span>existingWord<span class="op">);</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>builder<span class="op">.</span><span class="fu">PrependCell</span><span class="op">(</span>BrailleCell<span class="op">.</span><span class="fu">Capital</span><span class="op">);</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>builder<span class="op">.</span><span class="fu">ApplyTo</span><span class="op">(</span>existingWord<span class="op">);</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>這對既有規則很重要。很多 braille rule 不是單純建立新 word，而是在轉換後替既有 word 補 cell、換 cell 或加 metadata。<code>FromBrailleWord(...).ApplyTo(...)</code> 讓 mutation 集中在 construction boundary，同時保留舊流程需要的物件相容性。</p>
+<p><code>BrailleLineBuilder</code> 採取同樣策略：建構階段可以 <code>AddWord(...)</code>、<code>InsertWords(...)</code>、<code>RemoveContextTags()</code>；完成後可以 <code>Build()</code> 成 result，也可以 <code>ToBrailleLine()</code> 或 <code>ApplyTo(...)</code> 進入仍需要可變模型的流程。</p>
+<p>這個設計並沒有承諾「每一步都更快」。它的價值是讓可變性出現在可命名、可測試、可量測的位置。</p>
+</section>
+<section id="a.7-explicit-identity不要把物件參考當成模型識別" class="level2">
+<h2 class="anchored" data-anchor-id="a.7-explicit-identity不要把物件參考當成模型識別">A.7　Explicit Identity：不要把物件參考當成模型識別</h2>
+<p>一旦系統開始使用 builder、copy、materialized result、JSON/YAML round-trip，原本依賴 <code>ReferenceEquals</code> 的邏輯就會變得脆弱。</p>
+<p>例如，文件中可能有兩個內容完全相同的 <code>BrailleWord</code>。值相等不代表它們是同一個位置的 word。editor selection、Undo/Redo、page title anchor 需要追蹤的是「這一個資料個體」，而不是「內容一樣的資料」。</p>
+<p>現行 <code>BrailleWord</code> 與 <code>BrailleLine</code> 因此加入 runtime identity：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">sealed</span> <span class="kw">class</span> BrailleWord <span class="op">:</span> IBrailleWordView</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="dt">long</span> m_Identity <span class="op">=</span> BrailleObjectIdentityGenerator<span class="op">.</span><span class="fu">NextWordIdentity</span><span class="op">();</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">long</span> Identity</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">get</span> <span class="op">{</span> <span class="kw">return</span> m_Identity<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>BrailleObjectIdentityGenerator</code> 使用 <code>Interlocked.Increment(...)</code> 發號：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">static</span> <span class="kw">class</span> BrailleObjectIdentityGenerator</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">static</span> <span class="dt">long</span> s_NextWordIdentity<span class="op">;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">private</span> <span class="kw">static</span> <span class="dt">long</span> s_NextLineIdentity<span class="op">;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> <span class="dt">long</span> <span class="fu">NextWordIdentity</span><span class="op">()</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> Interlocked<span class="op">.</span><span class="fu">Increment</span><span class="op">(</span><span class="kw">ref</span> s_NextWordIdentity<span class="op">);</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> <span class="dt">long</span> <span class="fu">NextLineIdentity</span><span class="op">()</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> Interlocked<span class="op">.</span><span class="fu">Increment</span><span class="op">(</span><span class="kw">ref</span> s_NextLineIdentity<span class="op">);</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>來源：</p>
+<ul>
+<li><code>text-to-braille/src/BrailleToolkit/BrailleWord.cs</code></li>
+<li><code>text-to-braille/src/BrailleToolkit/BrailleLine.cs</code></li>
+<li><code>text-to-braille/src/BrailleToolkit/BrailleObjectIdentityGenerator.cs</code></li>
+</ul>
+<p><code>BrailleLine.IndexOf(BrailleWord)</code> 也改成用 word identity 比對，而不是依賴物件參考。editor 的 grid bookmark、selection restore、page title anchor 也可以用 line / word identity 找回目前文件中的位置。</p>
+<p>這裡的重點不是把 runtime identity 當成 domain ID 存進外部資料庫。它是 editor runtime 裡的穩定追蹤機制，用來取代「剛好同一個 CLR object」這種太脆弱的假設。</p>
+</section>
+<section id="a.8-序列化與相容層" class="level2">
+<h2 class="anchored" data-anchor-id="a.8-序列化與相容層">A.8　序列化與相容層</h2>
+<p>read-only facade 與 builder boundary 導入後，序列化也要一起處理。</p>
+<p>JSON / DataContract 方面，<code>BrailleLine.Words</code> 對外可以是 read-only facade，但序列化格式仍需要維持既有 <code>Words</code> 欄位。做法是保留 backing field，並讓公開屬性避開 DataContract：</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode csharp code-with-copy"><code class="sourceCode cs"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="op">[</span><span class="fu">DataMember</span><span class="op">(</span>Name <span class="op">=</span> <span class="st">"Words"</span><span class="op">)]</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span> List<span class="op">&lt;</span>BrailleWord<span class="op">&gt;</span> m_Words<span class="op">;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="op">[</span>IgnoreDataMember<span class="op">]</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> IReadOnlyList<span class="op">&lt;</span>BrailleWord<span class="op">&gt;</span> Words</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">get</span> <span class="op">{</span> <span class="kw">return</span> m_Words<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="複製到剪貼簿" class="code-copy-button"><i class="bi"></i></button></div>
+<p>YAML 則改用 DTO model round-trip。serialize 時從 read-only view 讀取資料，deserialize 時透過 builder 或 construction boundary 建回 runtime model。</p>
+<p>這樣做的好處是：runtime model 可以逐步收斂 mutation surface，但外部資料格式不必跟著劇烈震盪。對有真實使用者資料的應用程式來說，這類相容層不是附屬品，而是重構設計的一部分。</p>
+</section>
+<section id="a.9-這次重構真正教會我們的事" class="level2">
+<h2 class="anchored" data-anchor-id="a.9-這次重構真正教會我們的事">A.9　這次重構真正教會我們的事</h2>
+<p>這個案例最後留下幾個判斷原則。</p>
+<p>第一，先釐清生命週期，再選資料結構。載入後大量查詢、不再修改的資料，適合 immutable entry 加 frozen lookup；建構中的資料，使用 builder 反而更自然。</p>
+<p>第二，<code>IReadOnlyList&lt;T&gt;</code> 不是 immutable collection，但它可以先把公開 mutation surface 收斂起來。這在既有系統中非常有用。</p>
+<p>第三，value type 不保證更快。<code>BrailleCell</code> 改成 <code>readonly record struct</code> 讓語意更正確，但 Phase 4a 曾經出現 throughput regression。效能結論必須靠 benchmark，不應靠語感。</p>
+<p>第四，Builder Boundary 的目標不是讓每個中間步驟看起來「純函數式」，而是把可變性集中到能測試與量測的地方。</p>
+<p>第五，當系統需要追蹤 UI selection、Undo/Redo、page title anchor 或特定資料個體，不要依賴 <code>ReferenceEquals</code>。導入 copy、builder 或序列化重建之前，先設計 explicit identity。</p>
+<p>第六，重構不是只改型別。它通常會同時牽動 benchmark、測試、序列化、相容層與文件。真正成熟的不可變資料設計，是一組工程取捨，而不是單一語法特性。</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script>
@@ -759,4 +1242,4 @@ ul.task-list li input[type="checkbox"] {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/huanlin/csharp-immutable-data-design-web/issues/new" class="toc-action"><i class="bi bi-github"></i>回報問題</a></li></ul></div></div></div></footer></body></html>

@@ -19,6 +19,12 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
 .github-repo-link { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border: 1px solid #ced4da; border-radius: .25rem; background: var(--bs-body-bg,#fff); color: var(--bs-body-color,#212529); text-decoration: none; }
 .language-switch:hover, .github-repo-link:hover { color: var(--bs-link-color,#0d6efd); text-decoration: none; }
 
+/* Home-page book contents: keep list layout without bullet markers. */
+.home-book-toc ul {
+  list-style: none;
+  padding-left: 0;
+}
+
 /* Keep Quarto's floating home-page cover visually separated from body text.
    styles.css centers all images inside paragraphs, so the HTML site needs a
    more specific override for the generated book cover. */
@@ -32,14 +38,6 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
     float: right;
     display: block;
     margin: 0 0 2rem 2rem !important;
-  }
-
-  /* A normal block can extend underneath a float, so the H2 border would run
-     behind the cover. Make the first home-page H2 a block formatting context;
-     its entire box, including border-bottom, then stays clear of the cover's
-     margin box. */
-  main.content:has(.quarto-cover-image) > section:first-of-type > h2:first-child {
-    display: flow-root;
   }
 }
 
