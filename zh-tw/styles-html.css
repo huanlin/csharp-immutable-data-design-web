@@ -18,4 +18,28 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
 .site-tools-sidebar { margin-top: .75rem; }
 .github-repo-link { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border: 1px solid #ced4da; border-radius: .25rem; background: var(--bs-body-bg,#fff); color: var(--bs-body-color,#212529); text-decoration: none; }
 .language-switch:hover, .github-repo-link:hover { color: var(--bs-link-color,#0d6efd); text-decoration: none; }
-.quarto-cover-image { border: 1px solid #dee2e6; border-radius: 2px; }
+
+/* Keep Quarto's floating home-page cover visually separated from body text.
+   styles.css centers all images inside paragraphs, so the HTML site needs a
+   more specific override for the generated book cover. */
+.quarto-cover-image {
+  border: 1px solid #dee2e6;
+  border-radius: 2px;
+}
+
+@media (min-width: 992px) {
+  main.content img.quarto-cover-image {
+    float: right;
+    display: block;
+    margin: 0 0 2rem 2rem !important;
+  }
+}
+
+@media (max-width: 991.98px) {
+  main.content img.quarto-cover-image {
+    float: none;
+    display: block;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
