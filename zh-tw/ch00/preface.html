@@ -82,7 +82,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-aacfcb05ce84cd84b371cb3846182f6d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-a90b5042977bc76a464b14ca3180e4ff.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -427,71 +427,38 @@ Response DTO       可能來自已被改過的狀態
 
 </main> <!-- /main -->
 <script>
-
 (() => {
-
   const path = window.location.pathname;
-
   const isZh = path.includes('/zh-tw');
-
   const target = isZh ? '/en/' : '/zh-tw/';
-
   const label = isZh ? '🌐 English' : '🌐 繁體中文';
 
-
-
   const link = document.createElement('a');
-
   link.className = 'language-switch';
-
   link.href = target;
-
   link.textContent = label;
 
-
-
   const githubLink = document.querySelector("#quarto-sidebar .sidebar-tools-main a.quarto-navigation-tool[href*='github.com']");
-
   const generatedTools = githubLink?.parentElement;
-
   const tools = document.createElement('div');
-
   tools.className = 'site-tools';
-
   tools.appendChild(link);
 
-
-
   if (githubLink) {
-
     githubLink.className = 'github-repo-link';
-
     githubLink.target = '_blank';
-
     githubLink.rel = 'noopener noreferrer';
-
     tools.appendChild(githubLink);
-
     generatedTools?.remove();
-
   }
-
-
 
   const sidebarHeader = document.querySelector('#quarto-sidebar .sidebar-header');
-
   if (sidebarHeader) {
-
     tools.classList.add('site-tools-sidebar');
-
     sidebarHeader.appendChild(tools);
-
   }
-
 })();
-
 </script>
-
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";
