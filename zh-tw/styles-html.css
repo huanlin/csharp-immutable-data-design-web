@@ -33,6 +33,14 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
     display: block;
     margin: 0 0 2rem 2rem !important;
   }
+
+  /* A normal block can extend underneath a float, so the H2 border would run
+     behind the cover. Make the first home-page H2 a block formatting context;
+     its entire box, including border-bottom, then stays clear of the cover's
+     margin box. */
+  main.content:has(.quarto-cover-image) > section:first-of-type > h2:first-child {
+    display: flow-root;
+  }
 }
 
 @media (max-width: 991.98px) {
