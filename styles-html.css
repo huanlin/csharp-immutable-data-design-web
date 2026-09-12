@@ -19,6 +19,44 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
 .github-repo-link { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border: 1px solid #ced4da; border-radius: .25rem; background: var(--bs-body-bg,#fff); color: var(--bs-body-color,#212529); text-decoration: none; }
 .language-switch:hover, .github-repo-link:hover { color: var(--bs-link-color,#0d6efd); text-decoration: none; }
 
+/* Title metadata: one label/value pair per row. */
+#title-block-header .quarto-title-meta {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+#title-block-header .quarto-title-meta > div {
+  display: flex;
+  align-items: baseline;
+}
+
+#title-block-header .quarto-title-meta-heading {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: inherit;
+  text-transform: none;
+}
+
+#title-block-header .quarto-title-meta-heading::after {
+  content: ":";
+  margin-right: .35em;
+}
+
+#title-block-header:lang(zh) .quarto-title-meta-heading::after {
+  content: "：";
+  margin-right: 0;
+}
+
+#title-block-header .quarto-title-meta-contents {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#title-block-header .quarto-title-meta-contents p {
+  margin: 0;
+}
+
 /* Home-page book contents: keep list layout without bullet markers. */
 .home-book-toc ul {
   list-style: none;
