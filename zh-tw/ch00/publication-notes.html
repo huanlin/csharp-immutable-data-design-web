@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Publication notes （出版備忘） – C# 不可變資料設計</title>
+<title>出版序言 – C# 不可變資料設計</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -246,7 +246,7 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-title">Publication notes （出版備忘）</span></h1>
+<h1 class="title"><span class="chapter-title">出版序言</span></h1>
 </div>
 
 
@@ -269,20 +269,9 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>現在的 C#/.NET 開發者剛好站在物件導向程式設計（object-oriented programming; OOP）與資料導向程式設計（data-oriented programming; DOP）風格的交會處。</p>
-<p>C# 近年加入或強化了很多適合 DOP 的語言特性：</p>
-<ul>
-<li><code>recor</code>d /<code>record struct</code></li>
-<li><code>init</code>-only property</li>
-<li>pattern matching</li>
-<li>switch expression</li>
-<li>collection expression</li>
-<li>immutable collections</li>
-<li>nullable reference types</li>
-<li>source generators / JSON serialization</li>
-<li>minimal APIs / DTO / API boundary models</li>
-</ul>
-<p>這些特性讓 C# 不再只是傳統的「類別 + 可變物件 + 方法」的 OOP 語言。然而，即便很多 .NET 開發者知道這些語法，卻不見得知道它們在設計層面能夠應用到什麼程度。</p>
+<p>現在的 C#/.NET 開發者，有越來越多機會在熟悉的物件導向程式設計之外，嘗試以資料為中心的設計方式。C# 的 <code>record</code>、<code>init</code>、模式比對，加上 .NET 的不可變集合，讓開發者更容易將資料與操作分開思考。然而，知道這些工具怎麼用，與理解它們能帶來什麼設計上的改變，仍有一段距離。本書的出版動機，就是希望縮短這個距離。</p>
+<p>本書以不可變資料（immutable data）為切入點，因為「資料能不能被修改」是一個具體的設計問題，而且牽動著狀態如何傳遞、程式如何測試、以及錯誤如何追查。從這個問題出發，便能把個別語法連結到日常開發中的設計判斷。</p>
+<p>透過範例與取捨的討論，希望能讓讀者在使用這些工具時，更清楚自己想解決什麼問題，也知道何時值得採用、何時保留原本的做法。</p>
 
 
 
