@@ -147,6 +147,15 @@ blockquote > :first-child,
   padding-left: 2rem;
 }
 
+div.code-copy-outer-scaffold {
+  padding-top: 1.5em;
+  padding-bottom: 1.5em;
+}
+
+pre.sourceCode {
+  padding: 0.6em;
+}
+
 /* Keep Quarto's floating home-page cover visually separated from body text.
    styles.css centers all images inside paragraphs, so the HTML site needs a
    more specific override for the generated book cover. */
