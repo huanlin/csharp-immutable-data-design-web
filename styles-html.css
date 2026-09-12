@@ -65,6 +65,11 @@ p, li, blockquote, .blockquote, .callout { text-align: start; }
   padding-left: 0;
 }
 
+/* Sidebar table of contents: indent subsection links. */
+.sidebar nav[role=doc-toc] ul > li > ul > li > a {
+  padding-left: 1.8rem;
+}
+
 /* Keep Quarto's floating home-page cover visually separated from body text.
    styles.css centers all images inside paragraphs, so the HTML site needs a
    more specific override for the generated book cover. */
