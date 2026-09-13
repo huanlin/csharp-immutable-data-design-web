@@ -297,7 +297,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">最近更新日期</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">2026-09-12</p>
+      <p class="date-modified">2026-09-13</p>
     </div>
   </div>
     
@@ -1014,71 +1014,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </main> <!-- /main -->
 <script>
-
 (() => {
-
   const path = window.location.pathname;
-
   const isZh = path.includes('/zh-tw');
-
   const target = isZh ? '/en/' : '/zh-tw/';
-
   const label = isZh ? '🌐 English' : '🌐 繁體中文';
 
-
-
   const link = document.createElement('a');
-
   link.className = 'language-switch';
-
   link.href = target;
-
   link.textContent = label;
 
-
-
   const githubLink = document.querySelector("#quarto-sidebar .sidebar-tools-main a.quarto-navigation-tool[href*='github.com']");
-
   const generatedTools = githubLink?.parentElement;
-
   const tools = document.createElement('div');
-
   tools.className = 'site-tools';
-
   tools.appendChild(link);
 
-
-
   if (githubLink) {
-
     githubLink.className = 'github-repo-link';
-
     githubLink.target = '_blank';
-
     githubLink.rel = 'noopener noreferrer';
-
     tools.appendChild(githubLink);
-
     generatedTools?.remove();
-
   }
-
-
 
   const sidebarHeader = document.querySelector('#quarto-sidebar .sidebar-header');
-
   if (sidebarHeader) {
-
     tools.classList.add('site-tools-sidebar');
-
     sidebarHeader.appendChild(tools);
-
   }
-
 })();
-
 </script>
-
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     const icon = "";

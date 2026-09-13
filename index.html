@@ -4,28 +4,198 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Immutable Data Design in C#</title>
-  <meta name="description" content="Official book site for Immutable Data Design in C# (中文本：C# 不可變資料設計).">
+  <meta name="description" content="Official book site for Immutable Data Design in C# (中文版：C# 不可變資料設計).">
+  <link rel="canonical" href="https://immutable-csharp.huanlin.cc/">
+  <link rel="icon" href="images/cover-en-small.webp" type="image/webp">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="styles-html.css">
   <style>
-    .language-links { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.875rem; margin-top:1.75rem; }
-    .language-link { display:flex; align-items:center; justify-content:center; min-height:3.5rem; padding:.75rem 1.25rem; border:2px solid #0d6efd; border-radius:.75rem; background:#0d6efd; color:#fff; font-size:1.075rem; font-weight:650; text-decoration:none; box-shadow:0 .25rem .75rem rgba(13,110,253,.18); }
-    .language-link:hover { background:#0a58ca; border-color:#0a58ca; color:#fff; text-decoration:none; }
-    .subtitle { color:#495057; margin-top:.25rem; }
-    .note { margin-top:2.25rem; color:#6c757d; }
-    @media (max-width:575.98px) { .language-links { grid-template-columns:1fr; } }
+    body {
+      background: #f6f8fb;
+    }
+
+    .landing-page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 4rem 1.25rem;
+    }
+
+    .landing-header {
+      max-width: 760px;
+      margin: 0 auto 2.5rem;
+      text-align: center;
+    }
+
+    .landing-header h1 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      text-align: center;
+    }
+
+    .landing-subtitle {
+      margin-top: 0;
+      margin-bottom: 0;
+      color: #495057;
+      font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+      text-align: center;
+    }
+
+    .language-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+
+    .language-card {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 1.25rem;
+      align-items: center;
+      padding: 1.25rem;
+      border: 1px solid #dce3ea;
+      border-radius: 1rem;
+      background: #fff;
+      color: #212529;
+      text-decoration: none;
+      box-shadow: 0 0.35rem 1.25rem rgba(33, 37, 41, 0.08);
+      transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    }
+
+    .language-card:hover {
+      border-color: #6ea8fe;
+      color: #0a58ca;
+      text-decoration: none;
+      transform: translateY(-3px);
+      box-shadow: 0 0.7rem 1.75rem rgba(13, 110, 253, 0.14);
+    }
+
+    .language-card:focus-visible {
+      outline: 3px solid rgba(13, 110, 253, 0.35);
+      outline-offset: 3px;
+    }
+
+    .language-card img {
+      width: 112px;
+      margin: 0;
+      border-radius: 0.35rem;
+      box-shadow: 0 0.25rem 0.75rem rgba(33, 37, 41, 0.18);
+    }
+
+    .language-card__label,
+    .language-card__title,
+    .language-card__action {
+      display: block;
+    }
+
+    .language-card__label {
+      margin-bottom: 0.4rem;
+      color: #6c757d;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .language-card__title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .language-card__action {
+      margin-top: 0.75rem;
+      color: #0d6efd;
+      font-weight: 650;
+    }
+
+    .more-links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #dce3ea;
+    }
+
+    .more-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4em;
+      font-weight: 650;
+    }
+
+    .more-links i {
+      font-size: 1.1em;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 720px) {
+      .landing-page {
+        padding-top: 2.5rem;
+      }
+
+      .language-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .language-card {
+        grid-template-columns: 80px 1fr;
+      }
+
+      .language-card img {
+        width: 80px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .language-card {
+        transition: none;
+      }
+    }
   </style>
 </head>
 <body class="quarto-light">
-  <main class="content" style="max-width:760px; margin:4rem auto; padding:0 1.25rem;">
-    <h1>Immutable Data Design in C#</h1>
-    <p class="subtitle">Records and State Modeling</p>
-    <p><strong>中文版：C# 不可變資料設計—Records 與狀態建模</strong></p>
-    <nav class="language-links" aria-label="Choose a language">
-      <a class="language-link" href="en/" lang="en">English</a>
-      <a class="language-link" href="zh-tw/" lang="zh-Hant">繁體中文</a>
+  <main class="landing-page">
+    <header class="landing-header">
+      <h1>Immutable Data Design in C#</h1>
+      <p class="landing-subtitle">Records and State Modeling</p>
+    </header>
+
+    <nav class="language-cards" aria-label="Choose a language">
+      <a class="language-card" href="en/" lang="en">
+        <img src="images/cover-en-small.webp" alt="">
+        <span>
+          <span class="language-card__label">English</span>
+          <span class="language-card__title">Immutable Data Design in C#</span>
+          <span class="language-card__action">Start reading</span>
+        </span>
+      </a>
+
+      <a class="language-card" href="zh-tw/" lang="zh-Hant">
+        <img src="images/cover-tw-small.webp" alt="">
+        <span>
+          <span class="language-card__label">繁體中文</span>
+          <span class="language-card__title">C# 不可變資料設計</span>
+          <span class="language-card__action">開始閱讀</span>
+        </span>
+      </a>
     </nav>
-    <p class="note">By Michael Tsai / 蔡煥麟 · Ippo Books</p>
+
+    <nav class="more-links" aria-label="More from Michael Tsai">
+      <i class="fa-solid fa-house" aria-hidden="true"></i>&nbsp;
+      <a href="https://huanlin.cc/">
+        Author website
+      </a>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <i class="fa-brands fa-blogger-b" aria-hidden="true"></i>&nbsp;
+      <a href="https://www.huanlintalk.com/">
+        Blog
+      </a>
+    </nav>
   </main>
 </body>
 </html>
